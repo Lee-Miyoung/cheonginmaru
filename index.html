@@ -1,20 +1,404 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-  <title>Web1-Welcome</title>
-  <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="청인마루">
+    <link rel="apple-touch-icon" href="icon.jpg">
+    <link rel="icon" type="image/jpeg" href="icon.jpg">
+    <title>청인마루 통합 마스터 시스템 (v23.0)</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0f4f8; color: #1e293b; -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .premium-shadow { box-shadow: 0 10px 40px -10px rgba(30, 41, 59, 0.15); }
+        .report-gradient { background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%); color: white; position: relative; }
+        .watermark-wrapper { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 0; pointer-events: none; opacity: 0.1; overflow: hidden; }
+        .watermark-img { width: 120%; max-width: 800px; transform: rotate(-15deg); filter: grayscale(100%); }
+        .btn-bluetooth { background: #3b82f6; color: white; border-radius: 12px; padding: 8px 14px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 6px; border: none; cursor: pointer; }
+        .btn-bluetooth.connected { background: #10b981; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        .measuring-focus { border: 3px solid #3b82f6 !important; background-color: #eff6ff !important; }
+        #login-gate { display: flex; position: fixed; inset: 0; background: #0f172a; z-index: 99999; align-items: center; justify-content: center; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; padding: 15px; }
+        .record-container { background: #f8fafc; width: 100%; max-width: 650px; height: 90vh; border-radius: 32px; overflow: hidden; display: flex; flex-direction: column; }
+        .input-premium { width: 100%; padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; font-weight: 700; outline: none; transition: all 0.2s; }
+        .tab-btn { flex: 1; padding: 12px; font-size: 10px; font-weight: 800; text-align: center; cursor: pointer; border-radius: 10px; transition: all 0.2s; white-space: nowrap; }
+        .tab-btn.active { background: #2563eb; color: white; }
+        .tab-btn.inactive { background: #f1f5f9; color: #94a3b8; }
+        .btn-action { display: flex; align-items: center; justify-content: center; width: 100%; padding: 14px 8px; border-radius: 14px; font-weight: 800; font-size: 13px; transition: all 0.1s; cursor: pointer; }
+        #toast { visibility: hidden; min-width: 200px; background-color: #334155; color: #fff; text-align: center; border-radius: 50px; padding: 12px 24px; position: fixed; z-index: 10000; left: 50%; bottom: 100px; transform: translateX(-50%); font-size: 14px; font-weight: 700; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
+    </style>
 </head>
-<body>
-  <h1><a href="index.html">WEB</a></h1>
- <ol>
-    <li><a href="1.html">HTML</a></li>
-    <li><a href="2.html">CSS</a></li>
-    <li><a href="3.html">Javascript</a></li>
- </ol>
- <h2>WEB</h2>
- <p>he World Wide Web (WWW or simply the Web) is an information system that enables content sharing over the Internet through user-friendly ways meant to appeal to users beyond IT specialists and hobbyists.[1] It allows documents and other web resources to be accessed over the Internet according to specific rules of the Hypertext Transfer Protocol
+<body class="antialiased overflow-x-hidden">
+
+    <div id="toast">알림 메시지</div>
+
+    <div id="login-gate">
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-sm text-center mx-4">
+            <h2 class="text-2xl font-black text-slate-900 mb-1">청인마루 Master</h2>
+            <p class="text-xs text-slate-500 font-bold mb-8">v23.0 CRM & 통계 통합 시스템</p>
+            <input type="password" id="app-password" class="w-full p-4 bg-slate-100 rounded-xl text-center text-lg font-black outline-none mb-4" placeholder="PASSWORD" onkeyup="if(window.event.keyCode==13){checkAppLogin()}">
+            <button onclick="checkAppLogin()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-lg shadow-xl">통합 관리 모드 접속</button>
+        </div>
+    </div>
+
+    <div id="record-modal" class="modal-overlay" onclick="closeModal(event, 'record-modal')">
+        <div class="record-container" onclick="event.stopPropagation()">
+            <div class="p-6 bg-white border-b flex justify-between items-center">
+                <h3 class="text-xl font-black text-slate-900">종합 업무 관리</h3>
+                <button onclick="document.getElementById('record-modal').style.display='none'" class="text-slate-400"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="p-4 bg-blue-50 border-b space-y-4">
+                <div class="flex bg-white p-1 rounded-xl overflow-x-auto gap-1">
+                    <button id="nav-quotes" onclick="toggleView('quotes')" class="tab-btn active">견적/입금</button>
+                    <button id="nav-samples" onclick="toggleView('samples')" class="tab-btn inactive">샘플북</button>
+                    <button id="nav-stats" onclick="toggleView('stats')" class="tab-btn inactive">매출통계</button>
+                    <button id="nav-crm" onclick="toggleView('crm')" class="tab-btn inactive">거래처CRM</button>
+                </div>
+                <div id="search-bar-container">
+                    <input type="text" id="record-search" class="w-full p-3 bg-white rounded-xl text-sm font-bold border outline-none" placeholder="검색어 입력..." oninput="renderRecords()">
+                </div>
+            </div>
+
+            <div id="record-list" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+
+            <div id="sample-input-form" class="p-4 bg-white border-t hidden space-y-3">
+                <div class="flex gap-2">
+                    <input type="text" id="new-sample-firm" class="flex-1 p-2 bg-slate-100 rounded-lg text-xs font-bold outline-none" placeholder="업체명">
+                    <input type="date" id="new-sample-date" class="flex-1 p-2 bg-slate-100 rounded-lg text-xs font-bold outline-none">
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="new-sample-name" class="flex-[3] p-2 bg-blue-50 rounded-lg text-xs font-bold border border-blue-200 outline-none" placeholder="샘플북 명칭">
+                    <button onclick="addSampleLog()" class="flex-1 bg-blue-600 text-white rounded-lg font-black text-xs">기록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8">
+        <header class="flex flex-col items-center justify-center mb-6">
+            <h1 class="text-3xl font-black text-slate-900">청인마루 Master<span class="text-blue-600">.</span></h1>
+            <div class="flex gap-2 mt-4">
+                <button id="mode-toggle-consumer" onclick="setUserType('consumer')" class="px-4 py-2 rounded-full text-[10px] font-black bg-blue-600 text-white shadow-lg">소비자용</button>
+                <button id="mode-toggle-firm" onclick="setUserType('firm')" class="px-4 py-2 rounded-full text-[10px] font-black bg-white text-slate-400 shadow">인테리어 업체용</button>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <div class="bg-white rounded-[2rem] p-6 premium-shadow space-y-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
+                <div class="flex bg-slate-100 p-1 rounded-xl gap-1">
+                    <div id="tab-floor" onclick="setMeasurementMode('floor')" class="tab-btn active">마루/바닥</div>
+                    <div id="tab-wall" onclick="setMeasurementMode('wall')" class="tab-btn inactive">벽장재</div>
+                    <div id="tab-measure" onclick="setMeasurementMode('measure')" class="tab-btn inactive">실측전용</div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="relative"><input type="text" id="cust-name" class="input-premium" placeholder="고객명" oninput="updateCustInfo();"><span class="absolute top-[-8px] left-3 bg-white px-1 text-[10px] font-bold text-slate-400">성함</span></div>
+                        <div id="firm-name-box" class="relative hidden"><input type="text" id="firm-name" class="input-premium border-blue-200" placeholder="업체명" oninput="updateCustInfo();"><span class="absolute top-[-8px] left-3 bg-white px-1 text-[10px] font-bold text-blue-500">인테리어 업체</span></div>
+                        <div class="relative"><input type="tel" id="cust-phone" class="input-premium" placeholder="연락처" oninput="formatPhone(this); updateCustInfo();"><span class="absolute top-[-8px] left-3 bg-white px-1 text-[10px] font-bold text-slate-400">연락처</span></div>
+                    </div>
+                    <div class="relative"><input type="text" id="cust-addr" class="input-premium" placeholder="현장 주소" oninput="updateCustInfo();"><span class="absolute top-[-8px] left-3 bg-white px-1 text-[10px] font-bold text-slate-400">현장 주소</span></div>
+                </div>
+
+                <div id="price-logic-area" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3"><select id="select-brand" class="input-premium" onchange="updateProducts();"></select><select id="select-product" class="input-premium" onchange="handleProductSelect();"></select></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div id="labor-input-group" class="relative"><input type="text" id="input-labor-m2" class="input-premium text-right" value="0" oninput="formatInput(this); calculate();"><span class="absolute top-[-8px] left-3 bg-white px-1 text-[10px] font-bold text-slate-400">인건비(㎡)</span></div>
+                        <div class="relative bg-amber-50 rounded-xl border border-amber-200 flex items-center px-4"><span class="absolute top-[-8px] left-3 bg-amber-50 px-1 text-[10px] font-bold text-amber-600">BOX 단가</span><input type="text" id="input-box-price" class="bg-transparent font-black text-lg text-right text-amber-600 outline-none w-full" value="0" oninput="formatInput(this); calculate();"></div>
+                    </div>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-sm font-black text-slate-800">상세 실측 (보쉬 연동)</h3>
+                        <button id="btn-bt-connect" onclick="connectBosch()" class="btn-bluetooth"><i class="fab fa-bluetooth-b"></i> 연결</button>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-inner">
+                        <div class="flex gap-2 mb-3">
+                            <select id="zone-name-select" class="flex-[2] p-2 bg-white rounded-lg text-xs font-bold border outline-none h-11"></select>
+                            <input type="number" id="zone-deduct-w" class="flex-1 h-11 p-2 bg-white rounded-lg text-[10px] font-black border text-center" placeholder="공제W">
+                            <input type="number" id="zone-deduct-h" class="flex-1 h-11 p-2 bg-white rounded-lg text-[10px] font-black border text-center" placeholder="공제H">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="zone-w" class="flex-1 p-3 bg-white rounded-xl text-center font-black border outline-none" placeholder="가로">
+                            <span class="text-slate-300">×</span>
+                            <input type="number" id="zone-h" class="flex-1 p-3 bg-white rounded-xl text-center font-black border outline-none" placeholder="세로">
+                            <button onclick="addZone()" class="bg-blue-600 text-white w-12 h-12 rounded-xl shadow-lg"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div id="zone-list" class="mt-4 space-y-2"></div>
+                </div>
+            </div>
+
+            <div id="capture-area" class="report-gradient rounded-[2rem] p-6 md:p-8 flex flex-col justify-between premium-shadow min-h-[780px] text-white overflow-hidden relative">
+                <div class="watermark-wrapper"><img src="maruni.png" class="watermark-img" onerror="this.src='icon.jpg'"></div>
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start mb-8 pb-6 border-b border-white/10">
+                        <div>
+                            <span id="report-type-tag" class="text-blue-400 text-[9px] font-black uppercase tracking-widest mb-1 block">청인마루 통합 견적서</span>
+                            <h2 id="disp-name" class="text-2xl font-black mb-1">고객님</h2>
+                            <p id="disp-firm" class="text-xs text-blue-300 font-bold hidden"></p>
+                            <p id="disp-addr" class="text-[11px] text-slate-400 font-medium"></p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-lg font-black italic">청인마루</span>
+                            <p id="quote-no" class="text-[10px] text-amber-400 font-mono"></p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 id="res-product" class="text-2xl font-black mb-1">-</h3>
+                        <p id="res-area" class="text-3xl font-black text-blue-400 italic">0.00 ㎡</p>
+                        <div id="price-rows" class="mt-8 space-y-2 bg-black/20 p-4 rounded-xl text-xs font-bold border border-white/5">
+                            <div class="flex justify-between"><span>자재비</span><span id="det-base">0원</span></div>
+                            <div id="row-labor" class="flex justify-between"><span>인건비</span><span id="det-labor">0원</span></div>
+                            <div class="border-t border-white/10 pt-2 mt-2 flex justify-between text-lg"><span>합계 (VAT별도)</span><span id="det-total">0원</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative z-10 mt-auto">
+                    <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-[2rem] shadow-2xl text-center">
+                        <div class="flex items-baseline justify-center gap-1.5 mb-6"><span id="res-total-vat" class="text-4xl md:text-5xl font-black text-white">0</span>원</div>
+                        <div class="grid grid-cols-2 gap-2" data-html2canvas-ignore="true">
+                            <button onclick="shareQuote()" class="btn-action bg-[#FEE500] text-[#3c1e1e] hover:bg-[#fdd835]"><i class="fas fa-comment mr-2"></i> 카톡공유</button>
+                            <button onclick="sendDirectSMS()" class="btn-action bg-green-500 text-white hover:bg-green-600"><i class="fas fa-sms mr-2"></i> 문자전송</button>
+                            <button onclick="saveRecord()" class="btn-action bg-slate-800 text-white hover:bg-slate-700"><i class="fas fa-save mr-2"></i> 저장/입금관리</button>
+                            <button onclick="showRecordModal()" class="btn-action bg-blue-900 text-white hover:bg-blue-800"><i class="fas fa-database mr-2"></i> 종합관리센터</button>
+                            <button onclick="saveImage()" class="btn-action bg-white text-blue-900 col-span-2 shadow-inner"><i class="fas fa-download mr-2"></i> 견적 이미지 저장</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const SHEET_URL = "https://script.google.com/macros/s/AKfycbz1-xED4gTgT2SW1aAWfGkChXd2MtCmLWw8iM5YVIAg4bmMdfXIGfT5ZrzY-QiZmJ3y-w/exec";
+        let masterData = []; let zoneList = []; let userType = 'consumer'; let measureMode = 'floor';
+        let currentRecordView = 'quotes'; let currentBTTarget = 'w';
+
+        const spaceOptions = {
+            floor: ["거실 전체", "주방/식당", "복도", "침실 1", "침실 2", "침실 3", "드레스룸", "현관 입구", "기타"],
+            wall: ["거실 아트월", "거실 쇼파월", "주방 포인트", "복도 벽면", "침실 포인트", "현관/전실", "커튼박스", "기타"],
+            measure: ["구역 A", "구역 B", "구역 C", "기타"]
+        };
+
+        window.onload = async () => {
+            if (localStorage.getItem('cm_master_auth') === 'valid') { document.getElementById('login-gate').style.display = 'none'; await loadData(); }
+            setMeasurementMode('floor');
+            document.getElementById('quote-no').innerText = "Q" + new Date().getTime().toString().slice(-8);
+        };
+
+        function checkAppLogin() { if (btoa(document.getElementById('app-password').value) === 'MTMwNg==') { localStorage.setItem('cm_master_auth', 'valid'); location.reload(); } else { alert('오류'); } }
+
+        async function loadData() {
+            try {
+                const res = await fetch(SHEET_URL); const data = await res.json();
+                const temp = {};
+                data.forEach(item => {
+                    if(item.brand) {
+                        if(!temp[item.brand]) temp[item.brand] = { brand: item.brand, products: [] };
+                        temp[item.brand].products.push({ ...item, c_price: parseInt(item.price || 0), f_price: parseInt(item.firm_price || item.price || 0) });
+                    }
+                });
+                masterData = Object.values(temp);
+                const bSel = document.getElementById('select-brand');
+                bSel.innerHTML = '<option value="">브랜드 선택</option>';
+                masterData.forEach(m => bSel.add(new Option(m.brand, m.brand)));
+            } catch(e) {}
+        }
+
+        // --- 뷰 전환 및 관리 기능 ---
+        function toggleView(view) {
+            currentRecordView = view;
+            const btns = ['quotes', 'samples', 'stats', 'crm'];
+            btns.forEach(b => {
+                const el = document.getElementById('nav-' + b);
+                el.className = b === view ? 'tab-btn active' : 'tab-btn inactive';
+            });
+            document.getElementById('sample-input-form').style.display = view === 'samples' ? 'block' : 'none';
+            document.getElementById('search-bar-container').style.display = (view === 'stats' || view === 'crm') ? 'none' : 'block';
+            renderRecords();
+        }
+
+        function renderRecords() {
+            const list = document.getElementById('record-list');
+            const search = document.getElementById('record-search').value.toLowerCase();
+            const records = JSON.parse(localStorage.getItem('cm_unified_records') || '[]');
+            const samples = JSON.parse(localStorage.getItem('cm_sample_history') || '[]');
+
+            if(currentRecordView === 'quotes') {
+                let filtered = records.filter(r => r.name.toLowerCase().includes(search) || r.firm.toLowerCase().includes(search));
+                list.innerHTML = filtered.map(r => `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border ${r.isPaid ? 'border-slate-100' : 'border-red-100 bg-red-50/20'}">
+                        <div class="flex justify-between items-start">
+                            <div><span class="text-[9px] font-black text-blue-500 uppercase">${r.firm}</span><h4 class="font-black text-slate-800">${r.name} 고객</h4></div>
+                            <div class="text-right"><div class="text-sm font-black">${r.total}원</div><button onclick="togglePayment(${r.id})" class="text-[9px] px-2 py-1 rounded border mt-1 ${r.isPaid ? 'bg-slate-100' : 'bg-red-500 text-white'}">${r.isPaid ? '입금완료' : '미입금'}</button></div>
+                        </div><div class="text-[8px] text-slate-400 mt-2">${r.date}</div>
+                    </div>`).join('');
+            } else if(currentRecordView === 'samples') {
+                let filtered = samples.filter(s => s.firm.toLowerCase().includes(search) || s.name.toLowerCase().includes(search));
+                list.innerHTML = filtered.map(s => `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-blue-100 flex justify-between items-center">
+                        <div><span class="text-[9px] font-black text-blue-600 block">${s.date}</span><span class="text-[10px] font-bold text-slate-400">${s.firm}</span><h4 class="font-black text-slate-800 text-sm mt-1">📙 ${s.name}</h4></div>
+                        <button onclick="deleteSampleLog(${s.id})" class="text-slate-200 hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
+                    </div>`).join('');
+            } else if(currentRecordView === 'stats') {
+                // 매출 통계 엔진
+                const stats = {};
+                records.forEach(r => {
+                    const dateObj = new Date(r.date);
+                    const key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+                    const val = parseInt(r.total.replace(/,/g,''));
+                    if(!stats[key]) stats[key] = { total: 0, unpaid: 0 };
+                    stats[key].total += val;
+                    if(!r.isPaid) stats[key].unpaid += val;
+                });
+                list.innerHTML = Object.keys(stats).sort().reverse().map(k => `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="text-xs font-black text-slate-400 mb-2">${k} 매출 리포트</div>
+                        <div class="flex justify-between items-end"><span class="text-sm font-bold text-slate-600">총 견적 합계</span><span class="text-lg font-black text-blue-600">${stats[k].total.toLocaleString()}원</span></div>
+                        <div class="flex justify-between items-end mt-1"><span class="text-sm font-bold text-red-400">현재 미수금</span><span class="text-lg font-black text-red-500">${stats[k].unpaid.toLocaleString()}원</span></div>
+                    </div>`).join('');
+            } else if(currentRecordView === 'crm') {
+                // 거래처별 CRM 엔진
+                const firms = {};
+                records.forEach(r => {
+                    if(!firms[r.firm]) firms[r.firm] = { customers: [], total: 0 };
+                    firms[r.firm].customers.push({ name: r.name, date: r.date, total: r.total });
+                    firms[r.firm].total += parseInt(r.total.replace(/,/g,''));
+                });
+                list.innerHTML = Object.keys(firms).sort().map(f => `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-3"><h4 class="font-black text-slate-800">${f}</h4><span class="text-xs font-black text-blue-600">${firms[f].total.toLocaleString()}원</span></div>
+                        <div class="space-y-1 pl-3 border-l-2 border-slate-100">
+                            ${firms[f].customers.map(c => `<div class="flex justify-between text-[10px] font-bold text-slate-500"><span>👤 ${c.name}</span><span>${c.date.split(' ')[0]}</span></div>`).join('')}
+                        </div>
+                    </div>`).join('');
+            }
+        }
+
+        // --- 기존 핵심 로직 유지 ---
+        function setMeasurementMode(mode) {
+            measureMode = mode;
+            ['floor', 'wall', 'measure'].forEach(m => document.getElementById('tab-' + m).className = m === mode ? 'tab-btn active' : 'tab-btn inactive');
+            const laborGroup = document.getElementById('labor-input-group');
+            const hInput = document.getElementById('zone-h');
+            if(mode === 'floor') { laborGroup.style.display = 'none'; hInput.placeholder = '세로(L)'; hInput.value = ''; }
+            else if(mode === 'wall') { laborGroup.style.display = 'block'; hInput.placeholder = '높이(H)'; hInput.value = '2300'; }
+            else { document.getElementById('price-logic-area').style.display = 'none'; hInput.placeholder = '세로(L)'; hInput.value = ''; }
+            const sel = document.getElementById('zone-name-select'); sel.innerHTML = '';
+            spaceOptions[mode].forEach(opt => sel.add(new Option(opt, opt)));
+            calculate();
+        }
+
+        async function connectBosch() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Bosch GLM' }], optionalServices: ['0000170d-0000-1000-8000-00805f9b34fb', '232e51d8-9020-4b3f-95fa-4460f9919f1b'] });
+                const server = await device.gatt.connect();
+                document.getElementById('btn-bt-connect').classList.add('connected');
+                const services = await server.getPrimaryServices();
+                for (const s of services) {
+                    const chars = await s.getCharacteristics();
+                    for (const c of chars) {
+                        if (char.properties.notify) { await char.startNotifications(); char.addEventListener('characteristicvaluechanged', e => { 
+                            const val = e.target.value; try { let dist = val.getFloat32(1, true); if(dist > 0) inputBT(Math.round(dist * 1000)); } catch(err) {}
+                        }); }
+                    }
+                }
+            } catch(e) {}
+        }
+
+        function inputBT(val) {
+            const winp = document.getElementById('zone-w'), hinp = document.getElementById('zone-h');
+            if(currentBTTarget === 'w') { winp.value = val; currentBTTarget = 'h'; }
+            else { hinp.value = val; currentBTTarget = 'w'; }
+            winp.classList.toggle('measuring-focus', currentBTTarget === 'w');
+            hinp.classList.toggle('measuring-focus', currentBTTarget === 'h');
+        }
+
+        function addZone() {
+            const name = document.getElementById('zone-name-select').value, w = parseFloat(document.getElementById('zone-w').value) || 0, h = parseFloat(document.getElementById('zone-h').value) || 0;
+            const dw = parseFloat(document.getElementById('zone-deduct-w').value) || 0, dh = parseFloat(document.getElementById('zone-deduct-h').value) || 0;
+            if(!w || !h) return;
+            zoneList.push({ name, w, h, area: (w * h) / 1000000 - (dw * dh) / 1000000 });
+            document.getElementById('zone-w').value = ''; if(measureMode !== 'wall') document.getElementById('zone-h').value = '';
+            renderZones();
+        }
+
+        function renderZones() {
+            document.getElementById('zone-list').innerHTML = zoneList.map((z, i) => `
+                <div class="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm">
+                    <div class="text-[10px] font-black">${z.name} (${z.w}×${z.h})</div>
+                    <div class="flex items-center gap-3"><span class="text-blue-600 font-bold">${z.area.toFixed(2)}㎡</span><button onclick="zoneList.splice(${i},1);renderZones();" class="text-slate-200"><i class="fas fa-trash-alt"></i></button></div>
+                </div>`).join('');
+            calculate();
+        }
+
+        function calculate() {
+            const totalM2 = zoneList.reduce((sum, z) => sum + z.area, 0);
+            document.getElementById('input-real-m2').value = totalM2.toFixed(2);
+            const factor = parseFloat(document.getElementById('input-factor')?.value) || 3.2;
+            document.getElementById('input-boxes').value = Math.ceil((totalM2 / factor) * 1.1) || 0;
+            const boxPrice = parseInt(document.getElementById('input-box-price').value.replace(/,/g,'')) || 0;
+            const laborPrice = measureMode === 'wall' ? (parseInt(document.getElementById('input-labor-m2').value.replace(/,/g,'')) || 0) : 0;
+            const baseCost = (parseInt(document.getElementById('input-boxes').value) || 0) * boxPrice;
+            const total = baseCost + Math.round(totalM2 * laborPrice);
+            document.getElementById('res-area').innerText = totalM2.toFixed(2) + " ㎡";
+            document.getElementById('det-base').innerText = baseCost.toLocaleString() + "원";
+            document.getElementById('det-labor').innerText = Math.round(totalM2 * laborPrice).toLocaleString() + "원";
+            document.getElementById('det-total').innerText = total.toLocaleString() + "원";
+            document.getElementById('res-total-vat').innerText = Math.round(total * 1.1).toLocaleString();
+            document.getElementById('row-labor').style.display = measureMode === 'wall' ? 'flex' : 'none';
+        }
+
+        function setUserType(type) {
+            userType = type;
+            document.getElementById('mode-toggle-consumer').className = type === 'consumer' ? 'px-4 py-2 rounded-full text-[10px] font-black bg-blue-600 text-white shadow-lg' : 'px-4 py-2 rounded-full text-[10px] font-black bg-white text-slate-400 shadow';
+            document.getElementById('mode-toggle-firm').className = type === 'firm' ? 'px-4 py-2 rounded-full text-[10px] font-black bg-blue-600 text-white shadow-lg' : 'px-4 py-2 rounded-full text-[10px] font-black bg-white text-slate-400 shadow';
+            document.getElementById('firm-name-box').style.display = type === 'firm' ? 'block' : 'none';
+            document.getElementById('disp-firm').style.display = type === 'firm' ? 'block' : 'none';
+            handleProductSelect();
+        }
+
+        function saveRecord() {
+            const data = { id: Date.now(), name: document.getElementById('cust-name').value || "미지정", firm: document.getElementById('firm-name').value || "직거래", total: document.getElementById('res-total-vat').innerText, date: new Date().toLocaleString(), isPaid: false };
+            let rs = JSON.parse(localStorage.getItem('cm_unified_records') || '[]'); rs.unshift(data);
+            localStorage.setItem('cm_unified_records', JSON.stringify(rs)); showToast("견적 및 고객 데이터가 저장되었습니다.");
+        }
+
+        function addSampleLog() {
+            const firm = document.getElementById('new-sample-firm').value, date = document.getElementById('new-sample-date').value, name = document.getElementById('new-sample-name').value;
+            if(!firm || !name) return alert('필수 입력');
+            let ss = JSON.parse(localStorage.getItem('cm_sample_history') || '[]'); ss.unshift({ id: Date.now(), firm, date, name });
+            localStorage.setItem('cm_sample_history', JSON.stringify(ss)); document.getElementById('new-sample-name').value = ''; renderRecords();
+        }
+
+        function showRecordModal() { document.getElementById('record-modal').style.display = 'flex'; renderRecords(); }
+        function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.className = "show"; setTimeout(() => t.className = "", 2000); }
+        function closeModal(e, id) { if(e.target.id === id) document.getElementById(id).style.display = 'none'; }
+        function togglePayment(id) { let rs = JSON.parse(localStorage.getItem('cm_unified_records') || '[]'); let r = rs.find(x => x.id === id); if(r) r.isPaid = !r.isPaid; localStorage.setItem('cm_unified_records', JSON.stringify(rs)); renderRecords(); }
+        function updateCustInfo() { document.getElementById('disp-name').innerText = (document.getElementById('cust-name').value || "고객") + " 님"; document.getElementById('disp-firm').innerText = "업체: " + (document.getElementById('firm-name').value || "-"); document.getElementById('disp-addr').innerText = "현장: " + document.getElementById('cust-addr').value; }
+        function updateProducts() { let bName = document.getElementById('select-brand').value, pSel = document.getElementById('select-product'); pSel.innerHTML = '<option value="">제품 선택</option>'; let bObj = masterData.find(x => x.brand === bName); if(bObj) bObj.products.forEach(p => pSel.add(new Option(p.name, p.name))); }
+        function handleProductSelect() { let bName = document.getElementById('select-brand').value, pName = document.getElementById('select-product').value, bObj = masterData.find(x => x.brand === bName), pObj = bObj?.products.find(x => x.name === pName); if(pObj) { document.getElementById('input-box-price').value = (userType === 'firm' ? pObj.f_price : pObj.c_price).toLocaleString(); document.getElementById('res-product').innerText = pObj.name; } calculate(); }
+        function formatPhone(el) { el.value = el.value.replace(/[^0-9]/g, "").replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3"); }
+        function formatInput(el) { let val = el.value.replace(/[^0-9]/g, ''); el.value = val ? parseInt(val).toLocaleString() : ''; }
+        function shareQuote() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => canvas.toBlob(blob => navigator.share({files:[new File([blob], "견적.png", {type:"image/png"})]}))); }
+        function saveImage() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => { let a = document.createElement('a'); a.href = canvas.toDataURL(); a.download = "청인마루견적.png"; a.click(); }); }
+        function sendDirectSMS() { let phone = document.getElementById('cust-phone').value.replace(/-/g, ""), msg = `[청인마루 견적]\n제품: ${document.getElementById('res-product').innerText}\n합계: ${document.getElementById('res-total-vat').innerText}원`; location.href = `sms:${phone}${navigator.userAgent.match(/iPhone/i) ? '&' : '?'}body=${encodeURIComponent(msg)}`; }
+    </script>
 </body>
 </html>
-
-
-
