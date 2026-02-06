@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-title" content="청인마루">
     <link rel="apple-touch-icon" href="icon.jpg">
     <link rel="icon" type="image/jpeg" href="icon.jpg">
-    <title>청인마루 통합 마스터 v23.2</title>
+    <title>청인마루 통합 마스터 v23.3</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -22,44 +22,34 @@
         .report-gradient { background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%); color: white; position: relative; }
         .watermark-wrapper { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 0; pointer-events: none; opacity: 0.1; overflow: hidden; }
         .watermark-img { width: 120%; max-width: 800px; transform: rotate(-15deg); filter: grayscale(100%); }
+        .measuring-focus { border: 3px solid #3b82f6 !important; background-color: #eff6ff !important; transform: scale(1.01); transition: 0.2s; }
         
-        /* 보쉬 측정 시 포커스 효과 */
-        .measuring-focus { border: 3px solid #3b82f6 !important; background-color: #eff6ff !important; transform: scale(1.02); transition: all 0.2s; }
-        
-        /* 로그인 게이트 초기 스타일 */
-        #login-gate { display: flex; position: fixed; inset: 0; background: #0f172a; z-index: 99999; align-items: center; justify-content: center; }
+        /* 로그인 게이트 초기 상태: 기본적으로 숨김 처리 후 JS에서 노출 결정 */
+        #login-gate { display: none; position: fixed; inset: 0; background: #0f172a; z-index: 99999; align-items: center; justify-content: center; }
         
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; padding: 15px; }
         .record-container { background: #f8fafc; width: 100%; max-width: 650px; height: 90vh; border-radius: 32px; overflow: hidden; display: flex; flex-direction: column; }
-        
-        .input-premium { width: 100%; padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; font-weight: 700; outline: none; transition: all 0.2s; }
-        .input-premium:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        
+        .input-premium { width: 100%; padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; font-weight: 700; outline: none; }
         .tab-btn { flex: 1; padding: 12px; font-size: 10px; font-weight: 800; text-align: center; cursor: pointer; border-radius: 10px; transition: all 0.2s; white-space: nowrap; }
-        .tab-btn.active { background: #2563eb; color: white; shadow: 0 4px 6px rgba(37,99,235,0.2); }
+        .tab-btn.active { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
         .tab-btn.inactive { background: #f1f5f9; color: #94a3b8; }
-        
-        .btn-action { display: flex; align-items: center; justify-content: center; width: 100%; padding: 14px 8px; border-radius: 14px; font-weight: 800; font-size: 13px; transition: all 0.1s; cursor: pointer; }
-        .btn-action:active { transform: scale(0.95); }
-        
+        .btn-action { display: flex; align-items: center; justify-content: center; width: 100%; padding: 14px 8px; border-radius: 14px; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.1s; }
         #toast { visibility: hidden; min-width: 200px; background-color: #334155; color: #fff; text-align: center; border-radius: 50px; padding: 12px 24px; position: fixed; z-index: 10000; left: 50%; bottom: 100px; transform: translateX(-50%); font-size: 14px; font-weight: 700; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
-        @keyframes fadein { from {bottom: 80px; opacity: 0;} to {bottom: 100px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 100px; opacity: 1;} to {bottom: 80px; opacity: 0;} }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden">
 
-    <div id="toast">메시지</div>
+    <div id="toast">알림</div>
 
     <div id="login-gate">
         <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-sm text-center mx-4 relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-cyan-400"></div>
             <img src="icon.jpg" class="w-24 h-24 rounded-2xl mx-auto mb-6 shadow-lg" onerror="this.src='https://via.placeholder.com/100?text=ChungIn'">
             <h2 class="text-2xl font-black text-slate-900 mb-1">청인마루 Master</h2>
-            <p class="text-xs text-slate-500 font-bold mb-8">v23.2 통합 시스템</p>
-            <input type="password" id="app-password" class="w-full p-4 bg-slate-100 rounded-xl text-center text-lg font-black outline-none mb-4 focus:ring-2 ring-blue-500 transition-all" placeholder="PASSWORD" onkeyup="if(event.keyCode==13){checkAppLogin()}">
-            <button onclick="checkAppLogin()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-lg shadow-xl hover:bg-slate-800 transition-all">접속하기</button>
+            <p class="text-xs text-slate-500 font-bold mb-8">v23.3 통합 관리 시스템</p>
+            <input type="password" id="app-password" class="w-full p-4 bg-slate-100 rounded-xl text-center text-lg font-black outline-none mb-4 focus:ring-2 ring-blue-500" placeholder="PASSWORD" onkeyup="if(event.keyCode==13){checkAppLogin()}">
+            <button onclick="checkAppLogin()" class="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-lg shadow-xl hover:bg-slate-800 active:scale-95 transition-all">접속하기</button>
         </div>
     </div>
 
@@ -67,30 +57,25 @@
         <div class="record-container" onclick="event.stopPropagation()">
             <div class="p-6 bg-white border-b flex justify-between items-center">
                 <h3 class="text-xl font-black text-slate-900">종합 업무 관리 센터</h3>
-                <button onclick="document.getElementById('record-modal').style.display='none'" class="text-slate-400 p-2"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="document.getElementById('record-modal').style.display='none'" class="text-slate-400"><i class="fas fa-times text-xl"></i></button>
             </div>
-            
             <div class="p-4 bg-blue-50 border-b space-y-4">
-                <div class="flex bg-white p-1 rounded-xl overflow-x-auto gap-1 shadow-inner">
+                <div class="flex bg-white p-1 rounded-xl overflow-x-auto gap-1">
                     <button id="nav-quotes" onclick="toggleView('quotes')" class="tab-btn active">견적/입금</button>
                     <button id="nav-samples" onclick="toggleView('samples')" class="tab-btn inactive">샘플북전달</button>
                     <button id="nav-stats" onclick="toggleView('stats')" class="tab-btn inactive">매출통계</button>
                     <button id="nav-crm" onclick="toggleView('crm')" class="tab-btn inactive">업체별CRM</button>
                 </div>
-                <div id="search-bar-container">
-                    <input type="text" id="record-search" class="w-full p-3 bg-white rounded-xl text-sm font-bold border outline-none focus:ring-2 ring-blue-200" placeholder="검색어 입력..." oninput="renderRecords()">
-                </div>
+                <input type="text" id="record-search" class="w-full p-3 bg-white rounded-xl text-sm font-bold border outline-none" placeholder="검색어 입력..." oninput="renderRecords()">
             </div>
-
             <div id="record-list" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-
-            <div id="sample-input-form" class="p-4 bg-white border-t hidden space-y-3 shadow-inner">
+            <div id="sample-input-form" class="p-4 bg-white border-t hidden space-y-3">
                 <div class="flex gap-2">
                     <input type="text" id="new-sample-firm" class="flex-1 p-2 bg-slate-100 rounded-lg text-xs font-bold outline-none" placeholder="업체명">
                     <input type="date" id="new-sample-date" class="flex-1 p-2 bg-slate-100 rounded-lg text-xs font-bold outline-none">
                 </div>
                 <div class="flex gap-2">
-                    <input type="text" id="new-sample-name" class="flex-[3] p-2 bg-blue-50 rounded-lg text-xs font-bold border border-blue-200 outline-none" placeholder="전달한 샘플북">
+                    <input type="text" id="new-sample-name" class="flex-[3] p-2 bg-blue-50 rounded-lg text-xs font-bold border border-blue-200 outline-none" placeholder="샘플북 명칭">
                     <button onclick="addSampleLog()" class="flex-1 bg-blue-600 text-white rounded-lg font-black text-xs">기록</button>
                 </div>
             </div>
@@ -136,12 +121,8 @@
 
                 <div>
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-sm font-black text-slate-800"><i class="fas fa-ruler-combined text-blue-500 mr-1"></i> 현장 실측</h3>
+                        <h3 class="text-sm font-black text-slate-800">현장 실측 (보쉬 연동)</h3>
                         <button id="btn-bt-connect" onclick="connectBosch()" class="btn-bluetooth"><i class="fab fa-bluetooth-b"></i> 보쉬 연결</button>
-                    </div>
-                    <div id="bt-guide" class="text-[10px] font-black text-blue-600 mb-2 px-2 hidden flex items-center gap-2">
-                        <img src="maruni.png" class="w-5 h-5 rounded-full bg-white shadow-sm" onerror="this.src='icon.jpg'">
-                        <span id="bt-guide-text">데이터 대기 중...</span>
                     </div>
                     <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 shadow-inner">
                         <div class="flex gap-2 mb-3">
@@ -150,16 +131,20 @@
                             <input type="number" id="zone-deduct-h" class="flex-1 h-11 p-2 pt-5 bg-white rounded-lg text-[10px] font-black border text-center" placeholder="공제H">
                         </div>
                         <div class="flex items-center gap-2">
-                            <input type="number" id="zone-w" class="flex-1 p-3 bg-white rounded-xl text-center font-black border outline-none transition-all" placeholder="가로">
+                            <input type="number" id="zone-w" class="flex-1 p-3 bg-white rounded-xl text-center font-black border outline-none" placeholder="가로">
                             <span class="text-slate-300 font-bold">×</span>
-                            <input type="number" id="zone-h" class="flex-1 p-3 bg-white rounded-xl text-center font-black border outline-none transition-all" placeholder="세로/높이">
-                            <button onclick="addZone()" class="bg-blue-600 text-white w-12 h-12 rounded-xl shadow-lg active:scale-90 transition-all"><i class="fas fa-plus"></i></button>
+                            <input type="number" id="zone-h" class="flex-1 p-3 bg-white rounded-xl text-center font-black border outline-none" placeholder="세로/높이">
+                            <button onclick="addZone()" class="bg-blue-600 text-white w-12 h-12 rounded-xl shadow-lg"><i class="fas fa-plus"></i></button>
                         </div>
                     </div>
                     <div id="zone-list" class="mt-4 space-y-2"></div>
                     <div class="grid grid-cols-2 gap-2 mt-4">
-                        <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 shadow-sm"><span class="text-[10px] font-bold text-blue-400 block">총 면적 합계</span><div class="flex items-baseline"><input type="number" id="input-real-m2" class="text-blue-600 font-black text-xl bg-transparent outline-none w-20" readonly><span class="text-xs font-bold text-blue-300 ml-1">㎡</span></div></div>
-                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-white shadow-lg"><span class="text-[10px] font-bold text-slate-400 block">최종 발주량</span><div class="flex items-baseline"><input type="number" id="input-boxes" class="text-white font-black text-xl bg-transparent outline-none w-16 text-right" readonly><span class="text-xs font-bold text-slate-500 ml-1">BOX</span></div></div>
+                        <div class="bg-blue-50 p-3 rounded-xl border border-blue-100"><span class="text-[10px] font-bold text-blue-400 block">총 면적</span><div class="flex items-baseline"><input type="number" id="input-real-m2" class="text-blue-600 font-black text-xl bg-transparent outline-none w-20" readonly><span class="text-xs font-bold text-blue-300 ml-1">㎡</span></div></div>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-white"><span class="text-[10px] font-bold text-slate-400 block">발주량</span><div class="flex items-baseline"><input type="number" id="input-boxes" class="text-white font-black text-xl bg-transparent outline-none w-16 text-right" readonly><span class="text-xs font-bold text-slate-500 ml-1">BOX</span></div></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <div class="bg-white p-2 border rounded-xl text-center"><span class="text-[9px] font-bold text-slate-400 block">1Box 면적</span><input type="number" id="input-factor" class="w-full text-center font-bold text-slate-600 outline-none" value="3.2" oninput="calculate();"></div>
+                        <div class="bg-white p-2 border rounded-xl text-center"><span class="text-[9px] font-bold text-slate-400 block">로스율</span><select id="select-loss" class="w-full text-center font-bold text-slate-600 outline-none" onchange="calculate();"><option value="5">5%</option><option value="10" selected>10%</option><option value="15">15%</option></select></div>
                     </div>
                 </div>
             </div>
@@ -191,13 +176,13 @@
                 </div>
                 <div class="relative z-10 mt-auto">
                     <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-[2rem] shadow-2xl text-center border border-white/10">
-                        <div class="flex items-baseline justify-center gap-1.5 mb-6"><span id="res-total-vat" class="text-4xl md:text-5xl font-black text-white drop-shadow-md">0</span>원</div>
+                        <div class="flex items-baseline justify-center gap-1.5 mb-6"><span id="res-total-vat" class="text-4xl md:text-5xl font-black text-white">0</span>원</div>
                         <div class="grid grid-cols-2 gap-2 mt-6" data-html2canvas-ignore="true">
-                            <button onclick="shareQuote()" class="btn-action bg-[#FEE500] text-[#3c1e1e] hover:bg-[#fdd835] shadow-lg"><i class="fas fa-comment mr-2 text-lg"></i> 카톡공유</button>
-                            <button onclick="sendDirectSMS()" class="btn-action bg-green-500 text-white hover:bg-green-600 shadow-lg"><i class="fas fa-sms mr-2 text-lg"></i> 문자전송</button>
+                            <button onclick="shareQuote()" class="btn-action bg-[#FEE500] text-[#3c1e1e] hover:bg-[#fdd835] shadow-lg"><i class="fas fa-comment mr-2"></i> 카톡공유</button>
+                            <button onclick="sendDirectSMS()" class="btn-action bg-green-500 text-white hover:bg-green-600 shadow-lg"><i class="fas fa-sms mr-2"></i> 문자전송</button>
                             <button onclick="saveRecord()" class="btn-action bg-slate-800 text-white hover:bg-slate-700 shadow-lg"><i class="fas fa-save mr-2"></i> 저장/입금관리</button>
                             <button onclick="showRecordModal()" class="btn-action bg-blue-900 text-white hover:bg-blue-800 shadow-lg"><i class="fas fa-database mr-2"></i> 종합센터</button>
-                            <button onclick="saveImage()" class="btn-action bg-white text-blue-900 col-span-2 shadow-inner mt-1"><i class="fas fa-download mr-2"></i> 견적 이미지 저장 (갤러리)</button>
+                            <button onclick="saveImage()" class="btn-action bg-white text-blue-900 col-span-2 shadow-inner mt-1"><i class="fas fa-download mr-2"></i> 이미지 저장</button>
                         </div>
                     </div>
                 </div>
@@ -213,20 +198,23 @@
         const spaceOptions = {
             floor: ["거실 전체", "주방/식당", "복도", "침실 1", "침실 2", "침실 3", "드레스룸", "현관 입구", "기타"],
             wall: ["거실 아트월", "거실 쇼파월", "주방 포인트", "복도 벽면", "침실 포인트", "현관/전실", "커튼박스", "기타"],
-            measure: ["실측 구역 A", "실측 구역 B", "실측 구역 C", "기타"]
+            measure: ["실측 A", "실측 B", "실측 C", "기타"]
         };
 
-        window.onload = async () => {
-            // 로그인 상태 체크
+        // --- 강력한 로그인 상태 관리 (v23.3) ---
+        window.addEventListener('DOMContentLoaded', () => {
             const authStatus = localStorage.getItem('cm_master_auth');
-            if (authStatus === 'valid') { 
-                const gate = document.getElementById('login-gate');
-                if(gate) gate.remove(); // 아예 제거하여 스크롤 시 재출현 방지
-                await loadData(); 
+            const gate = document.getElementById('login-gate');
+            if (authStatus === 'valid') {
+                gate.style.display = 'none';
+                gate.remove(); // 아예 노드 자체를 삭제하여 다시 나타나지 않게 함
+                loadData();
+            } else {
+                gate.style.display = 'flex'; // 인증 없으면 노출
             }
             setMeasurementMode('floor');
             document.getElementById('quote-no').innerText = "Q" + new Date().getTime().toString().slice(-8);
-        };
+        });
 
         function checkAppLogin() { 
             const pwdInput = document.getElementById('app-password');
@@ -234,8 +222,11 @@
             if (pwd === '1306') { 
                 localStorage.setItem('cm_master_auth', 'valid'); 
                 const gate = document.getElementById('login-gate');
-                if(gate) gate.remove(); // 로그인 성공 시 엘리먼트 즉시 삭제
-                loadData(); 
+                gate.style.opacity = '0';
+                setTimeout(() => {
+                    gate.remove(); // 로그인 성공 시 즉시 삭제
+                    loadData(); 
+                }, 300);
             } else { 
                 alert('비밀번호가 틀렸습니다.'); 
                 pwdInput.value = '';
@@ -262,24 +253,21 @@
 
         function toggleView(view) {
             currentRecordView = view;
-            const btns = ['quotes', 'samples', 'stats', 'crm'];
-            btns.forEach(b => { document.getElementById('nav-' + b).className = b === view ? 'tab-btn active' : 'tab-btn inactive'; });
+            ['quotes', 'samples', 'stats', 'crm'].forEach(b => { document.getElementById('nav-' + b).className = b === view ? 'tab-btn active' : 'tab-btn inactive'; });
             document.getElementById('sample-input-form').style.display = view === 'samples' ? 'block' : 'none';
-            document.getElementById('search-bar-container').style.display = (view === 'stats' || view === 'crm') ? 'none' : 'block';
             renderRecords();
         }
 
         function renderRecords() {
             const list = document.getElementById('record-list'), search = document.getElementById('record-search').value.toLowerCase();
             const records = JSON.parse(localStorage.getItem('cm_unified_records') || '[]'), samples = JSON.parse(localStorage.getItem('cm_sample_history') || '[]');
-
             if(currentRecordView === 'quotes') {
                 let filtered = records.filter(r => r.name.toLowerCase().includes(search) || r.firm.toLowerCase().includes(search));
                 list.innerHTML = filtered.map(r => `
                     <div class="bg-white p-4 rounded-2xl shadow-sm border ${r.isPaid ? 'border-slate-100' : 'border-red-100 bg-red-50/20'}">
                         <div class="flex justify-between items-start">
                             <div><span class="text-[9px] font-black text-blue-500 uppercase">${r.firm}</span><h4 class="font-black text-slate-800">${r.name} 고객</h4></div>
-                            <div class="text-right"><div class="text-sm font-black">${r.total}원</div><button onclick="togglePayment(${r.id})" class="text-[9px] px-2 py-1 rounded border mt-1 shadow-sm ${r.isPaid ? 'bg-slate-100 text-slate-400' : 'bg-red-500 text-white'}">${r.isPaid ? '입금완료' : '미입금 체크'}</button></div>
+                            <div class="text-right"><div class="text-sm font-black">${r.total}원</div><button onclick="togglePayment(${r.id})" class="text-[9px] px-2 py-1 rounded border mt-1 ${r.isPaid ? 'bg-slate-100 text-slate-400' : 'bg-red-500 text-white'}">${r.isPaid ? '입금완료' : '미입금'}</button></div>
                         </div><div class="text-[8px] text-slate-400 mt-2">${r.date}</div>
                     </div>`).join('');
             } else if(currentRecordView === 'samples') {
@@ -297,10 +285,10 @@
                     stats[key].total += val; if(!r.isPaid) stats[key].unpaid += val;
                 });
                 list.innerHTML = Object.keys(stats).sort().reverse().map(k => `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div class="text-xs font-black text-slate-400 mb-3">${k} 매출 실적</div>
-                        <div class="flex justify-between items-end"><span class="text-sm font-bold text-slate-600">총 견적 합계</span><span class="text-xl font-black text-blue-600">${stats[k].total.toLocaleString()}원</span></div>
-                        <div class="flex justify-between items-end mt-2"><span class="text-sm font-bold text-red-400">남은 미수금</span><span class="text-xl font-black text-red-500">${stats[k].unpaid.toLocaleString()}원</span></div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-2">
+                        <div class="text-xs font-black text-slate-400 mb-2">${k} 실적</div>
+                        <div class="flex justify-between items-end mb-1"><span class="text-sm font-bold text-slate-600">총 견적</span><span class="text-lg font-black text-blue-600">${stats[k].total.toLocaleString()}원</span></div>
+                        <div class="flex justify-between items-end"><span class="text-sm font-bold text-red-400">미수금</span><span class="text-lg font-black text-red-500">${stats[k].unpaid.toLocaleString()}원</span></div>
                     </div>`).join('');
             } else if(currentRecordView === 'crm') {
                 const firms = {};
@@ -310,23 +298,13 @@
                     firms[r.firm].total += parseInt(r.total.replace(/,/g,''));
                 });
                 list.innerHTML = Object.keys(firms).sort().map(f => `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-                        <div class="flex justify-between items-center mb-3"><h4 class="font-black text-slate-800 text-lg">${f}</h4><span class="text-xs font-black text-blue-600">누적 매출: ${firms[f].total.toLocaleString()}원</span></div>
-                        <div class="space-y-1.5 pl-3 border-l-2 border-slate-100">
-                            ${firms[f].customers.map(c => `<div class="flex justify-between text-[10px] font-bold text-slate-500 hover:text-blue-500"><span>👤 ${c.name}</span><span>${c.date.split(' ')[0]}</span></div>`).join('')}
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-2">
+                        <div class="flex justify-between items-center mb-2"><h4 class="font-black text-slate-800">${f}</h4><span class="text-xs font-black text-blue-600">누적: ${firms[f].total.toLocaleString()}원</span></div>
+                        <div class="space-y-1 pl-3 border-l-2 border-blue-50">
+                            ${firms[f].customers.map(c => `<div class="flex justify-between text-[10px] text-slate-500"><span>👤 ${c.name}</span><span>${c.date.split(' ')[0]}</span></div>`).join('')}
                         </div>
                     </div>`).join('');
             }
-        }
-
-        function setMeasurementMode(mode) {
-            measureMode = mode;
-            ['floor', 'wall', 'measure'].forEach(m => document.getElementById('tab-' + m).className = m === mode ? 'tab-btn active' : 'tab-btn inactive');
-            const hInput = document.getElementById('zone-h');
-            if(mode === 'floor') hInput.placeholder = '세로(L)'; else if(mode === 'wall') hInput.placeholder = '높이(H)';
-            const sel = document.getElementById('zone-name-select'); sel.innerHTML = '';
-            spaceOptions[mode].forEach(opt => sel.add(new Option(opt, opt)));
-            calculate();
         }
 
         async function connectBosch() {
@@ -375,13 +353,11 @@
         function calculate() {
             const totalM2 = zoneList.reduce((sum, z) => sum + z.area, 0);
             document.getElementById('input-real-m2').value = totalM2.toFixed(2);
-            const factor = parseFloat(document.getElementById('input-factor')?.value) || 3.2;
-            const boxes = Math.ceil((totalM2 / factor) * 1.1);
+            const boxes = Math.ceil((totalM2 / parseFloat(document.getElementById('input-factor').value)) * (1 + parseFloat(document.getElementById('select-loss').value)/100));
             document.getElementById('input-boxes').value = boxes || 0;
             const boxPrice = parseInt(document.getElementById('input-box-price').value.replace(/,/g,'')) || 0;
             const laborPrice = measureMode === 'wall' ? (parseInt(document.getElementById('input-labor-m2').value.replace(/,/g,'')) || 0) : 0;
-            const baseCost = (boxes * boxPrice) || 0, laborCost = Math.round(totalM2 * laborPrice) || 0;
-            const total = baseCost + laborCost;
+            const baseCost = boxes * boxPrice, laborCost = Math.round(totalM2 * laborPrice), total = baseCost + laborCost;
             document.getElementById('res-area').innerText = totalM2.toFixed(2) + " ㎡";
             document.getElementById('det-base').innerText = baseCost.toLocaleString() + "원";
             document.getElementById('det-labor').innerText = laborCost.toLocaleString() + "원";
@@ -399,30 +375,40 @@
             handleProductSelect();
         }
 
+        function setMeasurementMode(mode) {
+            measureMode = mode;
+            ['floor', 'wall', 'measure'].forEach(m => document.getElementById('tab-' + m).className = m === mode ? 'tab-btn active' : 'tab-btn inactive');
+            const hInput = document.getElementById('zone-h');
+            if(mode === 'floor') hInput.placeholder = '세로(L)'; else if(mode === 'wall') hInput.placeholder = '높이(H)';
+            const sel = document.getElementById('zone-name-select'); sel.innerHTML = '';
+            spaceOptions[mode].forEach(opt => sel.add(new Option(opt, opt)));
+            calculate();
+        }
+
         function saveRecord() {
-            const data = { id: Date.now(), name: document.getElementById('cust-name').value || "미지정", firm: document.getElementById('firm-name').value || "일반소비자", total: document.getElementById('res-total-vat').innerText, date: new Date().toLocaleString(), isPaid: false };
+            const data = { id: Date.now(), name: document.getElementById('cust-name').value || "미지정", firm: document.getElementById('firm-name').value || "직거래", total: document.getElementById('res-total-vat').innerText, date: new Date().toLocaleString(), isPaid: false };
             let rs = JSON.parse(localStorage.getItem('cm_unified_records') || '[]'); rs.unshift(data);
-            localStorage.setItem('cm_unified_records', JSON.stringify(rs)); showToast("견적/입금 관리 데이터 저장됨");
+            localStorage.setItem('cm_unified_records', JSON.stringify(rs)); showToast("견적/입금 데이터 저장됨");
         }
 
         function addSampleLog() {
             const firm = document.getElementById('new-sample-firm').value, date = document.getElementById('new-sample-date').value, name = document.getElementById('new-sample-name').value;
             if(!firm || !name) return;
             let ss = JSON.parse(localStorage.getItem('cm_sample_history') || '[]'); ss.unshift({ id: Date.now(), firm, date, name });
-            localStorage.setItem('cm_sample_history', JSON.stringify(ss)); document.getElementById('new-sample-name').value = ''; renderRecords(); showToast("샘플북 기록 저장됨");
+            localStorage.setItem('cm_sample_history', JSON.stringify(ss)); document.getElementById('new-sample-name').value = ''; renderRecords(); showToast("샘플 기록됨");
         }
 
         function showRecordModal() { document.getElementById('record-modal').style.display = 'flex'; renderRecords(); }
         function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.className = "show"; setTimeout(() => t.className = "", 2000); }
         function closeModal(e, id) { if(e.target.id === id) document.getElementById(id).style.display = 'none'; }
         function togglePayment(id) { let rs = JSON.parse(localStorage.getItem('cm_unified_records') || '[]'); let r = rs.find(x => x.id === id); if(r) r.isPaid = !r.isPaid; localStorage.setItem('cm_unified_records', JSON.stringify(rs)); renderRecords(); }
-        function updateCustInfo() { document.getElementById('disp-name').innerText = (document.getElementById('cust-name').value || "고객") + " 님"; document.getElementById('disp-firm').innerText = "업체: " + (document.getElementById('firm-name').value || "-"); document.getElementById('disp-addr').innerText = "현장: " + (document.getElementById('cust-addr').value || ""); }
+        function updateCustInfo() { document.getElementById('disp-name').innerText = (document.getElementById('cust-name').value || "고객") + " 님"; document.getElementById('disp-firm').innerText = "업체: " + (document.getElementById('firm-name').value || "-"); document.getElementById('disp-addr').innerText = "현장: " + document.getElementById('cust-addr').value; }
         function updateProducts() { let bName = document.getElementById('select-brand').value, pSel = document.getElementById('select-product'); pSel.innerHTML = '<option value="">제품 선택</option>'; let bObj = masterData.find(x => x.brand === bName); if(bObj) bObj.products.forEach(p => pSel.add(new Option(p.name, p.name))); }
         function handleProductSelect() { let bName = document.getElementById('select-brand').value, pName = document.getElementById('select-product').value, bObj = masterData.find(x => x.brand === bName), pObj = bObj?.products.find(x => x.name === pName); if(pObj) { document.getElementById('input-box-price').value = (userType === 'firm' ? pObj.f_price : pObj.c_price).toLocaleString(); document.getElementById('res-product').innerText = pObj.name; } calculate(); }
         function formatPhone(el) { el.value = el.value.replace(/[^0-9]/g, "").replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3"); }
         function formatInput(el) { let val = el.value.replace(/[^0-9]/g, ''); el.value = val ? parseInt(val).toLocaleString() : ''; }
-        function shareQuote() { showToast("이미지를 생성 중..."); html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => canvas.toBlob(blob => { navigator.share({files:[new File([blob], "청인마루견적.png", {type:"image/png"})]}); document.getElementById('toast').className = ""; })); }
-        function saveImage() { showToast("갤러리에 저장 중..."); html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => { let a = document.createElement('a'); a.href = canvas.toDataURL(); a.download = "청인마루견적.png"; a.click(); document.getElementById('toast').className = ""; }); }
+        function shareQuote() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => canvas.toBlob(blob => navigator.share({files:[new File([blob], "청인마루견적.png", {type:"image/png"})]}))); }
+        function saveImage() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => { let a = document.createElement('a'); a.href = canvas.toDataURL(); a.download = "청인마루견적.png"; a.click(); }); }
         function sendDirectSMS() { let phone = document.getElementById('cust-phone').value.replace(/-/g, ""), msg = `[청인마루 견적]\n제품: ${document.getElementById('res-product').innerText}\n합계: ${document.getElementById('res-total-vat').innerText}원`; location.href = `sms:${phone}${navigator.userAgent.match(/iPhone/i) ? '&' : '?'}body=${encodeURIComponent(msg)}`; }
     </script>
 </body>
