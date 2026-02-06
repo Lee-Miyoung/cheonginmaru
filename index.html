@@ -172,7 +172,7 @@
                 <div class="relative z-10 mt-auto">
                     <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-[2rem] shadow-2xl text-center">
                         <div class="flex items-baseline justify-center gap-1.5 mb-6"><span id="res-total-vat" class="text-4xl md:text-5xl font-black text-white">0</span>원</div>
-                        <div class="grid grid-cols-2 gap-2" data-html2canvas-ignore="true">
+                        <div class="grid grid-cols-2 gap-2 mt-6" data-html2canvas-ignore="true">
                             <button onclick="shareQuote()" class="btn-action bg-[#FEE500] text-[#3c1e1e] hover:bg-[#fdd835]"><i class="fas fa-comment mr-2"></i> 카톡공유</button>
                             <button onclick="sendDirectSMS()" class="btn-action bg-green-500 text-white hover:bg-green-600"><i class="fas fa-sms mr-2"></i> 문자전송</button>
                             <button onclick="saveRecord()" class="btn-action bg-slate-800 text-white hover:bg-slate-700"><i class="fas fa-save mr-2"></i> 저장/입금관리</button>
@@ -221,24 +221,18 @@
             } catch(e) {}
         }
 
-        // --- 뷰 전환 및 관리 기능 ---
         function toggleView(view) {
             currentRecordView = view;
             const btns = ['quotes', 'samples', 'stats', 'crm'];
-            btns.forEach(b => {
-                const el = document.getElementById('nav-' + b);
-                el.className = b === view ? 'tab-btn active' : 'tab-btn inactive';
-            });
+            btns.forEach(b => { document.getElementById('nav-' + b).className = b === view ? 'tab-btn active' : 'tab-btn inactive'; });
             document.getElementById('sample-input-form').style.display = view === 'samples' ? 'block' : 'none';
             document.getElementById('search-bar-container').style.display = (view === 'stats' || view === 'crm') ? 'none' : 'block';
             renderRecords();
         }
 
         function renderRecords() {
-            const list = document.getElementById('record-list');
-            const search = document.getElementById('record-search').value.toLowerCase();
-            const records = JSON.parse(localStorage.getItem('cm_unified_records') || '[]');
-            const samples = JSON.parse(localStorage.getItem('cm_sample_history') || '[]');
+            const list = document.getElementById('record-list'), search = document.getElementById('record-search').value.toLowerCase();
+            const records = JSON.parse(localStorage.getItem('cm_unified_records') || '[]'), samples = JSON.parse(localStorage.getItem('cm_sample_history') || '[]');
 
             if(currentRecordView === 'quotes') {
                 let filtered = records.filter(r => r.name.toLowerCase().includes(search) || r.firm.toLowerCase().includes(search));
@@ -257,15 +251,11 @@
                         <button onclick="deleteSampleLog(${s.id})" class="text-slate-200 hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
                     </div>`).join('');
             } else if(currentRecordView === 'stats') {
-                // 매출 통계 엔진
                 const stats = {};
                 records.forEach(r => {
-                    const dateObj = new Date(r.date);
-                    const key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
-                    const val = parseInt(r.total.replace(/,/g,''));
+                    const d = new Date(r.date), key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, val = parseInt(r.total.replace(/,/g,''));
                     if(!stats[key]) stats[key] = { total: 0, unpaid: 0 };
-                    stats[key].total += val;
-                    if(!r.isPaid) stats[key].unpaid += val;
+                    stats[key].total += val; if(!r.isPaid) stats[key].unpaid += val;
                 });
                 list.innerHTML = Object.keys(stats).sort().reverse().map(k => `
                     <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
@@ -274,7 +264,6 @@
                         <div class="flex justify-between items-end mt-1"><span class="text-sm font-bold text-red-400">현재 미수금</span><span class="text-lg font-black text-red-500">${stats[k].unpaid.toLocaleString()}원</span></div>
                     </div>`).join('');
             } else if(currentRecordView === 'crm') {
-                // 거래처별 CRM 엔진
                 const firms = {};
                 records.forEach(r => {
                     if(!firms[r.firm]) firms[r.firm] = { customers: [], total: 0 };
@@ -291,15 +280,11 @@
             }
         }
 
-        // --- 기존 핵심 로직 유지 ---
         function setMeasurementMode(mode) {
             measureMode = mode;
             ['floor', 'wall', 'measure'].forEach(m => document.getElementById('tab-' + m).className = m === mode ? 'tab-btn active' : 'tab-btn inactive');
-            const laborGroup = document.getElementById('labor-input-group');
             const hInput = document.getElementById('zone-h');
-            if(mode === 'floor') { laborGroup.style.display = 'none'; hInput.placeholder = '세로(L)'; hInput.value = ''; }
-            else if(mode === 'wall') { laborGroup.style.display = 'block'; hInput.placeholder = '높이(H)'; hInput.value = '2300'; }
-            else { document.getElementById('price-logic-area').style.display = 'none'; hInput.placeholder = '세로(L)'; hInput.value = ''; }
+            if(mode === 'floor') hInput.placeholder = '세로(L)'; else if(mode === 'wall') hInput.placeholder = '높이(H)';
             const sel = document.getElementById('zone-name-select'); sel.innerHTML = '';
             spaceOptions[mode].forEach(opt => sel.add(new Option(opt, opt)));
             calculate();
@@ -314,8 +299,8 @@
                 for (const s of services) {
                     const chars = await s.getCharacteristics();
                     for (const c of chars) {
-                        if (char.properties.notify) { await char.startNotifications(); char.addEventListener('characteristicvaluechanged', e => { 
-                            const val = e.target.value; try { let dist = val.getFloat32(1, true); if(dist > 0) inputBT(Math.round(dist * 1000)); } catch(err) {}
+                        if (c.properties.notify) { await c.startNotifications(); c.addEventListener('characteristicvaluechanged', e => { 
+                            const v = e.target.value; try { let d = v.getFloat32(1, true); if(d > 0) inputBT(Math.round(d * 1000)); } catch(err) {}
                         }); }
                     }
                 }
@@ -335,8 +320,7 @@
             const dw = parseFloat(document.getElementById('zone-deduct-w').value) || 0, dh = parseFloat(document.getElementById('zone-deduct-h').value) || 0;
             if(!w || !h) return;
             zoneList.push({ name, w, h, area: (w * h) / 1000000 - (dw * dh) / 1000000 });
-            document.getElementById('zone-w').value = ''; if(measureMode !== 'wall') document.getElementById('zone-h').value = '';
-            renderZones();
+            document.getElementById('zone-w').value = ''; renderZones();
         }
 
         function renderZones() {
@@ -351,12 +335,11 @@
         function calculate() {
             const totalM2 = zoneList.reduce((sum, z) => sum + z.area, 0);
             document.getElementById('input-real-m2').value = totalM2.toFixed(2);
-            const factor = parseFloat(document.getElementById('input-factor')?.value) || 3.2;
-            document.getElementById('input-boxes').value = Math.ceil((totalM2 / factor) * 1.1) || 0;
+            const boxes = Math.ceil((totalM2 / 3.2) * 1.1);
+            document.getElementById('input-boxes').value = boxes || 0;
             const boxPrice = parseInt(document.getElementById('input-box-price').value.replace(/,/g,'')) || 0;
             const laborPrice = measureMode === 'wall' ? (parseInt(document.getElementById('input-labor-m2').value.replace(/,/g,'')) || 0) : 0;
-            const baseCost = (parseInt(document.getElementById('input-boxes').value) || 0) * boxPrice;
-            const total = baseCost + Math.round(totalM2 * laborPrice);
+            const baseCost = boxes * boxPrice, total = baseCost + Math.round(totalM2 * laborPrice);
             document.getElementById('res-area').innerText = totalM2.toFixed(2) + " ㎡";
             document.getElementById('det-base').innerText = baseCost.toLocaleString() + "원";
             document.getElementById('det-labor').innerText = Math.round(totalM2 * laborPrice).toLocaleString() + "원";
@@ -377,12 +360,12 @@
         function saveRecord() {
             const data = { id: Date.now(), name: document.getElementById('cust-name').value || "미지정", firm: document.getElementById('firm-name').value || "직거래", total: document.getElementById('res-total-vat').innerText, date: new Date().toLocaleString(), isPaid: false };
             let rs = JSON.parse(localStorage.getItem('cm_unified_records') || '[]'); rs.unshift(data);
-            localStorage.setItem('cm_unified_records', JSON.stringify(rs)); showToast("견적 및 고객 데이터가 저장되었습니다.");
+            localStorage.setItem('cm_unified_records', JSON.stringify(rs)); showToast("견적/고객 데이터 저장됨");
         }
 
         function addSampleLog() {
             const firm = document.getElementById('new-sample-firm').value, date = document.getElementById('new-sample-date').value, name = document.getElementById('new-sample-name').value;
-            if(!firm || !name) return alert('필수 입력');
+            if(!firm || !name) return;
             let ss = JSON.parse(localStorage.getItem('cm_sample_history') || '[]'); ss.unshift({ id: Date.now(), firm, date, name });
             localStorage.setItem('cm_sample_history', JSON.stringify(ss)); document.getElementById('new-sample-name').value = ''; renderRecords();
         }
@@ -396,7 +379,7 @@
         function handleProductSelect() { let bName = document.getElementById('select-brand').value, pName = document.getElementById('select-product').value, bObj = masterData.find(x => x.brand === bName), pObj = bObj?.products.find(x => x.name === pName); if(pObj) { document.getElementById('input-box-price').value = (userType === 'firm' ? pObj.f_price : pObj.c_price).toLocaleString(); document.getElementById('res-product').innerText = pObj.name; } calculate(); }
         function formatPhone(el) { el.value = el.value.replace(/[^0-9]/g, "").replace(/(^02.{0}|^01.{1}|[0-9]{3})([0-9]+)([0-9]{4})/, "$1-$2-$3"); }
         function formatInput(el) { let val = el.value.replace(/[^0-9]/g, ''); el.value = val ? parseInt(val).toLocaleString() : ''; }
-        function shareQuote() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => canvas.toBlob(blob => navigator.share({files:[new File([blob], "견적.png", {type:"image/png"})]}))); }
+        function shareQuote() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => canvas.toBlob(blob => navigator.share({files:[new File([blob], "청인마루견적.png", {type:"image/png"})]}))); }
         function saveImage() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => { let a = document.createElement('a'); a.href = canvas.toDataURL(); a.download = "청인마루견적.png"; a.click(); }); }
         function sendDirectSMS() { let phone = document.getElementById('cust-phone').value.replace(/-/g, ""), msg = `[청인마루 견적]\n제품: ${document.getElementById('res-product').innerText}\n합계: ${document.getElementById('res-total-vat').innerText}원`; location.href = `sms:${phone}${navigator.userAgent.match(/iPhone/i) ? '&' : '?'}body=${encodeURIComponent(msg)}`; }
     </script>
