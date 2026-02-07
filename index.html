@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>청인마루 Master v42.0</title>
+    <title>청인마루 Master v45.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -41,14 +41,10 @@
 
         .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 20px; text-align: center; transition: 0.2s; background: #fff; cursor: pointer; }
         .drop-zone.dragover { border-color: #228BE6; background: #eff6ff; }
-        
         .option-row { display: flex; justify-content: space-between; font-size: 13px; color: #CED4DA; margin-bottom: 6px; }
         .option-row span:last-child { color: white; font-weight: 700; }
-        
         .input-mm-fit { font-size: 1.85rem !important; padding-left: 8px !important; padding-right: 8px !important; font-weight: 900 !important; }
-        
-        /* [신규] 자재 입력창 강조 스타일 */
-        .input-large { font-size: 18px !important; padding: 16px !important; }
+        .input-large { font-size: 16px !important; padding: 15px !important; }
     </style>
 </head>
 <body>
@@ -58,7 +54,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">CHUNG-IN</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v42.0</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v45.0</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4 border border-gray-700 focus:border-blue-500" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-colors">Access System</button>
         </div>
@@ -153,9 +149,16 @@
                 <span id="mode-label" class="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">마루/바닥</span>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-3">
-                <input type="text" id="brand-name" class="input-field" placeholder="브랜드 (예: 동화)" oninput="calc(); autoSave()">
-                <input type="text" id="prod-name" class="input-field" placeholder="제품명 (예: 나투스진)" oninput="calc(); autoSave()">
+                <select id="brand-select" class="input-field" onchange="updateProducts(); autoSave()">
+                    <option value="">브랜드 로딩중...</option>
+                </select>
+                <select id="product-select" class="input-field" onchange="handleProductSelect(); autoSave()">
+                    <option value="">제품 선택</option>
+                </select>
             </div>
+            <input type="text" id="manual-brand" class="input-field mb-3 hidden" placeholder="브랜드 직접 입력" oninput="autoSave()">
+            <input type="text" id="manual-prod" class="input-field mb-3 hidden" placeholder="제품명 직접 입력" oninput="autoSave()">
+
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <input type="text" id="prod-model" class="input-field input-large text-center" placeholder="세부 모델/색상" oninput="autoSave()">
                 <input type="text" id="prod-spec" class="input-field input-large text-center" placeholder="규격 (mm)" oninput="autoSave()">
@@ -262,13 +265,16 @@
     </div>
 
     <script>
-        let mode = 'floor'; let isExp = true; let zoneList = []; let userType = 'consumer'; let manageView = 'all';
+        // [업데이트] 실장님 구글 시트 URL 적용
+        const SHEET_URL = "https://script.google.com/macros/s/AKfycbzp2kx3wOkbCEh1eTj9m5zKaCpXjMatk1KAjSVhh2OmBJhxjX-YedcI8CNVo0pj7zPs/exec";
+        let masterData = []; let zoneList = []; let userType = 'consumer'; let isExp = true; let mode = 'floor'; let manageView = 'all';
         const TOAST = document.getElementById('toast');
 
         window.onload = () => {
             if(localStorage.getItem('cm_auth') === 'ok') document.getElementById('login-gate').remove();
             document.getElementById('rep-no').innerText = 'NO. ' + new Date().getTime().toString().slice(-6);
             setupDropZone();
+            loadData(); // 구글 시트 데이터 로딩
             loadAutoSave();
         };
 
@@ -279,15 +285,110 @@
             } else { alert('비밀번호 오류'); }
         }
 
-        // ... (Smart Parse / Mode Switch / Auto Save same as v41.0) ...
+        // [핵심] 구글 시트 데이터 로딩 및 드롭다운 연동
+        async function loadData() {
+            try {
+                const res = await fetch(SHEET_URL);
+                const data = await res.json();
+                const temp = {};
+                // 데이터 구조화: 브랜드 -> 제품 -> 상세
+                data.forEach(item => {
+                    if (item.brand) {
+                        if (!temp[item.brand]) temp[item.brand] = { brand: item.brand, products: [] };
+                        temp[item.brand].products.push({
+                            name: item.name,
+                            spec: item.spec || '',
+                            boxArea: parseFloat(item.box_area) || 3.2,
+                            // 소비자용 / 업체용 단가 구분
+                            price: item.price || 0,
+                            firmPrice: item.firm_price || item.price || 0
+                        });
+                    }
+                });
+                masterData = Object.values(temp);
+                updateBrandSelect();
+            } catch (e) {
+                console.error("Sheet Load Error:", e);
+                // 실패 시 기본 데이터라도 사용하도록 (옵션)
+            }
+        }
+
+        function updateBrandSelect() {
+            const bSel = document.getElementById('brand-select');
+            bSel.innerHTML = '<option value="">브랜드 선택</option>';
+            masterData.forEach(m => bSel.add(new Option(m.brand, m.brand)));
+            bSel.add(new Option("직접 입력", "direct"));
+        }
+
+        function updateProducts() {
+            const bName = document.getElementById('brand-select').value;
+            const pSel = document.getElementById('product-select');
+            const manualBrand = document.getElementById('manual-brand');
+            const manualProd = document.getElementById('manual-prod');
+
+            if (bName === 'direct') {
+                manualBrand.classList.remove('hidden');
+                manualProd.classList.remove('hidden');
+                pSel.innerHTML = '<option value="">직접 입력 모드</option>';
+                pSel.disabled = true;
+            } else {
+                manualBrand.classList.add('hidden');
+                manualProd.classList.add('hidden');
+                pSel.disabled = false;
+                pSel.innerHTML = '<option value="">제품 선택</option>';
+                
+                const bObj = masterData.find(x => x.brand === bName);
+                if (bObj) {
+                    bObj.products.forEach((p, idx) => {
+                        // value에 인덱스를 넣어 찾기 쉽게 함
+                        const opt = new Option(p.name, idx);
+                        pSel.add(opt);
+                    });
+                }
+            }
+            calc();
+        }
+
+        function handleProductSelect() {
+            const bName = document.getElementById('brand-select').value;
+            const pIdx = document.getElementById('product-select').value;
+            
+            if (bName !== 'direct' && pIdx !== "") {
+                const bObj = masterData.find(x => x.brand === bName);
+                if (bObj) {
+                    const pObj = bObj.products[pIdx];
+                    if (pObj) {
+                        // 자동 입력
+                        document.getElementById('prod-spec').value = pObj.spec;
+                        document.getElementById('input-box-area').value = pObj.boxArea;
+                        // 소비자/업체 모드에 따른 단가 적용
+                        const finalPrice = userType === 'firm' ? pObj.firmPrice : pObj.price;
+                        document.getElementById('box-price').value = finalPrice.toLocaleString();
+                    }
+                }
+            }
+            calc();
+        }
+
+        // ... (나머지 Smart Parse, Auto Save, UI Logic 동일) ...
         function setModeType(type) {
             userType = type;
             document.getElementById('mode-consumer').className = 'mode-btn ' + (type==='consumer'?'active':'');
             document.getElementById('mode-firm').className = 'mode-btn ' + (type==='firm'?'active':'');
+            
             document.getElementById('firm-row').style.display = type==='firm' ? 'block' : 'none';
             document.getElementById('rep-firm').style.display = type==='firm' ? 'block' : 'none';
+            
             const btn = document.getElementById('btn-manage');
-            if(type === 'consumer') { btn.innerHTML = '<i class="fas fa-list"></i> 견적 기록'; btn.onclick = () => { openManager('all'); }; } else { btn.innerHTML = '<i class="fas fa-tasks"></i> 업체 관리'; btn.onclick = () => { openManager('firm'); }; }
+            if(type === 'consumer') {
+                btn.innerHTML = '<i class="fas fa-list"></i> 견적 기록';
+                btn.onclick = () => { openManager('all'); };
+            } else {
+                btn.innerHTML = '<i class="fas fa-tasks"></i> 업체 관리';
+                btn.onclick = () => { openManager('firm'); };
+            }
+            // 모드 변경 시 단가 재적용
+            handleProductSelect();
             updateInfo(); autoSave();
         }
 
@@ -312,8 +413,21 @@
             tabs.innerHTML = btns;
         }
 
-        function autoSave() { const data = { timestamp: new Date().getTime(), custName: document.getElementById('cust-name').value, custPhone: document.getElementById('cust-phone').value, custAddr: document.getElementById('cust-addr').value, firmName: document.getElementById('firm-name').value, sDate: document.getElementById('cust-survey-date').value, wDate: document.getElementById('cust-work-date').value, supplyPy: document.getElementById('input-supply-py').value, realPy: document.getElementById('input-real-py').value, brand: document.getElementById('brand-name').value, prod: document.getElementById('prod-name').value, model: document.getElementById('prod-model').value, spec: document.getElementById('prod-spec').value, boxArea: document.getElementById('input-box-area').value, boxPrice: document.getElementById('box-price').value, optRemoval: document.getElementById('opt-removal').value, optMolding: document.getElementById('opt-molding').value, optLifting: document.getElementById('opt-lifting').value, optEtc: document.getElementById('opt-etc').value, zones: zoneList }; localStorage.setItem('cm_autosave', JSON.stringify(data)); }
-        function loadAutoSave() { const saved = JSON.parse(localStorage.getItem('cm_autosave')); if (saved) { if (new Date().getTime() - saved.timestamp > 300000) { localStorage.removeItem('cm_autosave'); return; } document.getElementById('cust-name').value = saved.custName || ''; document.getElementById('cust-phone').value = saved.custPhone || ''; document.getElementById('cust-addr').value = saved.custAddr || ''; document.getElementById('firm-name').value = saved.firmName || ''; document.getElementById('cust-survey-date').value = saved.sDate || ''; document.getElementById('cust-work-date').value = saved.wDate || ''; document.getElementById('input-supply-py').value = saved.supplyPy || ''; document.getElementById('input-real-py').value = saved.realPy || ''; document.getElementById('brand-name').value = saved.brand || ''; document.getElementById('prod-name').value = saved.prod || ''; document.getElementById('prod-model').value = saved.model || ''; document.getElementById('prod-spec').value = saved.spec || ''; document.getElementById('input-box-area').value = saved.boxArea || '3.2'; document.getElementById('box-price').value = saved.boxPrice || ''; document.getElementById('opt-removal').value = saved.optRemoval || ''; document.getElementById('opt-molding').value = saved.optMolding || ''; document.getElementById('opt-lifting').value = saved.optLifting || ''; document.getElementById('opt-etc').value = saved.optEtc || ''; if(saved.zones) { zoneList = saved.zones; renderZones(); } calc(); updateInfo(); showToast("작업 복구됨"); } }
+        function autoSave() { const data = { timestamp: new Date().getTime(), custName: document.getElementById('cust-name').value, custPhone: document.getElementById('cust-phone').value, custAddr: document.getElementById('cust-addr').value, firmName: document.getElementById('firm-name').value, sDate: document.getElementById('cust-survey-date').value, wDate: document.getElementById('cust-work-date').value, supplyPy: document.getElementById('input-supply-py').value, realPy: document.getElementById('input-real-py').value, brand: document.getElementById('brand-select').value, prodIdx: document.getElementById('product-select').value, manualBrand: document.getElementById('manual-brand').value, manualProd: document.getElementById('manual-prod').value, model: document.getElementById('prod-model').value, spec: document.getElementById('prod-spec').value, boxArea: document.getElementById('input-box-area').value, boxPrice: document.getElementById('box-price').value, optRemoval: document.getElementById('opt-removal').value, optMolding: document.getElementById('opt-molding').value, optLifting: document.getElementById('opt-lifting').value, optEtc: document.getElementById('opt-etc').value, zones: zoneList }; localStorage.setItem('cm_autosave', JSON.stringify(data)); }
+        function loadAutoSave() { const saved = JSON.parse(localStorage.getItem('cm_autosave')); if (saved) { if (new Date().getTime() - saved.timestamp > 300000) { localStorage.removeItem('cm_autosave'); return; } document.getElementById('cust-name').value = saved.custName || ''; document.getElementById('cust-phone').value = saved.custPhone || ''; document.getElementById('cust-addr').value = saved.custAddr || ''; document.getElementById('firm-name').value = saved.firmName || ''; document.getElementById('cust-survey-date').value = saved.sDate || ''; document.getElementById('cust-work-date').value = saved.wDate || ''; document.getElementById('input-supply-py').value = saved.supplyPy || ''; document.getElementById('input-real-py').value = saved.realPy || ''; document.getElementById('prod-model').value = saved.model || ''; document.getElementById('prod-spec').value = saved.spec || ''; document.getElementById('input-box-area').value = saved.boxArea || '3.2'; document.getElementById('box-price').value = saved.boxPrice || ''; document.getElementById('opt-removal').value = saved.optRemoval || ''; document.getElementById('opt-molding').value = saved.optMolding || ''; document.getElementById('opt-lifting').value = saved.optLifting || ''; document.getElementById('opt-etc').value = saved.optEtc || ''; if(saved.zones) { zoneList = saved.zones; renderZones(); } 
+            // 브랜드 셀렉트 박스 복구 로직 추가
+            const sel = document.getElementById('brand-select');
+            const savedBrand = saved.brand || '';
+            const options = Array.from(sel.options).map(o => o.value);
+            if (options.includes(savedBrand)) {
+                sel.value = savedBrand;
+                document.getElementById('brand-name').classList.add('hidden');
+            } else if (savedBrand) {
+                sel.value = 'direct';
+                document.getElementById('brand-name').classList.remove('hidden');
+            }
+            calc(); updateInfo(); showToast("작업 복구됨"); 
+        } }
         function setupDropZone() { const dz = document.getElementById('drop-zone'); dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); dz.addEventListener('dragleave', e => { e.preventDefault(); dz.classList.remove('dragover'); }); dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleImage(e.dataTransfer.files[0]); }); }
         function handleImage(file) { if(!file) return; showToast("분석중..."); document.getElementById('ocr-status').innerText = "분석중..."; Tesseract.recognize(file, 'kor').then(({ data: { text } }) => { document.getElementById('raw-text').value = text; document.getElementById('ocr-status').innerText = "완료!"; runSuperParse(); }).catch(err => { document.getElementById('ocr-status').innerText = "실패"; }); }
         function runSuperParse() { const txt = document.getElementById('raw-text').value; if(!txt) return alert("내용을 입력해주세요."); const nMatch = txt.match(/(?:성함|이름)[:\s]*([가-힣\w\s]+)/) || txt.match(/([가-힣]{3})(?=\s*님)/); const pMatch = txt.match(/010[\s-]?\d{3,4}[\s-]?\d{4}/); const aMatch = txt.match(/(([가-힣]+(시|도|구|군|동|로|길))\s[\w가-힣\d\s\-\(\),]+)/); const fMatch = txt.match(/(?:업체|회사)[:\s]*([가-힣\w\s]+)/); if(nMatch) document.getElementById('cust-name').value = nMatch[1] || nMatch[0]; if(pMatch) document.getElementById('cust-phone').value = pMatch[0].replace(/[^0-9]/g, '').replace(/^(\d{3})(\d{4})(\d{4})$/, `$1-$2-$3`); if(aMatch) document.getElementById('cust-addr').value = aMatch[0].trim(); if(fMatch && userType === 'firm') document.getElementById('firm-name').value = fMatch[1].trim(); document.getElementById('raw-text').value = ''; updateInfo(); autoSave(); showToast("입력 완료!"); }
@@ -323,7 +437,7 @@
         function renderManager() { const list = document.getElementById('manage-list'); const search = document.getElementById('manage-search').value.toLowerCase(); const rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); const ss = JSON.parse(localStorage.getItem('cm_samples') || '[]'); let html = ''; if (manageView === 'all' || manageView === 'unpaid') { let filtered = rs.filter(r => r.name.includes(search) || r.firm.includes(search)); if (manageView === 'unpaid') filtered = filtered.filter(r => !r.isPaid); html = filtered.map(r => `<div class="bg-gray-50 p-3 rounded-xl flex justify-between items-center border ${r.isPaid ? 'border-gray-200' : 'border-red-200 bg-red-50'}"><div><div class="text-[10px] text-gray-500">${r.firm}</div><div class="font-bold">${r.name}</div><div class="text-[10px] text-gray-400">${r.sDate||'-'} / ${r.wDate||'-'}</div></div><div class="text-right"><div class="font-bold text-blue-600">${r.total}</div><button onclick="togglePay(${r.id})" class="text-[10px] px-2 py-1 rounded ${r.isPaid ? 'bg-gray-200' : 'bg-red-500 text-white'}">${r.isPaid?'완료':'미수금'}</button></div></div>`).join(''); } else if (manageView === 'firm') { const firms = {}; rs.forEach(r => { if (!firms[r.firm]) firms[r.firm] = { count:0, list:[] }; firms[r.firm].count++; firms[r.firm].list.push(r); }); Object.keys(firms).forEach(f => { if(f.toLowerCase().includes(search)) { html += `<div class="bg-blue-50 p-3 rounded-xl mb-2"><div class="font-black text-blue-700 mb-2">${f} (${firms[f].count}건)</div>`; firms[f].list.forEach(item => { html += `<div class="flex justify-between text-xs border-b border-blue-100 py-1"><span>${item.name}</span><span>${item.total}</span></div>`; }); html += `</div>`; } }); } else if (manageView === 'samples') { html = ss.filter(s => s.firm.includes(search) || s.name.includes(search)).map(s => `<div class="bg-green-50 p-3 rounded-xl border border-green-100 flex justify-between"><div><div class="font-bold text-gray-700">${s.firm}</div><div class="text-xs text-green-600">📘 ${s.name}</div></div><div class="text-[10px] text-gray-400">${s.date}</div></div>`).join(''); } list.innerHTML = html || '<div class="text-center text-gray-400 py-4">데이터가 없습니다.</div>'; }
         function togglePay(id) { let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); let r = rs.find(x => x.id === id); if(r) r.isPaid = !r.isPaid; localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager(); }
         function addSample() { const firm = document.getElementById('new-sample-firm').value; const name = document.getElementById('new-sample-name').value; if(!firm || !name) return; let ss = JSON.parse(localStorage.getItem('cm_samples') || '[]'); ss.unshift({ id: Date.now(), firm, name, date: new Date().toLocaleDateString() }); localStorage.setItem('cm_samples', JSON.stringify(ss)); renderManager(); }
-        function setMode(m) { mode = m; ['floor', 'wall', 'measure'].forEach(id => document.getElementById('tab-'+id).className = 'tab-btn ' + (id===m ? 'active' : 'inactive')); document.getElementById('area-calc-box').style.display = m==='floor' ? 'block' : 'none'; document.getElementById('zone-h').value = m==='wall' ? '2300' : ''; calc(); autoSave(); }
+        function setMode(m) { mode = m; ['floor', 'wall', 'measure'].forEach(id => document.getElementById('tab-'+id).className = 'tab-btn ' + (id===m ? 'active' : 'inactive')); document.getElementById('area-calc-box').style.display = m==='floor' ? 'block' : 'none'; document.getElementById('zone-h').value = m==='wall' ? '2300' : ''; const label = document.getElementById('mode-label'); if (m === 'floor') { label.style.display = 'inline-block'; label.innerText = '마루/바닥'; label.className = "text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded"; } else { label.style.display = 'none'; } calc(); autoSave(); }
         function setExp(val) { isExp = val; document.getElementById('exp-on').className = val ? "px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600" : "px-3 py-1 text-[11px] font-bold text-gray-400"; document.getElementById('exp-off').className = !val ? "px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600" : "px-3 py-1 text-[11px] font-bold text-gray-400"; syncPy(); autoSave(); }
         function syncPy() { const py = parseFloat(document.getElementById('input-supply-py').value) || 0; document.getElementById('input-supply-m2').value = (py * 3.3058).toFixed(1); document.getElementById('input-real-py').value = Math.ceil(py * (isExp ? 0.8 : 0.75)); calc(); autoSave(); }
         function syncM2() { const m2 = parseFloat(document.getElementById('input-supply-m2').value) || 0; document.getElementById('input-supply-py').value = (m2 / 3.3058).toFixed(1); syncPy(); }
@@ -375,8 +489,11 @@
             const total = baseCost + optCost;
             
             let detailHtml = '';
-            const brand = document.getElementById('brand-name').value;
-            const prod = document.getElementById('prod-name').value;
+            let brand = document.getElementById('brand-select').value;
+            if (brand === 'direct' || brand === '') brand = document.getElementById('brand-name').value;
+            let prod = document.getElementById('product-select').options[document.getElementById('product-select').selectedIndex]?.text;
+            if (!prod || prod === '제품 선택' || document.getElementById('brand-select').value === 'direct') prod = document.getElementById('manual-prod').value;
+
             const model = document.getElementById('prod-model').value;
             const spec = document.getElementById('prod-spec').value;
             
