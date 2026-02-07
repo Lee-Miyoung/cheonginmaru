@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>청인마루 Master v38.0</title>
+    <title>청인마루 Master v39.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -52,7 +52,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">CHUNG-IN</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v38.0</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v39.0</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4 border border-gray-700 focus:border-blue-500" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-colors">Access System</button>
         </div>
@@ -135,7 +135,7 @@
 
         <div id="area-calc-box" class="card-clean">
             <div class="flex justify-between items-center mb-4">
-                <span class="text-sm font-black text-gray-700">면적 계산기</span>
+                <span class="text-sm font-black text-gray-700">마루 평형 자동 계산</span>
                 <div class="flex bg-gray-100 p-1 rounded-lg">
                     <button id="exp-on" onclick="setExp(true)" class="px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600">확장(0.8)</button>
                     <button id="exp-off" onclick="setExp(false)" class="px-3 py-1 text-[11px] font-bold text-gray-400">비확장(0.75)</button>
@@ -145,6 +145,13 @@
                 <div><label class="input-label">공급평형</label><input type="number" id="input-supply-py" class="input-field text-center text-blue-600" placeholder="0" oninput="syncPy(); autoSave()"></div>
                 <div><label class="input-label">공급㎡</label><input type="number" id="input-supply-m2" class="input-field text-center" placeholder="0" oninput="syncM2(); autoSave()"></div>
                 <div class="bg-blue-600 rounded-xl p-1 flex flex-col items-center justify-center text-white"><span class="text-[9px] opacity-70 mb-1">실시공(평)</span><input type="number" id="input-real-py" class="bg-transparent text-white font-black text-lg text-center w-full outline-none" placeholder="0" oninput="calculate(); autoSave()"></div>
+            </div>
+        </div>
+
+        <div id="material-box" class="card-clean">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-sm font-black text-gray-700">자재 선택 및 단가</span>
+                <span id="mode-label" class="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">마루/바닥</span>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <input type="text" id="brand-name" class="input-field" placeholder="브랜드" oninput="calc(); autoSave()">
@@ -263,7 +270,7 @@
             } else { alert('비밀번호 오류'); }
         }
 
-        // ... (이전의 OCR, 모달, 관리 기능 코드는 그대로 유지) ...
+        // ... (Smart Parse, Auto Save 등 기본 함수들은 v38.0과 동일) ...
         function autoSave() {
             const data = {
                 timestamp: new Date().getTime(),
@@ -311,7 +318,94 @@
             }
         }
 
-        // ... (나머지 헬퍼 함수들 유지) ...
+        // ... (OCR/Smart Parse logic same as v38.0) ...
+        function setupDropZone() { const dz = document.getElementById('drop-zone'); dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); dz.addEventListener('dragleave', e => { e.preventDefault(); dz.classList.remove('dragover'); }); dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleImage(e.dataTransfer.files[0]); }); }
+        function handleImage(file) { if(!file) return; showToast("분석중..."); document.getElementById('ocr-status').innerText = "분석중..."; Tesseract.recognize(file, 'kor').then(({ data: { text } }) => { document.getElementById('raw-text').value = text; document.getElementById('ocr-status').innerText = "완료!"; runSuperParse(); }).catch(err => { document.getElementById('ocr-status').innerText = "실패"; }); }
+        function runSuperParse() { const txt = document.getElementById('raw-text').value; if(!txt) return alert("내용을 입력해주세요."); const nMatch = txt.match(/(?:성함|이름)[:\s]*([가-힣\w\s]+)/) || txt.match(/([가-힣]{3})(?=\s*님)/); const pMatch = txt.match(/010[\s-]?\d{3,4}[\s-]?\d{4}/); const aMatch = txt.match(/(([가-힣]+(시|도|구|군|동|로|길))\s[\w가-힣\d\s\-\(\),]+)/); const fMatch = txt.match(/(?:업체|회사)[:\s]*([가-힣\w\s]+)/); if(nMatch) document.getElementById('cust-name').value = nMatch[1] || nMatch[0]; if(pMatch) document.getElementById('cust-phone').value = pMatch[0].replace(/[^0-9]/g, '').replace(/^(\d{3})(\d{4})(\d{4})$/, `$1-$2-$3`); if(aMatch) document.getElementById('cust-addr').value = aMatch[0].trim(); if(fMatch && userType === 'firm') document.getElementById('firm-name').value = fMatch[1].trim(); document.getElementById('raw-text').value = ''; updateInfo(); autoSave(); showToast("입력 완료!"); }
+
+        function openManager() { document.getElementById('manage-modal').style.display='flex'; toggleManageView('all'); }
+        function closeModal(e) { if(e.target.id === 'manage-modal') document.getElementById('manage-modal').style.display='none'; }
+        function saveRecord() { const data = { id: Date.now(), name: document.getElementById('cust-name').value || '미지정', firm: userType === 'firm' ? document.getElementById('firm-name').value : '일반소비자', total: document.getElementById('val-total').innerText, date: new Date().toLocaleDateString(), sDate: document.getElementById('cust-survey-date').value, wDate: document.getElementById('cust-work-date').value, isPaid: false }; let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); rs.unshift(data); localStorage.setItem('cm_records', JSON.stringify(rs)); showToast("저장됨"); }
+        function toggleManageView(v) { manageView = v; ['all','firm','unpaid','samples'].forEach(id => document.getElementById('nav-'+id).className = 'tab-btn whitespace-nowrap ' + (id===v ? 'active' : 'inactive')); document.getElementById('sample-form').style.display = v==='samples' ? 'block' : 'none'; renderManager(); }
+        function renderManager() { const list = document.getElementById('manage-list'); const search = document.getElementById('manage-search').value.toLowerCase(); const rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); const ss = JSON.parse(localStorage.getItem('cm_samples') || '[]'); let html = ''; if (manageView === 'all' || manageView === 'unpaid') { let filtered = rs.filter(r => r.name.includes(search) || r.firm.includes(search)); if (manageView === 'unpaid') filtered = filtered.filter(r => !r.isPaid); html = filtered.map(r => `<div class="bg-gray-50 p-3 rounded-xl flex justify-between items-center border ${r.isPaid ? 'border-gray-200' : 'border-red-200 bg-red-50'}"><div><div class="text-[10px] text-gray-500">${r.firm}</div><div class="font-bold">${r.name}</div><div class="text-[10px] text-gray-400">${r.sDate||'-'} / ${r.wDate||'-'}</div></div><div class="text-right"><div class="font-bold text-blue-600">${r.total}</div><button onclick="togglePay(${r.id})" class="text-[10px] px-2 py-1 rounded ${r.isPaid ? 'bg-gray-200' : 'bg-red-500 text-white'}">${r.isPaid?'완료':'미수금'}</button></div></div>`).join(''); } else if (manageView === 'firm') { const firms = {}; rs.forEach(r => { if (!firms[r.firm]) firms[r.firm] = { count:0, list:[] }; firms[r.firm].count++; firms[r.firm].list.push(r); }); Object.keys(firms).forEach(f => { if(f.toLowerCase().includes(search)) { html += `<div class="bg-blue-50 p-3 rounded-xl mb-2"><div class="font-black text-blue-700 mb-2">${f} (${firms[f].count}건)</div>`; firms[f].list.forEach(item => { html += `<div class="flex justify-between text-xs border-b border-blue-100 py-1"><span>${item.name}</span><span>${item.total}</span></div>`; }); html += `</div>`; } }); } else if (manageView === 'samples') { html = ss.filter(s => s.firm.includes(search) || s.name.includes(search)).map(s => `<div class="bg-green-50 p-3 rounded-xl border border-green-100 flex justify-between"><div><div class="font-bold text-gray-700">${s.firm}</div><div class="text-xs text-green-600">📘 ${s.name}</div></div><div class="text-[10px] text-gray-400">${s.date}</div></div>`).join(''); } list.innerHTML = html || '<div class="text-center text-gray-400 py-4">데이터가 없습니다.</div>'; }
+        function togglePay(id) { let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); let r = rs.find(x => x.id === id); if(r) r.isPaid = !r.isPaid; localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager(); }
+        function addSample() { const firm = document.getElementById('new-sample-firm').value; const name = document.getElementById('new-sample-name').value; if(!firm || !name) return; let ss = JSON.parse(localStorage.getItem('cm_samples') || '[]'); ss.unshift({ id: Date.now(), firm, name, date: new Date().toLocaleDateString() }); localStorage.setItem('cm_samples', JSON.stringify(ss)); renderManager(); }
+
+        function setModeType(type) {
+            userType = type;
+            document.getElementById('mode-consumer').className = 'mode-btn ' + (type==='consumer'?'active':'');
+            document.getElementById('mode-firm').className = 'mode-btn ' + (type==='firm'?'active':'');
+            document.getElementById('firm-row').style.display = type==='firm' ? 'block' : 'none';
+            document.getElementById('rep-firm').style.display = type==='firm' ? 'block' : 'none';
+            updateInfo(); autoSave();
+        }
+
+        // [핵심 수정] 탭 전환 시 면적 계산기만 숨김 (자재/단가 박스는 유지)
+        function setMode(m) {
+            mode = m;
+            ['floor', 'wall', 'measure'].forEach(id => document.getElementById('tab-'+id).className = 'tab-btn ' + (id===m ? 'active' : 'inactive'));
+            
+            // 면적 계산기(평형)는 마루 모드에서만 보임
+            document.getElementById('area-calc-box').style.display = m==='floor' ? 'block' : 'none';
+            
+            // 라벨 및 기본값 변경
+            const labelH = document.getElementById('label-h-input'); // This is virtual in JS if we don't have separate zone inputs outside Bosch box.
+            // But we have zones. The main calc logic uses zoneList.
+            
+            // 모드 라벨 업데이트
+            const label = m==='floor' ? '마루/바닥' : (m==='wall' ? '벽장재' : '실측전용');
+            document.getElementById('mode-label').innerText = label;
+            document.getElementById('mode-label').className = "text-[10px] font-bold px-2 py-1 rounded " + (m==='wall' ? 'text-green-500 bg-green-100' : 'text-gray-400 bg-gray-100');
+
+            if(m==='wall') document.getElementById('zone-h').value = '2300';
+            else document.getElementById('zone-h').value = '';
+            
+            calc(); autoSave();
+        }
+
+        function setExp(val) {
+            isExp = val;
+            document.getElementById('exp-on').className = val ? "px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600" : "px-3 py-1 text-[11px] font-bold text-gray-400";
+            document.getElementById('exp-off').className = !val ? "px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600" : "px-3 py-1 text-[11px] font-bold text-gray-400";
+            syncPy(); autoSave();
+        }
+
+        function syncPy() {
+            const py = parseFloat(document.getElementById('input-supply-py').value) || 0;
+            document.getElementById('input-supply-m2').value = (py * 3.3058).toFixed(1);
+            document.getElementById('input-real-py').value = Math.ceil(py * (isExp ? 0.8 : 0.75));
+            calc(); autoSave();
+        }
+        function syncM2() {
+            const m2 = parseFloat(document.getElementById('input-supply-m2').value) || 0;
+            document.getElementById('input-supply-py').value = (m2 / 3.3058).toFixed(1);
+            syncPy();
+        }
+
+        // Bosch Connection (Same)
+        async function connectBosch() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Bosch' }], optionalServices: ['0000170d-0000-1000-8000-00805f9b34fb', '232e51d8-9020-4b3f-95fa-4460f9919f1b'] });
+                const server = await device.gatt.connect(); document.getElementById('bt-btn').innerText = "연결됨";
+                const services = await server.getPrimaryServices();
+                for(const s of services) { const chars = await s.getCharacteristics(); for(const c of chars) { if(c.properties.notify) { await c.startNotifications(); c.addEventListener('characteristicvaluechanged', e => { const v = e.target.value.getFloat32(1, true); if(v>0) { const val = Math.round(v*1000); const w = document.getElementById('zone-w'); const h = document.getElementById('zone-h'); if(!w.value) w.value = val; else h.value = val; autoSave(); } }); } } }
+            } catch(e) {}
+        }
+
+        function addZone() {
+            const w = parseFloat(document.getElementById('zone-w').value)||0; const h = parseFloat(document.getElementById('zone-h').value)||0;
+            if(!w || !h) return;
+            const dw = parseFloat(document.getElementById('deduct-w').value)||0; const dh = parseFloat(document.getElementById('deduct-h').value)||0;
+            const area = (w*h)/1000000 - (dw*dh)/1000000;
+            zoneList.push({ name: document.getElementById('zone-name').value||'구역', w, h, area });
+            renderZones(); document.getElementById('zone-w').value=''; if(mode!=='wall') document.getElementById('zone-h').value=''; autoSave();
+        }
+
+        function renderZones() {
+            document.getElementById('zone-list').innerHTML = zoneList.map((z,i) => `<div class="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm"><div class="text-xs font-bold text-gray-700">${z.name} (${z.w}×${z.h})</div><div class="flex items-center gap-2"><span class="text-blue-600 font-bold">${z.area.toFixed(2)}㎡</span><button onclick="delZone(${i})" class="text-gray-300"><i class="fas fa-times"></i></button></div></div>`).join('');
+            calc();
+        }
+        function delZone(i) { zoneList.splice(i,1); renderZones(); autoSave(); }
 
         function calc() {
             let m2 = zoneList.reduce((a,b)=>a+b.area, 0);
@@ -326,7 +420,7 @@
             document.getElementById('total-m2').innerText = m2.toFixed(2);
             document.getElementById('rep-m2').innerText = m2.toFixed(2);
 
-            const realPy = m2 / 3.3058; // 평수 계산
+            const realPy = m2 / 3.3058; // 평수
 
             const boxArea = 3.2; 
             const loss = 1.1; 
@@ -336,14 +430,14 @@
             const price = parseInt(document.getElementById('box-price').value.replace(/,/g,'')) || 0;
             const baseCost = boxes * price;
 
-            // [수정된 부분] 철거비, 걸레받이는 단가 * 평수 / 나머지는 합계
+            // [부자재] 철거/걸레받이는 단가 * 평수
             const uRemoval = parseInt(document.getElementById('opt-removal').value.replace(/,/g,'')) || 0;
             const uMolding = parseInt(document.getElementById('opt-molding').value.replace(/,/g,'')) || 0;
             const uLifting = parseInt(document.getElementById('opt-lifting').value.replace(/,/g,'')) || 0;
             const uEtc = parseInt(document.getElementById('opt-etc').value.replace(/,/g,'')) || 0;
 
-            const costRemoval = uRemoval * Math.ceil(realPy); // 평당 단가 * 평수
-            const costMolding = uMolding * Math.ceil(realPy); // 평당 단가 * 평수
+            const costRemoval = uRemoval * Math.ceil(realPy);
+            const costMolding = uMolding * Math.ceil(realPy);
             
             const optCost = costRemoval + costMolding + uLifting + uEtc;
             const total = baseCost + optCost;
@@ -358,7 +452,6 @@
             document.getElementById('rep-prod').innerText = (brand ? brand + ' ' : '') + (prod || '제품 미선택');
         }
 
-        // ... (나머지 유틸리티 함수들 유지) ...
         function formatNum(el) { el.value = el.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
         function formatPhone(el) { el.value = el.value.replace(/[^0-9]/g, "").replace(/(^02|^0505|^1[0-9]{3}|^0[0-9]{2})([0-9]+)?([0-9]{4})$/,"$1-$2-$3").replace("--", "-"); updateInfo(); }
         function updateInfo() {
@@ -369,25 +462,14 @@
             const wDate = document.getElementById('cust-work-date').value;
             document.getElementById('rep-dates').innerText = (sDate ? `실측:${sDate} ` : '') + (wDate ? `시공:${wDate}` : '');
         }
-        function toggleOption() { document.getElementById('opt-content').classList.toggle('open'); document.getElementById('opt-arrow').classList.toggle('fa-chevron-up'); }
+        function toggleOption() { 
+            document.getElementById('opt-content').classList.toggle('open'); 
+            document.getElementById('opt-arrow').classList.toggle('fa-chevron-up'); 
+        }
         function showToast(msg) { const t = document.getElementById('toast'); t.innerText=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', 2000); }
         function shareKakao() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => { canvas.toBlob(blob => navigator.share({files:[new File([blob], "견적서.png", {type:"image/png"})]})); }); }
         function saveImg() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => { let a = document.createElement('a'); a.href = canvas.toDataURL(); a.download = "청인마루_견적.png"; a.click(); }); }
         function sendSms() { location.href=`sms:${document.getElementById('cust-phone').value}?body=견적서 송부드립니다.`; }
-        function runSuperParse() { /* (v34.0 파싱 로직 동일) */ 
-            const txt = document.getElementById('raw-text').value; if(!txt) return alert("내용을 입력해주세요.");
-            const nMatch = txt.match(/(?:성함|이름)[:\s]*([가-힣\w\s]+)/) || txt.match(/([가-힣]{3})(?=\s*님)/);
-            const pMatch = txt.match(/010[\s-]?\d{3,4}[\s-]?\d{4}/);
-            const aMatch = txt.match(/(([가-힣]+(시|도|구|군|동|로|길))\s[\w가-힣\d\s\-\(\),]+)/);
-            const fMatch = txt.match(/(?:업체|회사)[:\s]*([가-힣\w\s]+)/);
-            if(nMatch) document.getElementById('cust-name').value = nMatch[1] || nMatch[0];
-            if(pMatch) document.getElementById('cust-phone').value = pMatch[0].replace(/[^0-9]/g, '').replace(/^(\d{3})(\d{4})(\d{4})$/, `$1-$2-$3`);
-            if(aMatch) document.getElementById('cust-addr').value = aMatch[0].trim();
-            if(fMatch && userType === 'firm') document.getElementById('firm-name').value = fMatch[1].trim();
-            document.getElementById('raw-text').value = ''; updateInfo(); autoSave(); showToast("정보가 입력되었습니다!");
-        }
-        function setupDropZone() { const dz = document.getElementById('drop-zone'); dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); dz.addEventListener('dragleave', e => { e.preventDefault(); dz.classList.remove('dragover'); }); dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleImage(e.dataTransfer.files[0]); }); }
-        function handleImage(file) { if(!file) return; showToast("분석중..."); Tesseract.recognize(file, 'kor').then(({ data: { text } }) => { document.getElementById('raw-text').value = text; runSuperParse(); }).catch(err => { showToast("인식 실패"); }); }
     </script>
 </body>
 </html>
