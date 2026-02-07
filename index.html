@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>청인마루 Master v50.0</title>
+    <title>청인마루 Master v51.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -32,7 +32,7 @@
         .accordion-content.open { max-height: 1000px; }
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .manage-card { width: 95%; max-width: 600px; height: 90vh; background: #F8F9FA; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 15px; text-align: center; transition: 0.2s; background: #fff; cursor: pointer; position: relative; }
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; text-align: center; transition: 0.2s; background: #fff; cursor: pointer; position: relative; }
         .drop-zone.dragover { border-color: #228BE6; background: #eff6ff; }
         .option-row { display: flex; justify-content: space-between; font-size: 13px; color: #CED4DA; margin-bottom: 6px; }
         .option-row span:last-child { color: white; font-weight: 700; }
@@ -48,7 +48,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">CHUNG-IN</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v50.0</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v51.0</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4 border border-gray-700 focus:border-blue-500" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-colors">Access System</button>
         </div>
@@ -61,14 +61,8 @@
                 <button onclick="document.getElementById('manage-modal').style.display='none'" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-4 bg-white border-b space-y-3">
-                <div class="flex gap-2">
-                    <button id="nav-all" onclick="toggleManageView('all')" class="tab-btn active">전체 목록</button>
-                    <button id="nav-unpaid" onclick="toggleManageView('unpaid')" class="tab-btn inactive">미수금</button>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="exportToExcel()" class="flex-1 py-2 bg-green-600 text-white rounded-lg text-xs font-bold shadow"><i class="fas fa-file-excel mr-1"></i> 엑셀 저장</button>
-                    <button onclick="deleteSelected()" class="flex-1 py-2 bg-red-500 text-white rounded-lg text-xs font-bold shadow"><i class="fas fa-trash-alt mr-1"></i> 선택 삭제</button>
-                </div>
+                <div class="flex gap-2"><button id="nav-all" onclick="toggleManageView('all')" class="tab-btn active">전체 목록</button><button id="nav-unpaid" onclick="toggleManageView('unpaid')" class="tab-btn inactive">미수금</button></div>
+                <div class="flex gap-2"><button onclick="exportToExcel()" class="flex-1 py-2 bg-green-600 text-white rounded-lg text-xs font-bold shadow"><i class="fas fa-file-excel mr-1"></i> 엑셀 저장</button><button onclick="deleteSelected()" class="flex-1 py-2 bg-red-500 text-white rounded-lg text-xs font-bold shadow"><i class="fas fa-trash-alt mr-1"></i> 선택 삭제</button></div>
                 <input type="text" id="manage-search" class="input-field text-sm" placeholder="이름, 업체, 제품 검색..." oninput="renderManager()">
             </div>
             <div id="manage-list" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"></div>
@@ -94,34 +88,31 @@
 
         <div class="card-clean border-blue-100 bg-blue-50/50">
             <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-black text-blue-600 uppercase tracking-widest"><i class="fas fa-magic mr-1"></i> Smart Fill Engine</span>
+                <span class="text-xs font-black text-blue-600 uppercase tracking-widest"><i class="fas fa-magic mr-1"></i> Smart Fill v51.0</span>
                 <span id="ocr-status" class="text-[10px] text-gray-400 font-bold">READY</span>
             </div>
-            <textarea id="raw-text" class="w-full h-24 p-4 rounded-xl border border-blue-100 text-xs resize-none outline-none focus:ring-4 ring-blue-100 mb-3" placeholder="카톡 상담 내용이나 명함 텍스트를 붙여넣으세요."></textarea>
             <div class="grid grid-cols-2 gap-3 mb-3">
-                <div id="drop-zone" class="drop-zone flex flex-col justify-center items-center h-20" onclick="document.getElementById('file-input').click()">
+                <textarea id="raw-text" class="w-full h-28 p-3 rounded-xl border border-blue-100 text-xs resize-none outline-none focus:ring-4 ring-blue-100" placeholder="카톡 내용 붙여넣기"></textarea>
+                <div id="drop-zone" class="drop-zone flex flex-col justify-center items-center h-28" onclick="document.getElementById('file-input').click()">
                     <div id="ocr-loading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.8); border-radius:16px; align-items:center; justify-content:center; color:#228BE6; font-weight:800; font-size:11px;"><i class="fas fa-spinner fa-spin mr-2"></i> 분석중</div>
-                    <i class="fas fa-camera text-slate-300 text-2xl mb-1"></i>
+                    <i class="fas fa-camera text-slate-300 text-3xl mb-1"></i>
                     <p class="text-[9px] font-black text-slate-400">명함 드롭/클릭</p>
                     <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleImage(this.files[0])">
                 </div>
-                <button onclick="runSuperParse()" class="bg-blue-600 text-white rounded-xl font-black text-sm shadow-xl active:scale-95 transition-all">정보 추출하기</button>
+            </div>
+            <div class="flex justify-end">
+                <button onclick="runSuperParse()" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-black text-[11px] shadow-lg active:scale-95 transition-all">정보 추출하기</button>
             </div>
         </div>
 
         <div class="card-clean">
             <div class="grid grid-cols-2 gap-3 mb-3">
-                <div><label class="input-label">고객명(성함)</label><input type="text" id="cust-name" class="input-field" placeholder="자동 입력됨" oninput="updateInfo(); autoSave()"></div>
-                <div><label class="input-label">연락처</label><input type="tel" id="cust-phone" class="input-field" placeholder="자동 입력됨" oninput="formatPhone(this); autoSave()"></div>
+                <div><label class="input-label">고객명(성함)</label><input type="text" id="cust-name" class="input-field" placeholder="성함" oninput="updateInfo(); autoSave()"></div>
+                <div><label class="input-label">연락처</label><input type="tel" id="cust-phone" class="input-field" placeholder="연락처" oninput="formatPhone(this); autoSave()"></div>
             </div>
-            <div id="firm-row" class="mb-3 hidden">
-                <label class="input-label text-blue-500">인테리어 업체명</label><input type="text" id="firm-name" class="input-field border-blue-200 bg-blue-50/30" placeholder="거래처 이름" oninput="updateInfo(); autoSave()">
-            </div>
+            <div id="firm-row" class="mb-3 hidden"><label class="input-label text-blue-500">인테리어 업체명</label><input type="text" id="firm-name" class="input-field border-blue-200 bg-blue-50/30" placeholder="거래처 이름" oninput="updateInfo(); autoSave()"></div>
             <div class="mb-3"><label class="input-label">현장 시공 주소</label><input type="text" id="cust-addr" class="input-field" placeholder="시공지 주소" oninput="updateInfo(); autoSave()"></div>
-            <div class="grid grid-cols-2 gap-3">
-                <div><label class="input-label text-blue-600">실측 날짜</label><input type="date" id="cust-survey-date" class="input-field text-center text-sm" oninput="updateInfo(); autoSave()"></div>
-                <div><label class="input-label text-green-600">시공 날짜</label><input type="date" id="cust-work-date" class="input-field text-center text-sm" oninput="updateInfo(); autoSave()"></div>
-            </div>
+            <div class="grid grid-cols-2 gap-3"><div><label class="input-label text-blue-600">실측 날짜</label><input type="date" id="cust-survey-date" class="input-field text-center text-sm" oninput="updateInfo(); autoSave()"></div><div><label class="input-label text-green-600">시공 날짜</label><input type="date" id="cust-work-date" class="input-field text-center text-sm" oninput="updateInfo(); autoSave()"></div></div>
         </div>
 
         <div id="area-calc-box" class="card-clean">
@@ -169,28 +160,20 @@
             setupDropZone(); loadData(); loadAutoSave();
         };
 
-        // [v50.0 활성화 수정] 정보 추출 알고리즘 (한국식 이름/번호 최적화)
+        // [v51.0] 보강된 정보 추출 로직 (전화번호 인식률 강화)
         function runSuperParse() {
             const txt = document.getElementById('raw-text').value;
-            if(!txt) return showToast("분석할 내용을 넣어주세요.");
+            if(!txt) return showToast("내용을 입력하세요.");
             
-            // 1. 이름 추출 (성씨 리스트 + 직함 + 이름 패턴)
-            const nameRegex = /(?:성함|이름|성명|담당자|담당)[:\s]*([가-힣]{2,4})|([가-힣]{2,4})(?=\s*(?:님|고객|대표|실장|팀장|과장|부장|이사|대리|본부장|사장|주임|사원))|(?:\s|^)([가-힣]{3})(?:\s|$)/;
+            // 전화번호: 하이픈, 마침표, 공백 모두 포함하여 010 패턴 찾기
+            const phoneMatch = txt.match(/01[016789][\s\.\-]?\d{3,4}[\s\.\-]?\d{4}/);
+            // 이름: 성씨 패턴 + 호칭 조합 (성함이 이름인 경우 포함)
+            const nameRegex = /(?:성함|이름|성명|담당자|담당)[:\s]*([가-힣]{2,4})|([가-힣]{2,4})(?=\s*(?:님|고객|대표|실장|팀장|과장|부장|이사|대리|사장|주임))|(?:\s|^)([가-힣]{3})(?:\s|$)/;
             const nameMatch = txt.match(nameRegex);
-            
-            // 2. 연락처 추출 (010 번호 체계)
-            const phoneMatch = txt.match(/01[016789][\s-]?\d{3,4}[\s-]?\d{4}/);
-            
-            // 3. 주소 추출 (시/도/구/군/동/로/길 패턴)
             const addrMatch = txt.match(/([가-힣]+(?:시|도|구|군|동|로|길)\s[\w가-힣\d\s\-\(\),]+)/);
-            
-            // 4. 업체명 추출
-            const firmMatch = txt.match(/([가-힣\w\s]+(?:디자인|인테리어|건축|하우징|아트|컴퍼니|종합건설|공사))/);
+            const firmMatch = txt.match(/([가-힣\w\s]+(?:디자인|인테리어|건축|하우징|아트|컴퍼니|건설|공사))/);
 
-            if(nameMatch) {
-                const extractedName = nameMatch[1] || nameMatch[2] || nameMatch[3];
-                if (extractedName) document.getElementById('cust-name').value = extractedName.trim();
-            }
+            if(nameMatch) document.getElementById('cust-name').value = (nameMatch[1] || nameMatch[2] || nameMatch[3]).trim();
             if(phoneMatch) {
                 let p = phoneMatch[0].replace(/[^0-9]/g, '');
                 document.getElementById('cust-phone').value = p.replace(/^(\d{3})(\d{3,4})(\d{4})$/, `$1-$2-$3`);
@@ -198,33 +181,74 @@
             if(addrMatch) document.getElementById('cust-addr').value = addrMatch[0].trim();
             if(firmMatch && userType === 'firm') document.getElementById('firm-name').value = firmMatch[0].trim();
 
-            updateInfo(); autoSave(); showToast("분석 완료!");
+            updateInfo(); autoSave(); showToast("추출 완료!");
         }
 
-        // [v50.0] 명함 OCR 처리 강화
         function handleImage(f) {
             if(!f) return;
             document.getElementById('ocr-loading').style.display = 'flex';
-            document.getElementById('ocr-status').innerText = "OCR 분석중...";
-            
             Tesseract.recognize(f, 'kor+eng').then(({ data: { text } }) => {
                 document.getElementById('raw-text').value = text;
                 document.getElementById('ocr-loading').style.display = 'none';
-                document.getElementById('ocr-status').innerText = "분석 완료";
                 runSuperParse(); 
-            }).catch(e => {
-                document.getElementById('ocr-loading').style.display = 'none';
-                document.getElementById('ocr-status').innerText = "인식 오류";
-                showToast("명함 인식이 실패했습니다.");
-            });
+            }).catch(e => { document.getElementById('ocr-loading').style.display = 'none'; showToast("인식 실패"); });
         }
 
-        // ... 나머지 데이터 처리 / 관리 로직 (v49.0 기준 유지) ...
-        async function loadData() { try { const res = await fetch(SHEET_URL); const data = await res.json(); const temp = {}; data.forEach(item => { if (item.brand) { if (!temp[item.brand]) temp[item.brand] = { brand: item.brand, products: [] }; temp[item.brand].products.push({ name: item.name, spec: item.spec || '', boxArea: parseFloat(item.box_area) || 3.2, price: item.price || 0, firmPrice: item.firm_price || item.price || 0 }); } }); masterData = Object.values(temp); updateBrandSelect(); } catch (e) { showToast("데이터 로딩 실패"); } }
+        // [v49.0 관리 기능] 엑셀 및 선택 삭제
+        function exportToExcel() {
+            const rs = JSON.parse(localStorage.getItem('cm_records') || '[]');
+            if(rs.length === 0) return alert("데이터가 없습니다.");
+            let csv = "\uFEFF이름,업체,주소,제품,면적,박스,실측일,시공일,총액,날짜\n";
+            rs.forEach(r => { csv += `"${r.name}","${r.firm}","${r.addr}","${r.product}","${r.m2}","${r.boxes}","${r.sDate}","${r.wDate}","${r.total}","${r.date}"\n`; });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `청인마루_통합데이터.csv`;
+            link.click();
+        }
+
+        function deleteSelected() {
+            const checks = document.querySelectorAll('.manage-check:checked');
+            if(checks.length === 0) return alert("삭제할 항목을 선택하세요.");
+            if(!confirm("삭제하시겠습니까?")) return;
+            let rs = JSON.parse(localStorage.getItem('cm_records') || '[]');
+            const ids = Array.from(checks).map(c => parseInt(c.dataset.id));
+            rs = rs.filter(r => !ids.includes(r.id));
+            localStorage.setItem('cm_records', JSON.stringify(rs));
+            renderManager();
+        }
+
+        function renderManager() {
+            const list = document.getElementById('manage-list');
+            const search = document.getElementById('manage-search').value.toLowerCase();
+            let rs = JSON.parse(localStorage.getItem('cm_records') || '[]');
+            if(manageView === 'unpaid') rs = rs.filter(r => !r.isPaid);
+            const filtered = rs.filter(r => r.name.includes(search) || r.firm.includes(search));
+            list.innerHTML = filtered.map(r => `
+                <div class="manage-item shadow-sm">
+                    <div class="flex gap-3">
+                        <input type="checkbox" class="manage-check mt-1" data-id="${r.id}">
+                        <div class="flex-1">
+                            <div class="flex justify-between"><span class="text-[10px] text-blue-600 font-bold">${r.firm}</span><span class="text-[10px] text-gray-400">${r.date}</span></div>
+                            <div class="font-black text-lg">${r.name} 고객님</div>
+                            <div class="text-[12px] font-bold text-blue-500">${r.product}</div>
+                            <div class="detail-row"><span class="detail-tag">${r.m2}㎡</span><span class="detail-tag">${r.boxes} BOX</span></div>
+                            <div class="text-[11px] text-gray-500 mt-2 truncate">${r.addr}</div>
+                            <div class="flex justify-between items-center mt-3 pt-3 border-t">
+                                <button onclick="togglePay(${r.id})" class="text-[10px] px-2 py-1 rounded ${r.isPaid?'bg-gray-200':'bg-red-500 text-white'}">${r.isPaid?'결제완료':'미수금'}</button>
+                                <div class="font-black">${r.total}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`).join('');
+        }
+
+        // ... 나머지 보쉬 및 계산 코드 (v50.0 유지) ...
+        async function loadData() { try { const res = await fetch(SHEET_URL); const data = await res.json(); const temp = {}; data.forEach(item => { if (item.brand) { if (!temp[item.brand]) temp[item.brand] = { brand: item.brand, products: [] }; temp[item.brand].products.push({ name: item.name, spec: item.spec || '', boxArea: parseFloat(item.box_area) || 3.2, price: item.price || 0, firmPrice: item.firm_price || item.price || 0 }); } }); masterData = Object.values(temp); updateBrandSelect(); } catch (e) { showToast("시트 로딩 실패"); } }
         function updateBrandSelect() { const bSel = document.getElementById('brand-select'); bSel.innerHTML = '<option value="">브랜드 선택</option>'; masterData.forEach(m => bSel.add(new Option(m.brand, m.brand))); bSel.add(new Option("직접 입력", "direct")); }
         function updateProducts() { const bName = document.getElementById('brand-select').value; const pSel = document.getElementById('product-select'); if (bName === 'direct') { pSel.innerHTML = '<option value="">직접입력</option>'; pSel.disabled=true; } else { pSel.disabled=false; pSel.innerHTML = '<option value="">제품 선택</option>'; const bObj = masterData.find(x => x.brand === bName); if (bObj) bObj.products.forEach((p, idx) => pSel.add(new Option(p.name, idx))); } calc(); }
         function handleProductSelect() { const bName = document.getElementById('brand-select').value; const pIdx = document.getElementById('product-select').value; if (bName !== 'direct' && pIdx !== "") { const bObj = masterData.find(x => x.brand === bName); if (bObj) { const pObj = bObj.products[pIdx]; if (pObj) { document.getElementById('prod-spec').value = pObj.spec; document.getElementById('input-box-area').value = pObj.boxArea; const finalPrice = userType === 'firm' ? pObj.firmPrice : pObj.price; document.getElementById('box-price').value = finalPrice.toLocaleString(); } } } calc(); }
-        function checkAppLogin() { if(document.getElementById('app-password').value === '1306') { localStorage.setItem('cm_auth', 'ok'); document.getElementById('login-gate').style.display='none'; } else { alert('비밀번호 오류'); } }
+        function checkAppLogin() { if(document.getElementById('app-password').value === '1306') { localStorage.setItem('cm_auth', 'ok'); document.getElementById('login-gate').style.display='none'; } else { alert('비번 오류'); } }
         function setModeType(t) { userType = t; document.getElementById('mode-consumer').className = 'mode-btn ' + (t==='consumer'?'active':''); document.getElementById('mode-firm').className = 'mode-btn ' + (t==='firm'?'active':''); document.getElementById('firm-row').style.display = t==='firm' ? 'block' : 'none'; document.getElementById('rep-firm').style.display = t==='firm' ? 'block' : 'none'; handleProductSelect(); updateInfo(); autoSave(); }
         function setMode(m) { mode = m; ['floor', 'wall', 'measure'].forEach(id => document.getElementById('tab-'+id).className = 'tab-btn ' + (id===m ? 'active' : 'inactive')); document.getElementById('area-calc-box').style.display = m==='floor' ? 'block' : 'none'; const label = document.getElementById('mode-label'); label.style.display = m === 'floor' ? 'inline-block' : 'none'; calc(); autoSave(); }
         function formatNum(el) { el.value = el.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
@@ -232,20 +256,22 @@
         function showToast(m) { TOAST.innerText=m; TOAST.style.display='block'; setTimeout(()=>TOAST.style.display='none', 2000); }
         function closeModal(e) { if(e.target.id === 'manage-modal') document.getElementById('manage-modal').style.display='none'; }
         function openManager() { document.getElementById('manage-modal').style.display='flex'; renderManager(); }
-        function saveRecord() { const data = { id: Date.now(), name: document.getElementById('cust-name').value || '미지정', firm: userType === 'firm' ? document.getElementById('firm-name').value : '일반소비자', total: document.getElementById('val-total').innerText, supply: document.getElementById('val-supply').innerText, m2: document.getElementById('total-m2').value, boxes: document.getElementById('total-box').value, product: document.getElementById('rep-prod').innerText, addr: document.getElementById('cust-addr').value, date: new Date().toLocaleDateString(), isPaid: false }; let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); rs.unshift(data); localStorage.setItem('cm_records', JSON.stringify(rs)); showToast("기록 되었습니다."); }
+        function saveRecord() { const data = { id: Date.now(), name: document.getElementById('cust-name').value || '미지정', firm: userType === 'firm' ? document.getElementById('firm-name').value : '일반소비자', total: document.getElementById('val-total').innerText, supply: document.getElementById('val-supply').innerText, m2: document.getElementById('total-m2').value, boxes: document.getElementById('total-box').value, product: document.getElementById('rep-prod').innerText, addr: document.getElementById('cust-addr').value, date: new Date().toLocaleDateString(), sDate: document.getElementById('cust-survey-date').value, wDate: document.getElementById('cust-work-date').value, isPaid: false }; let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); rs.unshift(data); localStorage.setItem('cm_records', JSON.stringify(rs)); showToast("저장 완료"); }
         function updateInfo() { document.getElementById('rep-name').innerText = document.getElementById('cust-name').value || '고객님'; document.getElementById('rep-firm').innerText = userType==='firm' ? ('Partner: ' + document.getElementById('firm-name').value) : ''; document.getElementById('rep-addr').innerText = document.getElementById('cust-addr').value || ''; const sD = document.getElementById('cust-survey-date').value; const wD = document.getElementById('cust-work-date').value; document.getElementById('rep-dates').innerText = (sD ? `실측:${sD} ` : '') + (wD ? `시공:${wD}` : ''); }
         function saveImg() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(c => { let a = document.createElement('a'); a.href = c.toDataURL(); a.download = "청인마루_견적.png"; a.click(); }); }
         function shareKakao() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(c => { c.toBlob(b => navigator.share({files:[new File([b], "견적서.png", {type:"image/png"})]})); }); }
         function toggleOption() { document.getElementById('opt-content').classList.toggle('open'); document.getElementById('opt-arrow').classList.toggle('fa-chevron-up'); }
         function syncPy() { const py = parseFloat(document.getElementById('input-supply-py').value) || 0; document.getElementById('input-supply-m2').value = (py * 3.3058).toFixed(1); document.getElementById('input-real-py').value = Math.ceil(py * (isExp ? 0.8 : 0.75)); calc(); autoSave(); }
         function syncM2() { const m2 = parseFloat(document.getElementById('input-supply-m2').value) || 0; document.getElementById('input-supply-py').value = (m2 / 3.3058).toFixed(1); syncPy(); }
-        function setExp(v) { isExp = v; document.getElementById('exp-on').className = v ? "px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600" : "px-3 py-1 text-[11px] font-bold text-gray-400"; document.getElementById('exp-off').className = !v ? "px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600" : "px-3 py-1 text-[11px] font-bold text-gray-400"; syncPy(); }
+        function togglePay(id) { let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); let r = rs.find(x => x.id === id); if(r) r.isPaid = !r.isPaid; localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager(); }
+        function toggleManageView(v) { manageView = v; ['all','unpaid'].forEach(id => { if(document.getElementById('nav-'+id)) document.getElementById('nav-'+id).className = 'tab-btn ' + (id===v ? 'active' : 'inactive'); }); renderManager(); }
         function setupDropZone() { const dz = document.getElementById('drop-zone'); dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); dz.addEventListener('dragleave', e => { e.preventDefault(); dz.classList.remove('dragover'); }); dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleImage(e.dataTransfer.files[0]); }); }
         function autoSave() { const data = { timestamp: new Date().getTime(), custName: document.getElementById('cust-name').value, custPhone: document.getElementById('cust-phone').value, custAddr: document.getElementById('cust-addr').value, surveyDate: document.getElementById('cust-survey-date').value, workDate: document.getElementById('cust-work-date').value, supplyPy: document.getElementById('input-supply-py').value, realPy: document.getElementById('input-real-py').value, boxPrice: document.getElementById('box-price').value, zones: zoneList }; localStorage.setItem('cm_autosave', JSON.stringify(data)); }
         function loadAutoSave() { const saved = JSON.parse(localStorage.getItem('cm_autosave')); if (saved) { if (new Date().getTime() - saved.timestamp > 300000) { localStorage.removeItem('cm_autosave'); return; } document.getElementById('cust-name').value = saved.custName || ''; document.getElementById('cust-phone').value = saved.custPhone || ''; document.getElementById('cust-addr').value = saved.custAddr || ''; document.getElementById('cust-survey-date').value = saved.surveyDate || ''; document.getElementById('cust-work-date').value = saved.workDate || ''; document.getElementById('input-supply-py').value = saved.supplyPy || ''; document.getElementById('input-real-py').value = saved.realPy || ''; document.getElementById('box-price').value = saved.boxPrice || ''; if(saved.zones) { zoneList = saved.zones; renderZones(); } calc(); updateInfo(); } }
         function addZone() { const w = parseFloat(document.getElementById('zone-w').value)||0; const h = parseFloat(document.getElementById('zone-h').value)||0; if(!w || !h) return; const area = (w*h)/1000000 - ((parseFloat(document.getElementById('deduct-w').value)||0)*(parseFloat(document.getElementById('deduct-h').value)||0))/1000000; zoneList.push({ name: document.getElementById('zone-name').value||'구역', w, h, area }); renderZones(); document.getElementById('zone-w').value=''; autoSave(); }
         function renderZones() { document.getElementById('zone-list').innerHTML = zoneList.map((z,i) => `<div class="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm"><div class="text-xs font-bold text-gray-700">${z.name} (${z.w}×${z.h})</div><div class="flex items-center gap-2"><span class="text-blue-600 font-bold">${z.area.toFixed(2)}㎡</span><button onclick="delZone(${i})" class="text-gray-300"><i class="fas fa-times"></i></button></div></div>`).join(''); calc(); }
         function delZone(i) { zoneList.splice(i,1); renderZones(); autoSave(); }
+        async function connectBosch() { try { const d = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Bosch' }], optionalServices: ['0000170d-0000-1000-8000-00805f9b34fb', '232e51d8-9020-4b3f-95fa-4460f9919f1b'] }); const s = await d.gatt.connect(); document.getElementById('bt-btn').innerText = "온라인"; const svs = await s.getPrimaryServices(); for(const sv of svs) { const chs = await sv.getCharacteristics(); for(const ch of chs) { if(ch.properties.notify) { await ch.startNotifications(); ch.addEventListener('characteristicvaluechanged', e => { const v = e.target.value.getFloat32(1, true); if(v>0) { const val = Math.round(v*1000); document.getElementById('zone-w').value = val; autoSave(); } }); } } } } catch(e) {} }
 
         function calc() {
             let m2 = zoneList.reduce((a,b)=>a+b.area, 0);
@@ -285,8 +311,6 @@
             document.getElementById('val-supply').innerText = total.toLocaleString() + " 원";
             document.getElementById('val-total').innerText = Math.round(total * 1.1).toLocaleString();
         }
-
-        async function connectBosch() { try { const d = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Bosch' }], optionalServices: ['0000170d-0000-1000-8000-00805f9b34fb', '232e51d8-9020-4b3f-95fa-4460f9919f1b'] }); const s = await d.gatt.connect(); document.getElementById('bt-btn').innerText = "연결됨"; const svs = await s.getPrimaryServices(); for(const sv of svs) { const chs = await sv.getCharacteristics(); for(const ch of chs) { if(ch.properties.notify) { await ch.startNotifications(); ch.addEventListener('characteristicvaluechanged', e => { const v = e.target.value.getFloat32(1, true); if(v>0) { const val = Math.round(v*1000); const w = document.getElementById('zone-w'); const h = document.getElementById('zone-h'); if(!w.value) w.value = val; else h.value = val; autoSave(); } }); } } } } catch(e) {} }
     </script>
 </body>
 </html>
