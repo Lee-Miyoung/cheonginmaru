@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>청인마루 Master v46.0</title>
+    <title>청인마루 Master v47.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -14,37 +14,30 @@
 
     <style>
         body { font-family: 'Pretendard', sans-serif; background-color: #F4F6F8; color: #333; -webkit-tap-highlight-color: transparent; }
-        
         .card-clean { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #EEF2F6; margin-bottom: 20px; }
         .input-field { width: 100%; padding: 14px; background: #F8F9FA; border-radius: 12px; border: 1px solid #E9ECEF; font-weight: 700; font-size: 15px; color: #212529; outline: none; transition: 0.2s; }
         .input-field:focus { border-color: #4C6EF5; background: #FFF; box-shadow: 0 0 0 3px rgba(76, 110, 245, 0.1); }
         .input-label { display: block; font-size: 12px; font-weight: 800; color: #ADB5BD; margin-bottom: 6px; margin-left: 4px; }
-
         .tab-btn { flex: 1; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; text-align: center; transition: 0.2s; cursor: pointer; }
         .tab-btn.active { background: #228BE6; color: white; box-shadow: 0 4px 12px rgba(34, 139, 230, 0.3); }
         .tab-btn.inactive { background: white; color: #868E96; border: 1px solid #DEE2E6; }
-
         .report-dark { background: #1B202D; color: white; border-radius: 30px; padding: 30px; position: relative; overflow: hidden; }
         .report-label { font-size: 10px; font-weight: 800; color: #6C7293; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-main { width: 100%; padding: 16px; border-radius: 16px; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; cursor: pointer; }
-        
         .mode-switch { display: flex; background: #E9ECEF; padding: 4px; border-radius: 14px; margin-bottom: 20px; }
         .mode-btn { flex: 1; padding: 12px; text-align: center; font-size: 12px; font-weight: 900; border-radius: 12px; transition: 0.2s; color: #868E96; cursor: pointer; }
         .mode-btn.active { background: white; color: #228BE6; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-
         #login-gate { display: flex; position: fixed; inset: 0; background: #1B202D; z-index: 99999; align-items: center; justify-content: center; }
         .accordion-content { max-height: 0; overflow: hidden; transition: 0.3s ease-in-out; }
         .accordion-content.open { max-height: 1000px; }
-        
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .manage-card { width: 95%; max-width: 600px; height: 85vh; background: #F8F9FA; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-
-        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 20px; text-align: center; transition: 0.2s; background: #fff; cursor: pointer; }
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 20px; text-align: center; transition: 0.2s; background: #fff; cursor: pointer; position: relative; }
         .drop-zone.dragover { border-color: #228BE6; background: #eff6ff; }
         .option-row { display: flex; justify-content: space-between; font-size: 13px; color: #CED4DA; margin-bottom: 6px; }
         .option-row span:last-child { color: white; font-weight: 700; }
         .input-mm-fit { font-size: 1.85rem !important; padding-left: 8px !important; padding-right: 8px !important; font-weight: 900 !important; }
-        .input-large { font-size: 16px !important; padding: 15px !important; }
+        .input-large { font-size: 18px !important; padding: 16px !important; font-weight: 900 !important; color: #1e293b !important; }
     </style>
 </head>
 <body>
@@ -54,7 +47,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">CHUNG-IN</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v46.0</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v47.0</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4 border border-gray-700 focus:border-blue-500" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-colors">Access System</button>
         </div>
@@ -100,17 +93,19 @@
 
         <div class="card-clean border-blue-100 bg-blue-50/50">
             <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-black text-blue-600"><i class="fas fa-bolt mr-1"></i> 카톡 내용 자동 입력</span>
-                <button onclick="runSuperParse()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold shadow hover:bg-blue-500">정보 추출</button>
+                <span class="text-xs font-black text-blue-600"><i class="fas fa-bolt mr-1"></i> 명함/카톡 스마트 정보 입력</span>
+                <span id="ocr-status" class="text-[10px] text-gray-400 font-bold">대기중</span>
             </div>
             <div class="grid grid-cols-2 gap-2 mb-2">
-                <textarea id="raw-text" class="w-full h-24 p-3 rounded-xl border border-blue-100 text-xs placeholder-gray-400 resize-none outline-none focus:ring-2 ring-blue-200" placeholder="내용 붙여넣기"></textarea>
-                <div id="drop-zone" class="drop-zone flex flex-col justify-center items-center h-24" onclick="document.getElementById('file-input').click()">
-                    <i class="fas fa-camera"></i>
-                    <p>명함 사진<br>클릭/드롭</p>
+                <textarea id="raw-text" class="w-full h-28 p-3 rounded-xl border border-blue-100 text-xs placeholder-gray-400 resize-none outline-none focus:ring-2 ring-blue-200" placeholder="카톡 내용 붙여넣기"></textarea>
+                <div id="drop-zone" class="drop-zone flex flex-col justify-center items-center h-28" onclick="document.getElementById('file-input').click()">
+                    <div id="ocr-loading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.8); border-radius:16px; align-items:center; justify-content:center; color:#228BE6; font-weight:800; font-size:11px;"><i class="fas fa-spinner fa-spin mr-2"></i> 분석중</div>
+                    <i class="fas fa-camera text-slate-300 text-3xl"></i>
+                    <p class="mt-2 text-[11px] leading-tight">명함 사진<br>클릭 또는 드롭</p>
                     <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleImage(this.files[0])">
                 </div>
             </div>
+            <button onclick="runSuperParse()" class="w-full py-3 bg-blue-600 text-white rounded-xl text-xs font-black shadow-lg">정보 추출 및 자동 채우기</button>
         </div>
 
         <div class="card-clean">
@@ -139,39 +134,30 @@
             <div class="grid grid-cols-3 gap-2 mb-4">
                 <div><label class="input-label">공급평형</label><input type="number" id="input-supply-py" class="input-field text-center text-blue-600" placeholder="0" oninput="syncPy(); autoSave()"></div>
                 <div><label class="input-label">공급㎡</label><input type="number" id="input-supply-m2" class="input-field text-center" placeholder="0" oninput="syncM2(); autoSave()"></div>
-                <div class="bg-blue-600 rounded-xl p-1 flex flex-col items-center justify-center text-white"><span class="text-[9px] opacity-70 mb-1">실시공(평)</span><input type="number" id="input-real-py" class="bg-transparent text-white font-black text-lg text-center w-full outline-none" placeholder="0" oninput="calculate(); autoSave()"></div>
+                <div class="bg-blue-600 rounded-xl p-1 flex flex-col items-center justify-center text-white"><span class="text-[9px] opacity-70 mb-1">실시공(평)</span><input type="number" id="input-real-py" class="bg-transparent text-white font-black text-lg text-center w-full outline-none" placeholder="0" oninput="calc(); autoSave()"></div>
             </div>
         </div>
 
         <div id="material-box" class="card-clean">
             <div class="flex justify-between items-center mb-3">
                 <span class="text-sm font-black text-gray-700">자재 선택 및 단가</span>
-                <span id="mode-label" class="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">마루/바닥</span>
+                <span id="mode-label" class="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-1 rounded">마루/바닥</span>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-3">
-                <select id="brand-select" class="input-field" onchange="updateProducts(); autoSave()">
-                    <option value="">브랜드 로딩중...</option>
-                </select>
-                <select id="product-select" class="input-field" onchange="handleProductSelect(); autoSave()">
-                    <option value="">제품 선택</option>
-                </select>
+                <select id="brand-select" class="input-field" onchange="updateProducts(); autoSave()"><option value="">브랜드 로딩중...</option></select>
+                <select id="product-select" class="input-field" onchange="handleProductSelect(); autoSave()"><option value="">제품 선택</option></select>
             </div>
-            <input type="text" id="manual-brand" class="input-field mb-3 hidden" placeholder="브랜드 직접 입력" oninput="autoSave()">
-            <input type="text" id="manual-prod" class="input-field mb-3 hidden" placeholder="제품명 직접 입력" oninput="autoSave()">
-
+            <div class="grid grid-cols-2 gap-3 mb-3 hidden" id="manual-inputs">
+                <input type="text" id="manual-brand" class="input-field text-xs" placeholder="브랜드 직접 입력" oninput="autoSave()">
+                <input type="text" id="manual-prod" class="input-field text-xs" placeholder="제품명 직접 입력" oninput="autoSave()">
+            </div>
             <div class="grid grid-cols-2 gap-3 mb-3">
-                <input type="text" id="prod-model" class="input-field input-large text-center" placeholder="세부 모델/색상" oninput="autoSave()">
-                <input type="text" id="prod-spec" class="input-field input-large text-center" placeholder="규격 (mm)" oninput="autoSave()">
+                <div><label class="input-label">모델/색상</label><input type="text" id="prod-model" class="input-field input-large text-center" placeholder="모델명" oninput="autoSave()"></div>
+                <div><label class="input-label">규격(mm)</label><input type="text" id="prod-spec" class="input-field input-large text-center" placeholder="규격" oninput="autoSave()"></div>
             </div>
             <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="input-label text-[9px] text-center">1Box면적(㎡)</label>
-                    <input type="number" id="input-box-area" class="input-field input-large text-center text-blue-600" value="3.2" oninput="calc(); autoSave()">
-                </div>
-                <div>
-                    <label class="input-label text-[9px] text-center text-yellow-600">BOX단가(원)</label>
-                    <input type="text" id="box-price" class="input-field input-large text-center text-yellow-600" placeholder="0" oninput="formatNum(this); calc(); autoSave()">
-                </div>
+                <div><label class="input-label">1Box면적(㎡)</label><input type="number" id="input-box-area" class="input-field input-large text-center text-blue-600" value="3.2" oninput="calc(); autoSave()"></div>
+                <div><label class="input-label text-yellow-600 font-black">BOX단가(원)</label><input type="text" id="box-price" class="input-field input-large text-center text-yellow-600" placeholder="0" oninput="formatNum(this); calc(); autoSave()"></div>
             </div>
         </div>
 
@@ -200,7 +186,7 @@
             </div>
         </div>
 
-        <div class="card-clean cursor-pointer">
+        <div class="card-clean">
             <div class="flex justify-between items-center cursor-pointer mb-2" onclick="toggleOption()">
                 <span class="text-sm font-black text-gray-700">부자재 및 시공 옵션</span>
                 <i id="opt-arrow" class="fas fa-chevron-down text-gray-300 transition-transform"></i>
@@ -218,41 +204,21 @@
         <div id="capture-area" class="report-dark shadow-2xl">
             <div class="relative z-10">
                 <div class="flex justify-between items-start mb-8">
-                    <div>
-                        <p class="report-label text-blue-400">ESTIMATE FOR</p>
-                        <h2 id="rep-name" class="text-2xl font-black">고객님</h2>
-                        <p id="rep-firm" class="text-sm text-blue-300 font-bold mt-1 hidden"></p>
-                        <p id="rep-addr" class="text-xs text-gray-500 mt-1">-</p>
-                        <p id="rep-dates" class="text-[10px] text-gray-400 mt-2 font-mono"></p>
-                    </div>
-                    <div class="text-right">
-                        <p class="report-label">PROVIDER</p>
-                        <h3 class="text-xl font-black text-white">청인마루</h3>
-                        <p id="rep-no" class="text-[10px] text-gray-500 mt-1 font-mono"></p>
-                    </div>
+                    <div><p class="report-label text-blue-400">ESTIMATE FOR</p><h2 id="rep-name" class="text-2xl font-black">고객님</h2><p id="rep-firm" class="text-sm text-blue-300 font-bold mt-1 hidden"></p><p id="rep-addr" class="text-xs text-gray-500 mt-1">-</p><p id="rep-dates" class="text-[10px] text-gray-400 mt-2 font-mono"></p></div>
+                    <div class="text-right"><p class="report-label">PROVIDER</p><h3 class="text-xl font-black text-white">청인마루</h3><p id="rep-no" class="text-[10px] text-gray-500 mt-1 font-mono"></p></div>
                 </div>
-
-                <div class="mb-8">
-                    <p class="report-label">PRODUCT</p>
-                    <h2 id="rep-prod" class="text-2xl font-black mb-1">제품 미선택</h2>
-                    <p class="text-right text-4xl font-black text-blue-400 mt-2"><span id="rep-boxes">0</span> <span class="text-lg text-gray-500">BOX</span></p>
-                    <p class="text-right text-xs text-gray-600 mt-1">Total Area: <span id="rep-m2">0.00</span> ㎡</p>
-                </div>
-
+                <div class="mb-8"><p class="report-label">PRODUCT</p><h2 id="rep-prod" class="text-2xl font-black mb-1">제품 미선택</h2><p class="text-right text-4xl font-black text-blue-400 mt-2"><span id="rep-boxes">0</span> <span class="text-lg text-gray-500">BOX</span></p><p class="text-right text-xs text-gray-600 mt-1">Total Area: <span id="rep-m2">0.00</span> ㎡</p></div>
                 <div class="bg-gray-800/50 rounded-2xl p-5 border border-gray-700/50 mb-8">
                     <div id="report-detail-list" class="space-y-2 mb-4"></div>
-                    <div class="divider"></div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm font-black text-gray-300">공급가액 (VAT별도)</span>
-                        <span id="val-supply" class="text-xl font-black text-white">0 원</span>
+                    <div style="border-top:1px solid rgba(255,255,255,0.1); margin:15px 0;"></div>
+                    <div class="flex justify-between mb-2"><span class="text-xs font-bold text-gray-400">기본 자재비</span><span id="val-base" class="text-sm font-bold text-white">0 원</span></div>
+                    <div class="flex justify-between mb-2"><span class="text-xs font-bold text-gray-400">부자재/시공비</span><span id="val-opt" class="text-sm font-bold text-white">0 원</span></div>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="text-sm font-black text-gray-300 uppercase">Supply Amount</span>
+                        <span id="val-supply" class="text-xl font-black text-blue-400">0 원</span>
                     </div>
                 </div>
-
-                <div class="bg-blue-600 rounded-3xl p-6 text-center shadow-lg mb-6">
-                    <p class="text-[10px] font-black text-blue-200 mb-1 uppercase tracking-widest">Total Amount (VAT Inc.)</p>
-                    <h2 class="text-4xl font-black text-white mb-1"><span id="val-total">0</span> <span class="text-lg">원</span></h2>
-                </div>
-
+                <div class="bg-blue-600 rounded-3xl p-6 text-center shadow-lg mb-6"><p class="text-[10px] font-black text-blue-200 mb-1 uppercase tracking-widest">Total Amount (VAT Inc.)</p><h2 class="text-4xl font-black text-white mb-1"><span id="val-total">0</span> <span class="text-lg">원</span></h2></div>
                 <div class="grid grid-cols-2 gap-3" data-html2canvas-ignore="true">
                     <button onclick="shareKakao()" class="btn-main bg-[#FEE500] text-[#3c1e1e]"><i class="fas fa-comment"></i> 공유</button>
                     <button onclick="saveRecord()" class="btn-main bg-slate-700 text-white"><i class="fas fa-save"></i> 저장</button>
@@ -277,155 +243,55 @@
             loadAutoSave();
         };
 
-        function checkAppLogin() {
-            if(document.getElementById('app-password').value === '1306') {
-                localStorage.setItem('cm_auth', 'ok');
-                document.getElementById('login-gate').remove();
-            } else { alert('비밀번호 오류'); }
-        }
-
-        // [핵심] 구글 시트 데이터 로딩 (firm_price 포함)
         async function loadData() {
             try {
-                const res = await fetch(SHEET_URL);
-                const data = await res.json();
+                const res = await fetch(SHEET_URL); const data = await res.json();
                 const temp = {};
-                data.forEach(item => {
-                    if (item.brand) {
-                        if (!temp[item.brand]) temp[item.brand] = { brand: item.brand, products: [] };
-                        temp[item.brand].products.push({
-                            name: item.name,
-                            spec: item.spec || '',
-                            boxArea: parseFloat(item.box_area) || 3.2,
-                            price: item.price || 0,
-                            firmPrice: item.firm_price || item.price || 0 // firm_price 연결
-                        });
-                    }
-                });
-                masterData = Object.values(temp);
-                updateBrandSelect();
-            } catch (e) {
-                console.error("Sheet Load Error:", e);
-            }
+                data.forEach(item => { if (item.brand) { if (!temp[item.brand]) temp[item.brand] = { brand: item.brand, products: [] }; temp[item.brand].products.push({ name: item.name, spec: item.spec || '', boxArea: parseFloat(item.box_area) || 3.2, price: item.price || 0, firmPrice: item.firm_price || item.price || 0 }); } });
+                masterData = Object.values(temp); updateBrandSelect();
+            } catch (e) { showToast("데이터 로딩 실패"); }
         }
 
-        function updateBrandSelect() {
-            const bSel = document.getElementById('brand-select');
-            bSel.innerHTML = '<option value="">브랜드 선택</option>';
-            masterData.forEach(m => bSel.add(new Option(m.brand, m.brand)));
-            bSel.add(new Option("직접 입력", "direct"));
-        }
-
-        function updateProducts() {
-            const bName = document.getElementById('brand-select').value;
-            const pSel = document.getElementById('product-select');
-            const manualBrand = document.getElementById('manual-brand');
-            const manualProd = document.getElementById('manual-prod');
-
-            if (bName === 'direct') {
-                manualBrand.classList.remove('hidden');
-                manualProd.classList.remove('hidden');
-                pSel.innerHTML = '<option value="">직접 입력 모드</option>';
-                pSel.disabled = true;
-            } else {
-                manualBrand.classList.add('hidden');
-                manualProd.classList.add('hidden');
-                pSel.disabled = false;
-                pSel.innerHTML = '<option value="">제품 선택</option>';
-                
-                const bObj = masterData.find(x => x.brand === bName);
-                if (bObj) {
-                    bObj.products.forEach((p, idx) => {
-                        const opt = new Option(p.name, idx);
-                        pSel.add(opt);
-                    });
-                }
-            }
-            calc();
-        }
-
-        function handleProductSelect() {
-            const bName = document.getElementById('brand-select').value;
-            const pIdx = document.getElementById('product-select').value;
-            
-            if (bName !== 'direct' && pIdx !== "") {
-                const bObj = masterData.find(x => x.brand === bName);
-                if (bObj) {
-                    const pObj = bObj.products[pIdx];
-                    if (pObj) {
-                        document.getElementById('prod-spec').value = pObj.spec;
-                        document.getElementById('input-box-area').value = pObj.boxArea;
-                        
-                        // [핵심] 업체 모드일 때 firmPrice 적용
-                        const finalPrice = userType === 'firm' ? pObj.firmPrice : pObj.price;
-                        document.getElementById('box-price').value = finalPrice.toLocaleString();
-                    }
-                }
-            }
-            calc();
-        }
-
-        function setModeType(type) {
-            userType = type;
-            document.getElementById('mode-consumer').className = 'mode-btn ' + (type==='consumer'?'active':'');
-            document.getElementById('mode-firm').className = 'mode-btn ' + (type==='firm'?'active':'');
-            
-            document.getElementById('firm-row').style.display = type==='firm' ? 'block' : 'none';
-            document.getElementById('rep-firm').style.display = type==='firm' ? 'block' : 'none';
-            
-            const btn = document.getElementById('btn-manage');
-            if(type === 'consumer') {
-                btn.innerHTML = '<i class="fas fa-list"></i> 견적 기록';
-                btn.onclick = () => { openManager('all'); };
-            } else {
-                btn.innerHTML = '<i class="fas fa-tasks"></i> 업체 관리';
-                btn.onclick = () => { openManager('firm'); };
-            }
-            
-            // 모드 전환 시 단가 재적용 (중요)
-            handleProductSelect();
-            
-            updateInfo(); autoSave();
-        }
-
-        // ... (Smart Parse, Auto Save, UI Logic 동일) ...
-        function openManager(defaultView) { document.getElementById('manage-modal').style.display='flex'; const tabs = document.getElementById('manage-tabs'); let btns = ''; if(userType === 'consumer') { btns = `<button onclick="toggleManageView('all')" class="tab-btn active w-full">전체 견적 기록</button>`; document.getElementById('manage-title').innerText = "내 견적 기록"; toggleManageView('all'); } else { btns = `<button id="nav-all" onclick="toggleManageView('all')" class="tab-btn inactive whitespace-nowrap">전체</button><button id="nav-firm" onclick="toggleManageView('firm')" class="tab-btn active whitespace-nowrap">업체별</button><button id="nav-unpaid" onclick="toggleManageView('unpaid')" class="tab-btn inactive whitespace-nowrap">미수금</button><button id="nav-samples" onclick="toggleManageView('samples')" class="tab-btn inactive whitespace-nowrap">샘플북</button>`; document.getElementById('manage-title').innerText = "통합 관리 센터"; toggleManageView(defaultView || 'firm'); } tabs.innerHTML = btns; }
-        function autoSave() { const data = { timestamp: new Date().getTime(), custName: document.getElementById('cust-name').value, custPhone: document.getElementById('cust-phone').value, custAddr: document.getElementById('cust-addr').value, firmName: document.getElementById('firm-name').value, sDate: document.getElementById('cust-survey-date').value, wDate: document.getElementById('cust-work-date').value, supplyPy: document.getElementById('input-supply-py').value, realPy: document.getElementById('input-real-py').value, brand: document.getElementById('brand-select').value, prodIdx: document.getElementById('product-select').value, manualBrand: document.getElementById('manual-brand').value, manualProd: document.getElementById('manual-prod').value, model: document.getElementById('prod-model').value, spec: document.getElementById('prod-spec').value, boxArea: document.getElementById('input-box-area').value, boxPrice: document.getElementById('box-price').value, optRemoval: document.getElementById('opt-removal').value, optMolding: document.getElementById('opt-molding').value, optLifting: document.getElementById('opt-lifting').value, optEtc: document.getElementById('opt-etc').value, zones: zoneList }; localStorage.setItem('cm_autosave', JSON.stringify(data)); }
-        function loadAutoSave() { const saved = JSON.parse(localStorage.getItem('cm_autosave')); if (saved) { if (new Date().getTime() - saved.timestamp > 300000) { localStorage.removeItem('cm_autosave'); return; } document.getElementById('cust-name').value = saved.custName || ''; document.getElementById('cust-phone').value = saved.custPhone || ''; document.getElementById('cust-addr').value = saved.custAddr || ''; document.getElementById('firm-name').value = saved.firmName || ''; document.getElementById('cust-survey-date').value = saved.sDate || ''; document.getElementById('cust-work-date').value = saved.wDate || ''; document.getElementById('input-supply-py').value = saved.supplyPy || ''; document.getElementById('input-real-py').value = saved.realPy || ''; document.getElementById('prod-model').value = saved.model || ''; document.getElementById('prod-spec').value = saved.spec || ''; document.getElementById('input-box-area').value = saved.boxArea || '3.2'; document.getElementById('box-price').value = saved.boxPrice || ''; document.getElementById('opt-removal').value = saved.optRemoval || ''; document.getElementById('opt-molding').value = saved.optMolding || ''; document.getElementById('opt-lifting').value = saved.optLifting || ''; document.getElementById('opt-etc').value = saved.optEtc || ''; if(saved.manualBrand) { document.getElementById('manual-brand').value = saved.manualBrand; document.getElementById('manual-brand').classList.remove('hidden'); } if(saved.manualProd) { document.getElementById('manual-prod').value = saved.manualProd; document.getElementById('manual-prod').classList.remove('hidden'); } if(saved.zones) { zoneList = saved.zones; renderZones(); } const sel = document.getElementById('brand-select'); const savedBrand = saved.brand || ''; const options = Array.from(sel.options).map(o => o.value); if (options.includes(savedBrand)) { sel.value = savedBrand; document.getElementById('brand-name').classList.add('hidden'); } else if (savedBrand) { sel.value = 'direct'; document.getElementById('brand-name').classList.remove('hidden'); } calc(); updateInfo(); showToast("작업 복구됨"); } }
-        function setupDropZone() { const dz = document.getElementById('drop-zone'); dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); dz.addEventListener('dragleave', e => { e.preventDefault(); dz.classList.remove('dragover'); }); dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleImage(e.dataTransfer.files[0]); }); }
-        function handleImage(file) { if(!file) return; showToast("분석중..."); document.getElementById('ocr-status').innerText = "분석중..."; Tesseract.recognize(file, 'kor').then(({ data: { text } }) => { document.getElementById('raw-text').value = text; document.getElementById('ocr-status').innerText = "완료!"; runSuperParse(); }).catch(err => { document.getElementById('ocr-status').innerText = "실패"; }); }
-        function runSuperParse() { const txt = document.getElementById('raw-text').value; if(!txt) return alert("내용을 입력해주세요."); const nMatch = txt.match(/(?:성함|이름)[:\s]*([가-힣\w\s]+)/) || txt.match(/([가-힣]{3})(?=\s*님)/); const pMatch = txt.match(/010[\s-]?\d{3,4}[\s-]?\d{4}/); const aMatch = txt.match(/(([가-힣]+(시|도|구|군|동|로|길))\s[\w가-힣\d\s\-\(\),]+)/); const fMatch = txt.match(/(?:업체|회사)[:\s]*([가-힣\w\s]+)/); if(nMatch) document.getElementById('cust-name').value = nMatch[1] || nMatch[0]; if(pMatch) document.getElementById('cust-phone').value = pMatch[0].replace(/[^0-9]/g, '').replace(/^(\d{3})(\d{4})(\d{4})$/, `$1-$2-$3`); if(aMatch) document.getElementById('cust-addr').value = aMatch[0].trim(); if(fMatch && userType === 'firm') document.getElementById('firm-name').value = fMatch[1].trim(); document.getElementById('raw-text').value = ''; updateInfo(); autoSave(); showToast("입력 완료!"); }
-        function closeModal(e) { if(e.target.id === 'manage-modal') document.getElementById('manage-modal').style.display='none'; }
-        function saveRecord() { const data = { id: Date.now(), name: document.getElementById('cust-name').value || '미지정', firm: userType === 'firm' ? document.getElementById('firm-name').value : '일반소비자', total: document.getElementById('val-total').innerText, date: new Date().toLocaleDateString(), sDate: document.getElementById('cust-survey-date').value, wDate: document.getElementById('cust-work-date').value, isPaid: false }; let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); rs.unshift(data); localStorage.setItem('cm_records', JSON.stringify(rs)); showToast("저장됨"); }
-        function toggleManageView(v) { manageView = v; if(document.getElementById('nav-'+v)) ['all','firm','unpaid','samples'].forEach(id => { if(document.getElementById('nav-'+id)) document.getElementById('nav-'+id).className = 'tab-btn whitespace-nowrap ' + (id===v ? 'active' : 'inactive'); }); document.getElementById('sample-form').style.display = v==='samples' ? 'block' : 'none'; renderManager(); }
-        function renderManager() { const list = document.getElementById('manage-list'); const search = document.getElementById('manage-search').value.toLowerCase(); const rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); const ss = JSON.parse(localStorage.getItem('cm_samples') || '[]'); let html = ''; if (manageView === 'all' || manageView === 'unpaid') { let filtered = rs.filter(r => r.name.includes(search) || r.firm.includes(search)); if (manageView === 'unpaid') filtered = filtered.filter(r => !r.isPaid); html = filtered.map(r => `<div class="bg-gray-50 p-3 rounded-xl flex justify-between items-center border ${r.isPaid ? 'border-gray-200' : 'border-red-200 bg-red-50'}"><div><div class="text-[10px] text-gray-500">${r.firm}</div><div class="font-bold">${r.name}</div><div class="text-[10px] text-gray-400">${r.sDate||'-'} / ${r.wDate||'-'}</div></div><div class="text-right"><div class="font-bold text-blue-600">${r.total}</div><button onclick="togglePay(${r.id})" class="text-[10px] px-2 py-1 rounded ${r.isPaid ? 'bg-gray-200' : 'bg-red-500 text-white'}">${r.isPaid?'완료':'미수금'}</button></div></div>`).join(''); } else if (manageView === 'firm') { const firms = {}; rs.forEach(r => { if (!firms[r.firm]) firms[r.firm] = { count:0, list:[] }; firms[r.firm].count++; firms[r.firm].list.push(r); }); Object.keys(firms).forEach(f => { if(f.toLowerCase().includes(search)) { html += `<div class="bg-blue-50 p-3 rounded-xl mb-2"><div class="font-black text-blue-700 mb-2">${f} (${firms[f].count}건)</div>`; firms[f].list.forEach(item => { html += `<div class="flex justify-between text-xs border-b border-blue-100 py-1"><span>${item.name}</span><span>${item.total}</span></div>`; }); html += `</div>`; } }); } else if (manageView === 'samples') { html = ss.filter(s => s.firm.includes(search) || s.name.includes(search)).map(s => `<div class="bg-green-50 p-3 rounded-xl border border-green-100 flex justify-between"><div><div class="font-bold text-gray-700">${s.firm}</div><div class="text-xs text-green-600">📘 ${s.name}</div></div><div class="text-[10px] text-gray-400">${s.date}</div></div>`).join(''); } list.innerHTML = html || '<div class="text-center text-gray-400 py-4">데이터가 없습니다.</div>'; }
-        function togglePay(id) { let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); let r = rs.find(x => x.id === id); if(r) r.isPaid = !r.isPaid; localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager(); }
-        function addSample() { const firm = document.getElementById('new-sample-firm').value; const name = document.getElementById('new-sample-name').value; if(!firm || !name) return; let ss = JSON.parse(localStorage.getItem('cm_samples') || '[]'); ss.unshift({ id: Date.now(), firm, name, date: new Date().toLocaleDateString() }); localStorage.setItem('cm_samples', JSON.stringify(ss)); renderManager(); }
-        function setMode(m) { mode = m; ['floor', 'wall', 'measure'].forEach(id => document.getElementById('tab-'+id).className = 'tab-btn ' + (id===m ? 'active' : 'inactive')); document.getElementById('area-calc-box').style.display = m==='floor' ? 'block' : 'none'; document.getElementById('zone-h').value = m==='wall' ? '2300' : ''; const label = document.getElementById('mode-label'); if (m === 'floor') { label.style.display = 'inline-block'; label.innerText = '마루/바닥'; label.className = "text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded"; } else { label.style.display = 'none'; } calc(); autoSave(); }
-        function setExp(val) { isExp = val; document.getElementById('exp-on').className = val ? "px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600" : "px-3 py-1 text-[11px] font-bold text-gray-400"; document.getElementById('exp-off').className = !val ? "px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600" : "px-3 py-1 text-[11px] font-bold text-gray-400"; syncPy(); autoSave(); }
-        function syncPy() { const py = parseFloat(document.getElementById('input-supply-py').value) || 0; document.getElementById('input-supply-m2').value = (py * 3.3058).toFixed(1); document.getElementById('input-real-py').value = Math.ceil(py * (isExp ? 0.8 : 0.75)); calc(); autoSave(); }
-        function syncM2() { const m2 = parseFloat(document.getElementById('input-supply-m2').value) || 0; document.getElementById('input-supply-py').value = (m2 / 3.3058).toFixed(1); syncPy(); }
-        async function connectBosch() { try { const device = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Bosch' }], optionalServices: ['0000170d-0000-1000-8000-00805f9b34fb', '232e51d8-9020-4b3f-95fa-4460f9919f1b'] }); const server = await device.gatt.connect(); document.getElementById('bt-btn').innerText = "연결됨"; const services = await server.getPrimaryServices(); for(const s of services) { const chars = await s.getCharacteristics(); for(const c of chars) { if(c.properties.notify) { await c.startNotifications(); c.addEventListener('characteristicvaluechanged', e => { const v = e.target.value.getFloat32(1, true); if(v>0) { const val = Math.round(v*1000); const w = document.getElementById('zone-w'); const h = document.getElementById('zone-h'); if(!w.value) w.value = val; else h.value = val; autoSave(); } }); } } } } catch(e) {} }
-        function addZone() { const w = parseFloat(document.getElementById('zone-w').value)||0; const h = parseFloat(document.getElementById('zone-h').value)||0; if(!w || !h) return; const dw = parseFloat(document.getElementById('deduct-w').value)||0; const dh = parseFloat(document.getElementById('deduct-h').value)||0; const area = (w*h)/1000000 - (dw*dh)/1000000; zoneList.push({ name: document.getElementById('zone-name').value||'구역', w, h, area }); renderZones(); document.getElementById('zone-w').value=''; if(mode!=='wall') document.getElementById('zone-h').value=''; autoSave(); }
-        function renderZones() { document.getElementById('zone-list').innerHTML = zoneList.map((z,i) => `<div class="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm"><div class="text-xs font-bold text-gray-700">${z.name} (${z.w}×${z.h})</div><div class="flex items-center gap-2"><span class="text-blue-600 font-bold">${z.area.toFixed(2)}㎡</span><button onclick="delZone(${i})" class="text-gray-300"><i class="fas fa-times"></i></button></div></div>`).join(''); calc(); }
-        function delZone(i) { zoneList.splice(i,1); renderZones(); autoSave(); }
+        function updateBrandSelect() { const bSel = document.getElementById('brand-select'); bSel.innerHTML = '<option value="">브랜드 선택</option>'; masterData.forEach(m => bSel.add(new Option(m.brand, m.brand))); bSel.add(new Option("직접 입력", "direct")); }
+        function updateProducts() { const bName = document.getElementById('brand-select').value; const pSel = document.getElementById('product-select'); const manual = document.getElementById('manual-inputs'); if (bName === 'direct') { manual.classList.remove('hidden'); pSel.innerHTML = '<option value="">직접입력</option>'; pSel.disabled=true; } else { manual.classList.add('hidden'); pSel.disabled=false; pSel.innerHTML = '<option value="">제품 선택</option>'; const bObj = masterData.find(x => x.brand === bName); if (bObj) bObj.products.forEach((p, idx) => pSel.add(new Option(p.name, idx))); } calc(); }
+        function handleProductSelect() { const bName = document.getElementById('brand-select').value; const pIdx = document.getElementById('product-select').value; if (bName !== 'direct' && pIdx !== "") { const bObj = masterData.find(x => x.brand === bName); if (bObj) { const pObj = bObj.products[pIdx]; if (pObj) { document.getElementById('prod-spec').value = pObj.spec; document.getElementById('input-box-area').value = pObj.boxArea; const finalPrice = userType === 'firm' ? pObj.firmPrice : pObj.price; document.getElementById('box-price').value = finalPrice.toLocaleString(); } } } calc(); }
+        function checkAppLogin() { if(document.getElementById('app-password').value === '1306') { localStorage.setItem('cm_auth', 'ok'); document.getElementById('login-gate').remove(); } else { alert('비밀번호 오류'); } }
+        function handleImage(f) { if(!f) return; document.getElementById('ocr-loading').style.display = 'flex'; Tesseract.recognize(f, 'kor+eng').then(({ data: { text } }) => { document.getElementById('raw-text').value = text; document.getElementById('ocr-loading').style.display = 'none'; runSuperParse(); }).catch(e => { document.getElementById('ocr-loading').style.display = 'none'; }); }
+        function runSuperParse() { const t = document.getElementById('raw-text').value; if(!t) return; const pM = t.match(/01\d[\s-]?\d{3,4}[\s-]?\d{4}/); const nM = t.match(/([가-힣]{2,4})(?=\s*님| 고객| 팀장| 과장| 대표| 실장|$)/) || t.match(/(?:성함|이름|담당)[:\s]*([가-힣]{2,4})/); const aM = t.match(/([가-힣]+(시|도|구|군|동|로|길)\s[\w가-힣\d\s\-\(\),]+)/); const fM = t.match(/([가-힣\w\s]+(?:디자인|인테리어|건축|하우징|아트|컴퍼니|사))/); if(nM) document.getElementById('cust-name').value = (nM[1] || nM[0]).trim(); if(pM) { let p = pM[0].replace(/[^0-9]/g, ''); document.getElementById('cust-phone').value = p.replace(/^(\d{3})(\d{4})(\d{4})$/, `$1-$2-$3`); } if(aM) document.getElementById('cust-addr').value = aM[0].trim(); if(fM && userType === 'firm') document.getElementById('firm-name').value = fM[0].trim(); updateInfo(); autoSave(); }
+        function setModeType(t) { userType = t; document.getElementById('mode-consumer').className = 'mode-btn ' + (t==='consumer'?'active':''); document.getElementById('mode-firm').className = 'mode-btn ' + (t==='firm'?'active':''); document.getElementById('firm-row').style.display = t==='firm' ? 'block' : 'none'; document.getElementById('rep-firm').style.display = t==='firm' ? 'block' : 'none'; handleProductSelect(); updateInfo(); autoSave(); }
+        function setMode(m) { mode = m; ['floor', 'wall', 'measure'].forEach(id => document.getElementById('tab-'+id).className = 'tab-btn ' + (id===m ? 'active' : 'inactive')); document.getElementById('area-calc-box').style.display = m==='floor' ? 'block' : 'none'; document.getElementById('zone-h').value = m==='wall' ? '2300' : ''; const label = document.getElementById('mode-label'); if (m === 'floor') { label.style.display = 'inline-block'; } else { label.style.display = 'none'; } calc(); autoSave(); }
+        function autoSave() { const data = { timestamp: new Date().getTime(), custName: document.getElementById('cust-name').value, custPhone: document.getElementById('cust-phone').value, custAddr: document.getElementById('cust-addr').value, firmName: document.getElementById('firm-name').value, sDate: document.getElementById('cust-survey-date').value, wDate: document.getElementById('cust-work-date').value, supplyPy: document.getElementById('input-supply-py').value, realPy: document.getElementById('input-real-py').value, brand: document.getElementById('brand-select').value, model: document.getElementById('prod-model').value, spec: document.getElementById('prod-spec').value, boxArea: document.getElementById('input-box-area').value, boxPrice: document.getElementById('box-price').value, rem: document.getElementById('opt-removal').value, mol: document.getElementById('opt-molding').value, lift: document.getElementById('opt-lifting').value, etc: document.getElementById('opt-etc').value, zones: zoneList }; localStorage.setItem('cm_autosave', JSON.stringify(data)); }
+        function loadAutoSave() { const saved = JSON.parse(localStorage.getItem('cm_autosave')); if (saved) { if (new Date().getTime() - saved.timestamp > 300000) { localStorage.removeItem('cm_autosave'); return; } document.getElementById('cust-name').value = saved.custName || ''; document.getElementById('cust-phone').value = saved.custPhone || ''; document.getElementById('cust-addr').value = saved.custAddr || ''; document.getElementById('firm-name').value = saved.firmName || ''; document.getElementById('cust-survey-date').value = saved.sDate || ''; document.getElementById('cust-work-date').value = saved.wDate || ''; document.getElementById('input-supply-py').value = saved.supplyPy || ''; document.getElementById('input-real-py').value = saved.realPy || ''; document.getElementById('prod-model').value = saved.model || ''; document.getElementById('prod-spec').value = saved.spec || ''; document.getElementById('input-box-area').value = saved.boxArea || '3.2'; document.getElementById('box-price').value = saved.boxPrice || ''; document.getElementById('opt-removal').value = saved.rem || ''; document.getElementById('opt-molding').value = saved.mol || ''; document.getElementById('opt-lifting').value = saved.lift || ''; document.getElementById('opt-etc').value = saved.etc || ''; if(saved.zones) { zoneList = saved.zones; renderZones(); } calc(); updateInfo(); } }
         function formatNum(el) { el.value = el.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
         function formatPhone(el) { el.value = el.value.replace(/[^0-9]/g, "").replace(/(^02|^0505|^1[0-9]{3}|^0[0-9]{2})([0-9]+)?([0-9]{4})$/,"$1-$2-$3").replace("--", "-"); updateInfo(); }
-        function updateInfo() { document.getElementById('rep-name').innerText = document.getElementById('cust-name').value || '고객님'; document.getElementById('rep-firm').innerText = userType==='firm' ? ('Partner: ' + document.getElementById('firm-name').value) : ''; document.getElementById('rep-addr').innerText = document.getElementById('cust-addr').value || ''; const sDate = document.getElementById('cust-survey-date').value; const wDate = document.getElementById('cust-work-date').value; document.getElementById('rep-dates').innerText = (sDate ? `실측:${sDate} ` : '') + (wDate ? `시공:${wDate}` : ''); }
+        function syncPy() { const py = parseFloat(document.getElementById('input-supply-py').value) || 0; document.getElementById('input-supply-m2').value = (py * 3.3058).toFixed(1); document.getElementById('input-real-py').value = Math.ceil(py * (isExp ? 0.8 : 0.75)); calc(); autoSave(); }
+        function syncM2() { const m2 = parseFloat(document.getElementById('input-supply-m2').value) || 0; document.getElementById('input-supply-py').value = (m2 / 3.3058).toFixed(1); syncPy(); }
+        function setExp(v) { isExp = v; document.getElementById('exp-on').className = v ? "px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600" : "px-3 py-1 text-[11px] font-bold text-gray-400"; document.getElementById('exp-off').className = !v ? "px-3 py-1 bg-white rounded-md text-[11px] font-bold shadow-sm text-blue-600" : "px-3 py-1 text-[11px] font-bold text-gray-400"; syncPy(); }
         function toggleOption() { document.getElementById('opt-content').classList.toggle('open'); document.getElementById('opt-arrow').classList.toggle('fa-chevron-up'); }
-        function showToast(msg) { const t = document.getElementById('toast'); t.innerText=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', 2000); }
-        function shareKakao() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => { canvas.toBlob(blob => navigator.share({files:[new File([blob], "견적서.png", {type:"image/png"})]})); }); }
-        function saveImg() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => { let a = document.createElement('a'); a.href = canvas.toDataURL(); a.download = "청인마루_견적.png"; a.click(); }); }
-        function sendSms() { location.href=`sms:${document.getElementById('cust-phone').value}?body=견적서 송부드립니다.`; }
+        function addZone() { const w = parseFloat(document.getElementById('zone-w').value)||0; const h = parseFloat(document.getElementById('zone-h').value)||0; if(!w || !h) return; const area = (w*h)/1000000 - ((parseFloat(document.getElementById('deduct-w').value)||0)*(parseFloat(document.getElementById('deduct-h').value)||0))/1000000; zoneList.push({ name: document.getElementById('zone-name').value||'구역', w, h, area }); renderZones(); document.getElementById('zone-w').value=''; autoSave(); }
+        function renderZones() { document.getElementById('zone-list').innerHTML = zoneList.map((z,i) => `<div class="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm"><div class="text-xs font-bold text-gray-700">${z.name} (${z.w}×${z.h})</div><div class="flex items-center gap-2"><span class="text-blue-600 font-bold">${z.area.toFixed(2)}㎡</span><button onclick="delZone(${i})" class="text-gray-300"><i class="fas fa-times"></i></button></div></div>`).join(''); calc(); }
+        function delZone(i) { zoneList.splice(i,1); renderZones(); autoSave(); }
+        function showToast(m) { TOAST.innerText=m; TOAST.style.display='block'; setTimeout(()=>TOAST.style.display='none', 2000); }
+        function updateInfo() { document.getElementById('rep-name').innerText = document.getElementById('cust-name').value || '고객님'; document.getElementById('rep-firm').innerText = userType==='firm' ? ('Partner: ' + document.getElementById('firm-name').value) : ''; document.getElementById('rep-addr').innerText = document.getElementById('cust-addr').value || ''; const sD = document.getElementById('cust-survey-date').value; const wD = document.getElementById('cust-work-date').value; document.getElementById('rep-dates').innerText = (sD ? `실측:${sD} ` : '') + (wD ? `시공:${wD}` : ''); }
+        function saveImg() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(c => { let a = document.createElement('a'); a.href = c.toDataURL(); a.download = "청인마루_견적.png"; a.click(); }); }
+        function saveRecord() { const data = { id: Date.now(), name: document.getElementById('cust-name').value || '미지정', firm: userType === 'firm' ? document.getElementById('firm-name').value : '일반소비자', total: document.getElementById('val-total').innerText, date: new Date().toLocaleDateString(), isPaid: false }; let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); rs.unshift(data); localStorage.setItem('cm_records', JSON.stringify(rs)); showToast("저장됨"); }
+        function toggleManageView(v) { manageView = v; if(document.getElementById('nav-'+v)) ['all','firm','unpaid','samples'].forEach(id => { if(document.getElementById('nav-'+id)) document.getElementById('nav-'+id).className = 'tab-btn whitespace-nowrap ' + (id===v ? 'active' : 'inactive'); }); renderManager(); }
+        function renderManager() { const list = document.getElementById('manage-list'); const rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); list.innerHTML = rs.map(r => `<div class="bg-gray-50 p-3 rounded-xl flex justify-between items-center border"><div><div class="text-[10px] text-gray-500">${r.firm}</div><div class="font-bold">${r.name}</div></div><div class="text-right font-bold text-blue-600">${r.total}원</div></div>`).join(''); }
+        function openManager() { document.getElementById('manage-modal').style.display='flex'; toggleManageView('all'); }
+        function closeModal(e) { if(e.target.id === 'manage-modal') document.getElementById('manage-modal').style.display='none'; }
+        function setupDropZone() { const dz = document.getElementById('drop-zone'); dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); dz.addEventListener('dragleave', e => { e.preventDefault(); dz.classList.remove('dragover'); }); dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleImage(e.dataTransfer.files[0]); }); }
+        function shareKakao() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(c => { c.toBlob(b => navigator.share({files:[new File([b], "견적서.png", {type:"image/png"})]})); }); }
+        async function connectBosch() { try { const d = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Bosch' }], optionalServices: ['0000170d-0000-1000-8000-00805f9b34fb', '232e51d8-9020-4b3f-95fa-4460f9919f1b'] }); const s = await d.gatt.connect(); document.getElementById('bt-btn').innerText = "연결됨"; const svs = await s.getPrimaryServices(); for(const sv of svs) { const chs = await sv.getCharacteristics(); for(const ch of chs) { if(ch.properties.notify) { await ch.startNotifications(); ch.addEventListener('characteristicvaluechanged', e => { const v = e.target.value.getFloat32(1, true); if(v>0) { const val = Math.round(v*1000); const w = document.getElementById('zone-w'); const h = document.getElementById('zone-h'); if(!w.value) w.value = val; else h.value = val; autoSave(); } }); } } } } catch(e) {} }
 
+        // [v47.0] 정밀 계산 로직
         function calc() {
             let m2 = zoneList.reduce((a,b)=>a+b.area, 0);
+            const inputReal = parseFloat(document.getElementById('input-real-py').value) || 0;
             if(m2 === 0 && mode === 'floor') {
-                const inputReal = parseFloat(document.getElementById('input-real-py').value);
                 if (inputReal > 0) m2 = inputReal * 3.3058;
                 else { const py = parseFloat(document.getElementById('input-supply-py').value) || 0; m2 = (py * 3.3058) * (isExp ? 0.8 : 0.75); }
             }
-            document.getElementById('total-m2').innerText = m2.toFixed(2);
+            document.getElementById('total-m2').value = m2.toFixed(2);
             document.getElementById('rep-m2').innerText = m2.toFixed(2);
 
             const realPy = Math.ceil(m2 / 3.3058); 
@@ -433,47 +299,38 @@
             const loss = 1.1; 
             const boxes = Math.ceil(m2 / boxArea * loss);
             
-            document.getElementById('total-box').innerText = boxes;
+            document.getElementById('total-box').value = boxes;
             document.getElementById('rep-boxes').innerText = boxes;
 
-            const price = parseInt(document.getElementById('box-price').value.replace(/,/g,'')) || 0;
+            const price = parseInt((document.getElementById('box-price').value || "0").replace(/[^0-9]/g,'')) || 0;
             const baseCost = boxes * price;
 
-            const uRemoval = parseInt(document.getElementById('opt-removal').value.replace(/,/g,'')) || 0;
-            const uMolding = parseInt(document.getElementById('opt-molding').value.replace(/,/g,'')) || 0;
-            const uLifting = parseInt(document.getElementById('opt-lifting').value.replace(/,/g,'')) || 0;
-            const uEtc = parseInt(document.getElementById('opt-etc').value.replace(/,/g,'')) || 0;
+            const uRem = parseInt((document.getElementById('opt-removal').value || "0").replace(/[^0-9]/g,'')) || 0;
+            const uMol = parseInt((document.getElementById('opt-molding').value || "0").replace(/[^0-9]/g,'')) || 0;
+            const uLift = parseInt((document.getElementById('opt-lifting').value || "0").replace(/[^0-9]/g,'')) || 0;
+            const uEtc = parseInt((document.getElementById('opt-etc').value || "0").replace(/[^0-9]/g,'')) || 0;
 
-            const costRemoval = uRemoval * realPy; 
             const supplyPy = parseFloat(document.getElementById('input-supply-py').value) || 0;
             const calcPy = supplyPy > 0 ? supplyPy : realPy; 
-            const costMolding = uMolding * calcPy; 
+            const costRem = uRem * realPy; const costMol = uMol * calcPy; 
+            const total = baseCost + costRem + costMol + uLift + uEtc;
             
-            const optCost = costRemoval + costMolding + uLifting + uEtc;
-            const total = baseCost + optCost;
-            
-            let detailHtml = '';
-            let brand = document.getElementById('brand-select').value;
-            if (brand === 'direct' || brand === '') brand = document.getElementById('manual-brand').value;
-            let prod = document.getElementById('product-select').options[document.getElementById('product-select').selectedIndex]?.text;
-            if (!prod || prod === '제품 선택' || document.getElementById('brand-select').value === 'direct') prod = document.getElementById('manual-prod').value;
+            let detHtml = '';
+            let b = document.getElementById('brand-select').value === 'direct' ? document.getElementById('manual-brand').value : document.getElementById('brand-select').value;
+            let p = document.getElementById('product-select').options[document.getElementById('product-select').selectedIndex]?.text;
+            if (!p || p === '제품 선택' || document.getElementById('brand-select').value === 'direct') p = document.getElementById('manual-prod').value;
+            const mo = document.getElementById('prod-model').value;
+            document.getElementById('rep-prod').innerText = (b?b+' ':'') + (p||'미선택') + (mo?` (${mo})`:'');
 
-            const model = document.getElementById('prod-model').value;
-            const spec = document.getElementById('prod-spec').value;
-            
-            document.getElementById('rep-prod').innerText = (brand?brand+' ':'') + (prod||'제품 미선택') + (model?` (${model})`:'');
-            
-            if (price > 0) detailHtml += `<div class="option-row"><span>기본 자재/시공 (${boxes}Box)</span><span>${baseCost.toLocaleString()} 원</span></div>`;
-            if (costRemoval > 0) detailHtml += `<div class="option-row"><span>철거비 (${realPy}평)</span><span>${costRemoval.toLocaleString()} 원</span></div>`;
-            if (costMolding > 0) detailHtml += `<div class="option-row"><span>걸레받이 (${calcPy}평)</span><span>${costMolding.toLocaleString()} 원</span></div>`;
-            if (uLifting > 0) detailHtml += `<div class="option-row"><span>운반/양중</span><span>${uLifting.toLocaleString()} 원</span></div>`;
-            if (uEtc > 0) detailHtml += `<div class="option-row"><span>기타/보양</span><span>${uEtc.toLocaleString()} 원</span></div>`;
-            if (spec) detailHtml += `<div class="text-[9px] text-gray-500 mt-2 text-right">규격: ${spec} | 1Box: ${boxArea}㎡</div>`;
+            if (price > 0) detHtml += `<div class="option-row"><span>기본 자재/시공 (${boxes}Box)</span><span>${baseCost.toLocaleString()} 원</span></div>`;
+            if (costRem > 0) detHtml += `<div class="option-row"><span>철거비 (${realPy}평)</span><span>${costRem.toLocaleString()} 원</span></div>`;
+            if (costMol > 0) detHtml += `<div class="option-row"><span>걸레받이 (${calcPy}평)</span><span>${costMol.toLocaleString()} 원</span></div>`;
+            if (uLift > 0) detHtml += `<div class="option-row"><span>운반/양중</span><span>${uLift.toLocaleString()} 원</span></div>`;
+            if (uEtc > 0) detHtml += `<div class="option-row"><span>기타/보양</span><span>${uEtc.toLocaleString()} 원</span></div>`;
 
-            document.getElementById('report-detail-list').innerHTML = detailHtml;
-
+            document.getElementById('report-detail-list').innerHTML = detHtml;
             document.getElementById('val-base').innerText = baseCost.toLocaleString() + " 원";
-            document.getElementById('val-opt').innerText = optCost.toLocaleString() + " 원";
+            document.getElementById('val-opt').innerText = (costRem + costMol + uLift + uEtc).toLocaleString() + " 원";
             document.getElementById('val-supply').innerText = total.toLocaleString() + " 원";
             document.getElementById('val-total').innerText = Math.round(total * 1.1).toLocaleString();
         }
