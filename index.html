@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>청인마루 Master v45.0</title>
+    <title>청인마루 Master v46.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -54,7 +54,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">CHUNG-IN</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v45.0</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v46.0</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4 border border-gray-700 focus:border-blue-500" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-colors">Access System</button>
         </div>
@@ -265,7 +265,6 @@
     </div>
 
     <script>
-        // [업데이트] 실장님 구글 시트 URL 적용
         const SHEET_URL = "https://script.google.com/macros/s/AKfycbzp2kx3wOkbCEh1eTj9m5zKaCpXjMatk1KAjSVhh2OmBJhxjX-YedcI8CNVo0pj7zPs/exec";
         let masterData = []; let zoneList = []; let userType = 'consumer'; let isExp = true; let mode = 'floor'; let manageView = 'all';
         const TOAST = document.getElementById('toast');
@@ -274,7 +273,7 @@
             if(localStorage.getItem('cm_auth') === 'ok') document.getElementById('login-gate').remove();
             document.getElementById('rep-no').innerText = 'NO. ' + new Date().getTime().toString().slice(-6);
             setupDropZone();
-            loadData(); // 구글 시트 데이터 로딩
+            loadData(); 
             loadAutoSave();
         };
 
@@ -285,13 +284,12 @@
             } else { alert('비밀번호 오류'); }
         }
 
-        // [핵심] 구글 시트 데이터 로딩 및 드롭다운 연동
+        // [핵심] 구글 시트 데이터 로딩 (firm_price 포함)
         async function loadData() {
             try {
                 const res = await fetch(SHEET_URL);
                 const data = await res.json();
                 const temp = {};
-                // 데이터 구조화: 브랜드 -> 제품 -> 상세
                 data.forEach(item => {
                     if (item.brand) {
                         if (!temp[item.brand]) temp[item.brand] = { brand: item.brand, products: [] };
@@ -299,9 +297,8 @@
                             name: item.name,
                             spec: item.spec || '',
                             boxArea: parseFloat(item.box_area) || 3.2,
-                            // 소비자용 / 업체용 단가 구분
                             price: item.price || 0,
-                            firmPrice: item.firm_price || item.price || 0
+                            firmPrice: item.firm_price || item.price || 0 // firm_price 연결
                         });
                     }
                 });
@@ -309,7 +306,6 @@
                 updateBrandSelect();
             } catch (e) {
                 console.error("Sheet Load Error:", e);
-                // 실패 시 기본 데이터라도 사용하도록 (옵션)
             }
         }
 
@@ -340,7 +336,6 @@
                 const bObj = masterData.find(x => x.brand === bName);
                 if (bObj) {
                     bObj.products.forEach((p, idx) => {
-                        // value에 인덱스를 넣어 찾기 쉽게 함
                         const opt = new Option(p.name, idx);
                         pSel.add(opt);
                     });
@@ -358,10 +353,10 @@
                 if (bObj) {
                     const pObj = bObj.products[pIdx];
                     if (pObj) {
-                        // 자동 입력
                         document.getElementById('prod-spec').value = pObj.spec;
                         document.getElementById('input-box-area').value = pObj.boxArea;
-                        // 소비자/업체 모드에 따른 단가 적용
+                        
+                        // [핵심] 업체 모드일 때 firmPrice 적용
                         const finalPrice = userType === 'firm' ? pObj.firmPrice : pObj.price;
                         document.getElementById('box-price').value = finalPrice.toLocaleString();
                     }
@@ -370,7 +365,6 @@
             calc();
         }
 
-        // ... (나머지 Smart Parse, Auto Save, UI Logic 동일) ...
         function setModeType(type) {
             userType = type;
             document.getElementById('mode-consumer').className = 'mode-btn ' + (type==='consumer'?'active':'');
@@ -387,47 +381,17 @@
                 btn.innerHTML = '<i class="fas fa-tasks"></i> 업체 관리';
                 btn.onclick = () => { openManager('firm'); };
             }
-            // 모드 변경 시 단가 재적용
+            
+            // 모드 전환 시 단가 재적용 (중요)
             handleProductSelect();
+            
             updateInfo(); autoSave();
         }
 
-        function openManager(defaultView) { 
-            document.getElementById('manage-modal').style.display='flex';
-            const tabs = document.getElementById('manage-tabs');
-            let btns = '';
-            if(userType === 'consumer') {
-                btns = `<button onclick="toggleManageView('all')" class="tab-btn active w-full">전체 견적 기록</button>`;
-                document.getElementById('manage-title').innerText = "내 견적 기록";
-                toggleManageView('all');
-            } else {
-                btns = `
-                    <button id="nav-all" onclick="toggleManageView('all')" class="tab-btn inactive whitespace-nowrap">전체</button>
-                    <button id="nav-firm" onclick="toggleManageView('firm')" class="tab-btn active whitespace-nowrap">업체별</button>
-                    <button id="nav-unpaid" onclick="toggleManageView('unpaid')" class="tab-btn inactive whitespace-nowrap">미수금</button>
-                    <button id="nav-samples" onclick="toggleManageView('samples')" class="tab-btn inactive whitespace-nowrap">샘플북</button>
-                `;
-                document.getElementById('manage-title').innerText = "통합 관리 센터";
-                toggleManageView(defaultView || 'firm');
-            }
-            tabs.innerHTML = btns;
-        }
-
+        // ... (Smart Parse, Auto Save, UI Logic 동일) ...
+        function openManager(defaultView) { document.getElementById('manage-modal').style.display='flex'; const tabs = document.getElementById('manage-tabs'); let btns = ''; if(userType === 'consumer') { btns = `<button onclick="toggleManageView('all')" class="tab-btn active w-full">전체 견적 기록</button>`; document.getElementById('manage-title').innerText = "내 견적 기록"; toggleManageView('all'); } else { btns = `<button id="nav-all" onclick="toggleManageView('all')" class="tab-btn inactive whitespace-nowrap">전체</button><button id="nav-firm" onclick="toggleManageView('firm')" class="tab-btn active whitespace-nowrap">업체별</button><button id="nav-unpaid" onclick="toggleManageView('unpaid')" class="tab-btn inactive whitespace-nowrap">미수금</button><button id="nav-samples" onclick="toggleManageView('samples')" class="tab-btn inactive whitespace-nowrap">샘플북</button>`; document.getElementById('manage-title').innerText = "통합 관리 센터"; toggleManageView(defaultView || 'firm'); } tabs.innerHTML = btns; }
         function autoSave() { const data = { timestamp: new Date().getTime(), custName: document.getElementById('cust-name').value, custPhone: document.getElementById('cust-phone').value, custAddr: document.getElementById('cust-addr').value, firmName: document.getElementById('firm-name').value, sDate: document.getElementById('cust-survey-date').value, wDate: document.getElementById('cust-work-date').value, supplyPy: document.getElementById('input-supply-py').value, realPy: document.getElementById('input-real-py').value, brand: document.getElementById('brand-select').value, prodIdx: document.getElementById('product-select').value, manualBrand: document.getElementById('manual-brand').value, manualProd: document.getElementById('manual-prod').value, model: document.getElementById('prod-model').value, spec: document.getElementById('prod-spec').value, boxArea: document.getElementById('input-box-area').value, boxPrice: document.getElementById('box-price').value, optRemoval: document.getElementById('opt-removal').value, optMolding: document.getElementById('opt-molding').value, optLifting: document.getElementById('opt-lifting').value, optEtc: document.getElementById('opt-etc').value, zones: zoneList }; localStorage.setItem('cm_autosave', JSON.stringify(data)); }
-        function loadAutoSave() { const saved = JSON.parse(localStorage.getItem('cm_autosave')); if (saved) { if (new Date().getTime() - saved.timestamp > 300000) { localStorage.removeItem('cm_autosave'); return; } document.getElementById('cust-name').value = saved.custName || ''; document.getElementById('cust-phone').value = saved.custPhone || ''; document.getElementById('cust-addr').value = saved.custAddr || ''; document.getElementById('firm-name').value = saved.firmName || ''; document.getElementById('cust-survey-date').value = saved.sDate || ''; document.getElementById('cust-work-date').value = saved.wDate || ''; document.getElementById('input-supply-py').value = saved.supplyPy || ''; document.getElementById('input-real-py').value = saved.realPy || ''; document.getElementById('prod-model').value = saved.model || ''; document.getElementById('prod-spec').value = saved.spec || ''; document.getElementById('input-box-area').value = saved.boxArea || '3.2'; document.getElementById('box-price').value = saved.boxPrice || ''; document.getElementById('opt-removal').value = saved.optRemoval || ''; document.getElementById('opt-molding').value = saved.optMolding || ''; document.getElementById('opt-lifting').value = saved.optLifting || ''; document.getElementById('opt-etc').value = saved.optEtc || ''; if(saved.zones) { zoneList = saved.zones; renderZones(); } 
-            // 브랜드 셀렉트 박스 복구 로직 추가
-            const sel = document.getElementById('brand-select');
-            const savedBrand = saved.brand || '';
-            const options = Array.from(sel.options).map(o => o.value);
-            if (options.includes(savedBrand)) {
-                sel.value = savedBrand;
-                document.getElementById('brand-name').classList.add('hidden');
-            } else if (savedBrand) {
-                sel.value = 'direct';
-                document.getElementById('brand-name').classList.remove('hidden');
-            }
-            calc(); updateInfo(); showToast("작업 복구됨"); 
-        } }
+        function loadAutoSave() { const saved = JSON.parse(localStorage.getItem('cm_autosave')); if (saved) { if (new Date().getTime() - saved.timestamp > 300000) { localStorage.removeItem('cm_autosave'); return; } document.getElementById('cust-name').value = saved.custName || ''; document.getElementById('cust-phone').value = saved.custPhone || ''; document.getElementById('cust-addr').value = saved.custAddr || ''; document.getElementById('firm-name').value = saved.firmName || ''; document.getElementById('cust-survey-date').value = saved.sDate || ''; document.getElementById('cust-work-date').value = saved.wDate || ''; document.getElementById('input-supply-py').value = saved.supplyPy || ''; document.getElementById('input-real-py').value = saved.realPy || ''; document.getElementById('prod-model').value = saved.model || ''; document.getElementById('prod-spec').value = saved.spec || ''; document.getElementById('input-box-area').value = saved.boxArea || '3.2'; document.getElementById('box-price').value = saved.boxPrice || ''; document.getElementById('opt-removal').value = saved.optRemoval || ''; document.getElementById('opt-molding').value = saved.optMolding || ''; document.getElementById('opt-lifting').value = saved.optLifting || ''; document.getElementById('opt-etc').value = saved.optEtc || ''; if(saved.manualBrand) { document.getElementById('manual-brand').value = saved.manualBrand; document.getElementById('manual-brand').classList.remove('hidden'); } if(saved.manualProd) { document.getElementById('manual-prod').value = saved.manualProd; document.getElementById('manual-prod').classList.remove('hidden'); } if(saved.zones) { zoneList = saved.zones; renderZones(); } const sel = document.getElementById('brand-select'); const savedBrand = saved.brand || ''; const options = Array.from(sel.options).map(o => o.value); if (options.includes(savedBrand)) { sel.value = savedBrand; document.getElementById('brand-name').classList.add('hidden'); } else if (savedBrand) { sel.value = 'direct'; document.getElementById('brand-name').classList.remove('hidden'); } calc(); updateInfo(); showToast("작업 복구됨"); } }
         function setupDropZone() { const dz = document.getElementById('drop-zone'); dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); dz.addEventListener('dragleave', e => { e.preventDefault(); dz.classList.remove('dragover'); }); dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleImage(e.dataTransfer.files[0]); }); }
         function handleImage(file) { if(!file) return; showToast("분석중..."); document.getElementById('ocr-status').innerText = "분석중..."; Tesseract.recognize(file, 'kor').then(({ data: { text } }) => { document.getElementById('raw-text').value = text; document.getElementById('ocr-status').innerText = "완료!"; runSuperParse(); }).catch(err => { document.getElementById('ocr-status').innerText = "실패"; }); }
         function runSuperParse() { const txt = document.getElementById('raw-text').value; if(!txt) return alert("내용을 입력해주세요."); const nMatch = txt.match(/(?:성함|이름)[:\s]*([가-힣\w\s]+)/) || txt.match(/([가-힣]{3})(?=\s*님)/); const pMatch = txt.match(/010[\s-]?\d{3,4}[\s-]?\d{4}/); const aMatch = txt.match(/(([가-힣]+(시|도|구|군|동|로|길))\s[\w가-힣\d\s\-\(\),]+)/); const fMatch = txt.match(/(?:업체|회사)[:\s]*([가-힣\w\s]+)/); if(nMatch) document.getElementById('cust-name').value = nMatch[1] || nMatch[0]; if(pMatch) document.getElementById('cust-phone').value = pMatch[0].replace(/[^0-9]/g, '').replace(/^(\d{3})(\d{4})(\d{4})$/, `$1-$2-$3`); if(aMatch) document.getElementById('cust-addr').value = aMatch[0].trim(); if(fMatch && userType === 'firm') document.getElementById('firm-name').value = fMatch[1].trim(); document.getElementById('raw-text').value = ''; updateInfo(); autoSave(); showToast("입력 완료!"); }
@@ -490,7 +454,7 @@
             
             let detailHtml = '';
             let brand = document.getElementById('brand-select').value;
-            if (brand === 'direct' || brand === '') brand = document.getElementById('brand-name').value;
+            if (brand === 'direct' || brand === '') brand = document.getElementById('manual-brand').value;
             let prod = document.getElementById('product-select').options[document.getElementById('product-select').selectedIndex]?.text;
             if (!prod || prod === '제품 선택' || document.getElementById('brand-select').value === 'direct') prod = document.getElementById('manual-prod').value;
 
