@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>청인마루 통합 시스템 v65.0</title>
+    <title>청인마루 통합 시스템 v66.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -30,8 +30,8 @@
         .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; text-align: center; background: #fff; cursor: pointer; position: relative; }
         .input-large { font-size: 18px !important; padding: 16px !important; font-weight: 900 !important; }
         .manage-item { background: white; padding: 18px; border-radius: 20px; border: 1px solid #EEF2F6; margin-bottom: 12px; cursor: pointer; }
-        .firm-name-large { font-size: 16px; font-weight: 900; color: #4C6EF5; margin-bottom: 2px; }
-        .cust-name-title { font-size: 18px; font-weight: 900; color: #1e293b; }
+        .firm-name-large { font-size: 20px; font-weight: 900; color: #4C6EF5; margin-bottom: 4px; }
+        .cust-name-title { font-size: 15px; font-weight: 700; color: #64748b; }
         .detail-accordion { max-height: 0; overflow: hidden; transition: 0.3s ease-out; background: #F8F9FA; border-radius: 12px; padding: 0 12px; }
         .detail-accordion.open { max-height: 1000px; padding: 12px; border: 1px dashed #DEE2E6; margin-top: 10px; }
         .option-row { display: flex; justify-content: space-between; font-size: 12px; color: #CED4DA; margin-bottom: 4px; }
@@ -46,7 +46,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-2xl font-black text-white mb-2">청인마루 통합 시스템</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold">v65.0 LOGIN</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold">v66.0 LOGIN</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4 border border-gray-700" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold">Access System</button>
         </div>
@@ -77,7 +77,7 @@
 
     <div class="max-w-xl mx-auto p-4">
         <header class="mb-6">
-            <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v65.0</span></h1>
+            <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v66.0</span></h1>
             <p class="text-[13px] text-blue-500 font-black tracking-tight uppercase">공간의 위로가 되다</p>
         </header>
 
@@ -93,12 +93,8 @@
         </div>
 
         <div class="card-clean border-blue-100 bg-blue-50/50">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-black text-blue-600 uppercase tracking-widest"><i class="fas fa-bolt mr-1"></i> SMART EXTRACTOR</span>
-                <span id="ocr-status" class="text-[10px] text-gray-400 font-bold">READY</span>
-            </div>
             <div class="grid grid-cols-2 gap-3 mb-3">
-                <textarea id="raw-text" class="w-full h-28 p-3 rounded-xl border border-blue-100 text-xs resize-none outline-none focus:ring-4 ring-blue-100" placeholder="카톡/명함 내용을 붙여넣으세요"></textarea>
+                <textarea id="raw-text" class="w-full h-28 p-3 rounded-xl border border-blue-100 text-xs resize-none" placeholder="카톡/명함 내용을 붙여넣으세요"></textarea>
                 <div id="drop-zone" class="drop-zone flex flex-col justify-center items-center h-28" onclick="document.getElementById('file-input').click()">
                     <div id="ocr-loading" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.9); border-radius:16px; align-items:center; justify-content:center; color:#228BE6; font-weight:900;"><i class="fas fa-spinner fa-spin mr-2"></i> 분석 중...</div>
                     <i class="fas fa-id-badge text-slate-300 text-3xl"></i>
@@ -106,9 +102,7 @@
                     <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleImage(this.files[0])">
                 </div>
             </div>
-            <div class="flex justify-end">
-                <button onclick="runSuperParse()" class="bg-blue-600 text-white px-8 py-2.5 rounded-xl font-black text-[11px] shadow-lg hover:bg-blue-700 active:scale-95 transition-all">정보 추출하기</button>
-            </div>
+            <div class="flex justify-end"><button onclick="runSuperParse()" class="bg-blue-600 text-white px-8 py-2.5 rounded-xl font-black text-[11px] shadow-lg">정보 추출하기</button></div>
         </div>
 
         <div class="card-clean">
@@ -137,15 +131,15 @@
         </div>
 
         <div class="card-clean">
-            <div class="flex justify-between items-center mb-4"><span class="text-sm font-black">정밀 실측 (BOSCH)</span><button onclick="connectBosch()" id="bt-btn" class="bg-gray-100 text-gray-500 px-3 py-1.5 rounded-lg text-[10px] font-bold"><i class="fab fa-bluetooth-b"></i> 연결</button></div>
+            <div class="flex justify-between items-center mb-4"><span class="text-sm font-black">정밀 실측</span><button onclick="connectBosch()" id="bt-btn" class="bg-gray-100 text-gray-500 px-3 py-1.5 rounded-lg text-[10px] font-bold"><i class="fab fa-bluetooth-b"></i> 연결</button></div>
             <div class="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-100">
                 <div class="grid grid-cols-3 gap-2 mb-2"><input type="text" id="zone-name" class="input-field text-xs text-center py-1" placeholder="구역명"><input type="number" id="deduct-w" class="input-field text-xs text-center py-1" placeholder="공제W"><input type="number" id="deduct-h" class="input-field text-xs text-center py-1" placeholder="공제H"></div>
                 <div class="flex items-center gap-2"><input type="number" id="zone-w" class="input-field text-center text-xl h-14 input-mm-fit" placeholder="가로W"><span class="font-bold">×</span><input type="number" id="zone-h" class="input-field text-center text-xl h-14 input-mm-fit" placeholder="높이H"><button onclick="addZone()" class="w-14 h-14 bg-blue-600 text-white rounded-xl shadow-lg active:scale-95 transition-all"><i class="fas fa-plus"></i></button></div>
             </div>
             <div id="zone-list" class="space-y-2 mb-4"></div>
             <div class="grid grid-cols-2 gap-2">
-                <div class="bg-blue-50 rounded-xl p-3 text-center text-blue-600 font-black">총 면적: <span id="total-m2-disp">0.00</span>㎡</div>
-                <div class="bg-gray-800 rounded-xl p-3 text-center text-white font-black">발주분(10%): <span id="total-box-disp">0</span>BOX</div>
+                <div class="bg-blue-50 rounded-xl p-3 text-center"><span class="text-[10px] text-blue-400 font-bold block">총 실면적</span><div class="font-black text-blue-600 text-xl"><span id="total-m2-disp">0.00</span>㎡</div></div>
+                <div class="bg-gray-800 rounded-xl p-3 text-center text-white"><span class="text-[10px] text-gray-400 font-bold block">발주분(10% 로스)</span><div class="font-black text-white text-xl"><span id="total-box-disp">0</span>BOX</div></div>
             </div>
             <input type="hidden" id="total-m2" value="0.00"><input type="hidden" id="total-box" value="0">
         </div>
@@ -153,22 +147,22 @@
         <div id="wall-options" class="card-clean hidden">
             <span class="text-sm font-black block mb-4 border-b pb-2 text-blue-600">벽장재 전용 부자재</span>
             <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="bg-gray-50 p-3 rounded-xl"><label class="input-label text-center">전용본드(1만)</label><input type="number" id="wall-bond-qty" class="input-field text-center" oninput="calc();"></div>
-                <div class="bg-gray-50 p-3 rounded-xl"><label class="input-label text-center">시공목(5천)</label><input type="number" id="wall-wood-qty" class="input-field text-center" oninput="calc();"></div>
+                <div class="bg-gray-50 p-3 rounded-xl"><label class="input-label text-center">전용본드 (개당 1만)</label><input type="number" id="wall-bond-qty" class="input-field text-center" oninput="calc();"></div>
+                <div class="bg-gray-50 p-3 rounded-xl"><label class="input-label text-center">시공목 (개당 5천)</label><input type="number" id="wall-wood-qty" class="input-field text-center" oninput="calc();"></div>
             </div>
             <div class="bg-gray-50 p-4 rounded-xl mb-4 border border-gray-100">
-                <span class="text-xs font-black block mb-3 text-gray-600">마감 몰딩 (개수)</span>
+                <span class="text-xs font-black block mb-3 text-gray-600 uppercase">마감 몰딩 선택 (개수)</span>
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between"><label class="text-xs font-bold">일반 (5,000)</label><input type="number" id="mold-gen-qty" class="w-20 p-1 text-center bg-white border rounded" oninput="calc()"></div>
-                    <div class="flex items-center justify-between"><label class="text-xs font-bold">프리미엄 (15,000)</label><input type="number" id="mold-pre-qty" class="w-20 p-1 text-center bg-white border rounded" oninput="calc()"></div>
-                    <div class="flex items-center justify-between"><label class="text-xs font-bold">표준 (10,000)</label><input type="number" id="mold-std-qty" class="w-20 p-1 text-center bg-white border rounded" oninput="calc()"></div>
+                    <div class="flex items-center justify-between"><label class="text-xs font-bold">일반 (5,000)</label><input type="number" id="mold-gen-qty" class="w-20 p-1 text-center bg-white border rounded font-black" oninput="calc()"></div>
+                    <div class="flex items-center justify-between"><label class="text-xs font-bold">프리미엄 (15,000)</label><input type="number" id="mold-pre-qty" class="w-20 p-1 text-center bg-white border rounded font-black" oninput="calc()"></div>
+                    <div class="flex items-center justify-between"><label class="text-xs font-bold">표준 (10,000)</label><input type="number" id="mold-std-qty" class="w-20 p-1 text-center bg-white border rounded font-black" oninput="calc()"></div>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <input type="text" id="wall-rem" class="input-field text-xs text-right" placeholder="벽재제거(원)" oninput="formatNum(this); calc()">
-                <input type="text" id="wall-waste" class="input-field text-xs text-right" placeholder="폐기물(원)" oninput="formatNum(this); calc()">
-                <input type="text" id="wall-lifting" class="input-field text-xs text-right" placeholder="운반/양중(원)" oninput="formatNum(this); calc()">
-                <input type="text" id="wall-etc" class="input-field text-xs text-right" placeholder="보양/기타(원)" oninput="formatNum(this); calc()">
+                <div><label class="input-label text-[10px]">기존벽재제거</label><input type="text" id="wall-rem" class="input-field text-xs text-right" placeholder="0" oninput="formatNum(this); calc();"></div>
+                <div><label class="input-label text-[10px]">폐기물처리비</label><input type="text" id="wall-waste" class="input-field text-xs text-right" placeholder="0" oninput="formatNum(this); calc();"></div>
+                <div><label class="input-label text-[10px]">운반/양중</label><input type="text" id="wall-lifting" class="input-field text-xs text-right" placeholder="0" oninput="formatNum(this); calc();"></div>
+                <div><label class="input-label text-[10px]">보양/기타</label><input type="text" id="wall-etc" class="input-field text-xs text-right" placeholder="0" oninput="formatNum(this); calc();"></div>
             </div>
         </div>
 
@@ -185,16 +179,18 @@
         <div id="capture-area" class="report-dark shadow-2xl">
             <div class="relative z-10">
                 <div class="flex justify-between items-start mb-8">
-                    <div><h2 id="rep-name" class="text-2xl font-black">고객님</h2><p id="rep-firm" class="text-sm text-blue-300 font-bold mt-1"></p><p id="rep-addr" class="text-xs text-gray-500 mt-1">-</p><p id="rep-dates" class="text-[10px] text-gray-400 mt-2 font-mono"></p></div>
+                    <div><h2 id="rep-name" class="text-2xl font-black">고객님</h2><p id="rep-firm" class="text-sm text-blue-300 font-bold mt-1"></p><p id="rep-addr" class="text-xs text-gray-500 mt-1">-</p><p id="rep-dates" class="text-[10px] text-gray-400 mt-2"></p></div>
                     <div class="text-right text-xl font-black">청인마루</div>
                 </div>
-                <div class="mb-8"><p class="report-label">PRODUCT</p><h2 id="rep-prod" class="text-2xl font-black mb-1">제품 미선택</h2><p class="text-right text-4xl font-black text-blue-400 mt-2"><span id="rep-boxes">0</span> BOX</p></div>
+                <div class="mb-8"><p class="report-label">PRODUCT</p><h2 id="rep-prod" class="text-2xl font-black mb-1">제품 미선택</h2><p class="text-right text-4xl font-black text-blue-400 mt-2"><span id="rep-boxes">0</span> BOX</p><p class="text-right text-xs text-gray-500 mt-1">Total Area: <span id="rep-m2-text">0.00</span> ㎡</p></div>
                 <div class="bg-gray-800/50 rounded-2xl p-5 border border-gray-700/50 mb-8">
                     <div id="report-detail-list" class="space-y-2 mb-4"></div>
                     <div style="border-top:1px solid rgba(255,255,255,0.1); margin:15px 0;"></div>
-                    <div class="flex justify-between items-center mt-4 text-blue-400 font-black"><span class="text-sm">SUPPLY TOTAL</span><span id="val-supply" class="text-xl">0 원</span></div>
+                    <div class="flex justify-between mb-2 text-white"><span class="text-xs text-gray-400">자재비 합계</span><span id="val-base">0 원</span></div>
+                    <div class="flex justify-between mb-2 text-white"><span class="text-xs text-gray-400">부자재/시공 합계</span><span id="val-opt">0 원</span></div>
+                    <div class="flex justify-between items-center mt-4 text-blue-400 font-black"><span class="text-sm uppercase font-bold">Supply Amount</span><span id="val-supply" class="text-xl">0 원</span></div>
                 </div>
-                <div class="bg-blue-600 rounded-3xl p-6 text-center shadow-lg mb-6"><h2 class="text-4xl font-black text-white"><span id="val-total">0</span> 원</h2><p class="text-[10px] font-black opacity-70 mt-1 uppercase font-black">VAT Included</p></div>
+                <div class="bg-blue-600 rounded-3xl p-6 text-center shadow-lg mb-6"><h2 class="text-4xl font-black text-white"><span id="val-total">0</span> 원</h2><p class="text-[10px] font-black opacity-70 mt-1 uppercase">VAT Included</p></div>
                 <div class="grid grid-cols-2 gap-3" data-html2canvas-ignore="true">
                     <button onclick="shareKakao()" class="btn-main bg-[#FEE500] text-[#3c1e1e] font-black">공유</button>
                     <button onclick="saveRecord()" class="btn-main bg-slate-700 text-white font-black">저장</button>
@@ -214,86 +210,77 @@
 
         window.onload = () => { if(localStorage.getItem('cm_auth') === 'ok') document.getElementById('login-gate').style.display='none'; loadData(); loadAutoSave(); };
 
-        // [v65.0] 강화된 추출 로직 (이름, 번호, 주소, 상호 찰떡 매칭)
-        function runSuperParse() {
-            const txt = document.getElementById('raw-text').value;
-            if(!txt) return showToast("분석할 내용을 입력해주세요.");
-            
-            // 이름: 성함/대표자/담당자 키워드 혹은 대표/실장 등 직함 앞뒤 추출
-            const nameMatch = txt.match(/(?:성함|이름|대표자|성명|담당자)[:\s]*([가-힣]{2,4})/) || 
-                            txt.match(/([가-힣]{2,4})(?=\s*(?:대표|실장|팀장|과장|이사|본부장|님|고객))/) ||
-                            txt.match(/(?:대표|실장|팀장|과장|이사|본부장)[:\s]*([가-힣]{2,4})/);
-            
-            // 번호: 010 패턴, 구분자(점, 하이픈, 공백) 모두 대응
-            const phoneMatch = txt.match(/01[016789][\s\.\-]?\d{3,4}[\s\.\-]?\d{4}/);
-            
-            // 주소: 시/도/구/군/동/로/길 패턴 정밀화
-            const addrMatch = txt.match(/([가-힣]+(?:시|도|구|군|동|읍|면|로|길)\s[\w가-힣\d\s\-\(\),]{5,})/);
-            
-            // 상호: 상호/업체명 키워드 또는 인테리어/디자인 등 업종명 추출
-            const firmMatch = txt.match(/(?:상호|업체명|상호명)[:\s]*([가-힣\w\s\(\)]+)/) || 
-                            txt.match(/([가-힣\w\s]+(?:디자인|인테리어|건축|하우징|아트|컴퍼니|종합건설|건설|공사))/);
-
-            if(nameMatch) document.getElementById('cust-name').value = (nameMatch[1] || nameMatch[0]).trim();
-            if(phoneMatch) {
-                let p = phoneMatch[0].replace(/[^0-9]/g, '');
-                document.getElementById('cust-phone').value = p.replace(/^(\d{3})(\d{3,4})(\d{4})$/, `$1-$2-$3`);
-            }
-            if(addrMatch) document.getElementById('cust-addr').value = addrMatch[0].trim();
-            if(firmMatch) document.getElementById('firm-name').value = (firmMatch[1] || firmMatch[0]).trim();
-
-            updateInfo(); autoSave(); showToast("추출 및 입력 완료!");
-        }
-
-        function handleImage(f) {
-            if(!f) return;
-            document.getElementById('ocr-loading').style.display='flex';
-            Tesseract.recognize(f, 'kor+eng').then(({data:{text}})=>{
-                document.getElementById('raw-text').value=text;
-                document.getElementById('ocr-loading').style.display='none';
-                runSuperParse();
-            }).catch(e => { document.getElementById('ocr-loading').style.display='none'; showToast("인식 실패"); });
-        }
-
-        // 정밀 계산 및 로스율 10% 복구 고정
+        // [v66.0] 계산 로직 복구 및 상세 내역 출력 강화
         function calc() {
             let m2 = zoneList.reduce((a,b)=>a+b.area, 0);
             const inReal = parseFloat(document.getElementById('input-real-py').value) || 0;
             if(m2 === 0 && mode === 'floor') { if(inReal > 0) m2 = inReal * 3.3058; else m2 = (parseFloat(document.getElementById('input-supply-py').value)||0) * 3.3058 * (isExp?0.8:0.75); }
+            
             document.getElementById('total-m2').value = m2.toFixed(2);
             document.getElementById('total-m2-disp').innerText = m2.toFixed(2);
-            const bA = parseFloat(document.getElementById('input-box-area').value) || 3.2;
-            const boxes = Math.ceil((m2 / bA) * 1.1); // [고정] 로스율 10% 적용
+            document.getElementById('rep-m2-text').innerText = m2.toFixed(2);
+            
+            const rPy = Math.ceil(m2 / 3.3058);
+            const bArea = parseFloat(document.getElementById('input-box-area').value) || 3.2;
+            
+            // [복구] 로스율 10% 적용
+            const boxes = Math.ceil((m2 / bArea) * 1.1);
             document.getElementById('total-box').value = boxes;
             document.getElementById('total-box-disp').innerText = boxes;
             document.getElementById('rep-boxes').innerText = boxes;
-            document.getElementById('rep-m2-text').innerText = m2.toFixed(2);
-            const bP = parseInt(document.getElementById('box-price').value.replace(/,/g,'')) || 0;
-            const bC = boxes * bP;
-            let oT = 0, dH = '';
+
+            const boxPrice = parseInt(document.getElementById('box-price').value.replace(/,/g,'')) || 0;
+            const baseCost = boxes * boxPrice;
+
+            let optTotal = 0, detH = '';
+
             if (mode === 'wall') {
                 const bQ = parseInt(document.getElementById('wall-bond-qty').value)||0, wQ = parseInt(document.getElementById('wall-wood-qty').value)||0;
                 const mG = parseInt(document.getElementById('mold-gen-qty').value)||0, mP = parseInt(document.getElementById('mold-pre-qty').value)||0, mS = parseInt(document.getElementById('mold-std-qty').value)||0;
                 const rC = parseInt(document.getElementById('wall-rem').value.replace(/,/g,''))||0, wsC = parseInt(document.getElementById('wall-waste').value.replace(/,/g,''))||0, lC = parseInt(document.getElementById('wall-lifting').value.replace(/,/g,''))||0, eC = parseInt(document.getElementById('wall-etc').value.replace(/,/g,''))||0;
-                oT = (bQ*10000)+(wQ*5000)+(mG*5000)+(mP*15000)+(mS*10000)+rC+wsC+lC+eC;
-                if(bQ>0) dH += `<div class="option-row"><span>본드 (1만 × ${bQ})</span><b>${(bQ*10000).toLocaleString()}원</b></div>`;
-                if(wQ>0) dH += `<div class="option-row"><span>시공목 (5천 × ${wQ})</span><b>${(wQ*5000).toLocaleString()}원</b></div>`;
-                if(mG>0) dH += `<div class="option-row"><span>몰딩일반 (5천 × ${mG})</span><b>${(mG*5000).toLocaleString()}원</b></div>`;
-                if(mP>0) dH += `<div class="option-row"><span>몰딩프리미엄 (1.5만 × ${mP})</span><b>${(mP*15000).toLocaleString()}원</b></div>`;
-                if(mS>0) dH += `<div class="option-row"><span>몰딩표준 (1만 × ${mS})</span><b>${(mS*10000).toLocaleString()}원</b></div>`;
-                if(rC>0) dH += `<div class="option-row"><span>벽재제거</span><b>${rC.toLocaleString()}원</b></div>`;
+                
+                optTotal = (bQ*10000)+(wQ*5000)+(mG*5000)+(mP*15000)+(mS*10000)+rC+wsC+lC+eC;
+                if(bQ>0) detH += `<div class="option-row"><span>전용본드 (1만 × ${bQ})</span><b>${(bQ*10000).toLocaleString()}원</b></div>`;
+                if(wQ>0) detH += `<div class="option-row"><span>시공목 (5천 × ${wQ})</span><b>${(wQ*5000).toLocaleString()}원</b></div>`;
+                if(mG>0) detH += `<div class="option-row"><span>몰딩 일반 (5천 × ${mG})</span><b>${(mG*5000).toLocaleString()}원</b></div>`;
+                if(mP>0) detH += `<div class="option-row"><span>몰딩 프리미엄 (1.5만 × ${mP})</span><b>${(mP*15000).toLocaleString()}원</b></div>`;
+                if(mS>0) detH += `<div class="option-row"><span>몰딩 표준 (1만 × ${mS})</span><b>${(mS*10000).toLocaleString()}원</b></div>`;
+                if(rC>0) detH += `<div class="option-row"><span>기존벽재제거</span><b>${rC.toLocaleString()}원</b></div>`;
+                if(wsC>0) detH += `<div class="option-row"><span>폐기물처리비</span><b>${wsC.toLocaleString()}원</b></div>`;
+                if(lC>0) detH += `<div class="option-row"><span>운반/양중비</span><b>${lC.toLocaleString()}원</b></div>`;
+                if(eC>0) detH += `<div class="option-row"><span>보양/기타비</span><b>${eC.toLocaleString()}원</b></div>`;
             } else {
                 const rU = parseInt(document.getElementById('opt-removal').value.replace(/,/g,''))||0, mU = parseInt(document.getElementById('opt-molding').value.replace(/,/g,''))||0;
-                const rPy = Math.ceil(m2 / 3.3058), sPy = parseFloat(document.getElementById('input-supply-py').value) || rPy;
                 const lC = parseInt(document.getElementById('opt-lifting').value.replace(/,/g,''))||0, eC = parseInt(document.getElementById('opt-etc').value.replace(/,/g,''))||0;
-                oT = (rU*rPy)+(mU*sPy)+lC+eC;
-                if(rU>0) dH += `<div class="option-row"><span>철거 (${rU.toLocaleString()} × ${rPy}평)</span><b>${(rU*rPy).toLocaleString()}원</b></div>`;
-                if(mU>0) dH += `<div class="option-row"><span>걸레받이 (${mU.toLocaleString()} × ${sPy}평)</span><b>${(mU*sPy).toLocaleString()}원</b></div>`;
+                const sPy = parseFloat(document.getElementById('input-supply-py').value) || rPy;
+                optTotal = (rU*rPy)+(mU*sPy)+lC+eC;
+                if(rU>0) detH += `<div class="option-row"><span>철거 (${rU.toLocaleString()} × ${rPy}평)</span><b>${(rU*rPy).toLocaleString()}원</b></div>`;
+                if(mU>0) detH += `<div class="option-row"><span>걸레받이 (${mU.toLocaleString()} × ${sPy}평)</span><b>${(mU*sPy).toLocaleString()}원</b></div>`;
+                if(lC>0) detH += `<div class="option-row"><span>운반비(합계)</span><b>${lC.toLocaleString()}원</b></div>`;
+                if(eC>0) detH += `<div class="option-row"><span>보양/기타(합계)</span><b>${eC.toLocaleString()}원</b></div>`;
             }
-            document.getElementById('report-detail-list').innerHTML = dH;
-            const supply = bC + oT;
+
+            document.getElementById('report-detail-list').innerHTML = detH;
+            document.getElementById('val-base').innerText = baseCost.toLocaleString() + " 원";
+            document.getElementById('val-opt').innerText = optTotal.toLocaleString() + " 원";
+            const supply = baseCost + optTotal;
             document.getElementById('val-supply').innerText = supply.toLocaleString() + " 원";
             document.getElementById('val-total').innerText = Math.round(supply * 1.1).toLocaleString();
+        }
+
+        // [v65.0] 강화된 추출 로직 고정
+        function runSuperParse() {
+            const txt = document.getElementById('raw-text').value;
+            if(!txt) return showToast("분석할 내용을 입력해주세요.");
+            const nameMatch = txt.match(/(?:성함|이름|대표자|성명|담당자)[:\s]*([가-힣]{2,4})/) || txt.match(/([가-힣]{2,4})(?=\s*(?:대표|실장|팀장|과장|이사|본부장|님|고객))/) || txt.match(/(?:대표|실장|팀장|과장|이사|본부장)[:\s]*([가-힣]{2,4})/);
+            const phoneMatch = txt.match(/01[016789][\s\.\-]?\d{3,4}[\s\.\-]?\d{4}/);
+            const addrMatch = txt.match(/([가-힣]+(?:시|도|구|군|동|읍|면|로|길)\s[\w가-힣\d\s\-\(\),]{5,})/);
+            const firmMatch = txt.match(/(?:상호|업체명|상호명)[:\s]*([가-힣\w\s\(\)]+)/) || txt.match(/([가-힣\w\s]+(?:디자인|인테리어|건축|하우징|아트|컴퍼니|종합건설|건설|공사))/);
+            if(nameMatch) document.getElementById('cust-name').value = (nameMatch[1] || nameMatch[0]).trim();
+            if(phoneMatch) { let p = phoneMatch[0].replace(/[^0-9]/g, ''); document.getElementById('cust-phone').value = p.replace(/^(\d{3})(\d{3,4})(\d{4})$/, `$1-$2-$3`); }
+            if(addrMatch) document.getElementById('cust-addr').value = addrMatch[0].trim();
+            if(firmMatch) document.getElementById('firm-name').value = (firmMatch[1] || firmMatch[0]).trim();
+            updateInfo(); autoSave(); showToast("추출 및 입력 완료!");
         }
 
         // 관리 센터 기능 고정
@@ -331,35 +318,35 @@
             }).join('');
         }
 
-        // ... 나머지 유틸리티 동일 ...
+        // 유틸리티 함수 동일 유지
         async function loadData() { const url = (mode==='wall' ? WALL_URL : FLOOR_URL); try { const res = await fetch(url); const data = await res.json(); const temp = {}; data.forEach(item => { if(item.brand) { if(!temp[item.brand]) temp[item.brand] = {brand:item.brand, products:[]}; temp[item.brand].products.push({name:item.name, spec:item.spec||'', boxArea:parseFloat(item.box_area)||3.2, price:item.price||0, firmPrice:item.firm_price||item.price}); } }); masterData = Object.values(temp); updateBrandSelect(); } catch(e) {} }
         function setModeType(t) { userType = t; const cBtn = document.getElementById('mode-consumer'), fBtn = document.getElementById('mode-firm'); if (t === 'consumer') { cBtn.className = 'mode-btn active-consumer'; fBtn.className = 'mode-btn'; } else { cBtn.className = 'mode-btn'; fBtn.className = 'mode-btn active-firm'; } document.getElementById('firm-row').style.display = t==='firm' ? 'block' : 'none'; handleProductSelect(); updateInfo(); }
-        function updatePaidAmount(id, v) { let rs = JSON.parse(localStorage.getItem('cm_records')||'[]'); let r = rs.find(x=>x.id===id); if(r) { r.paidAmount = parseInt(v)||0; localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager(); } }
-        function saveRecord() { const data = { id: Date.now(), userType: userType, name: document.getElementById('cust-name').value||'미지정', firm: userType==='firm'?document.getElementById('firm-name').value:'일반', total: document.getElementById('val-total').innerText, product: document.getElementById('rep-prod').innerText, m2: document.getElementById('total-m2').value, boxes: document.getElementById('total-box').value, addr: document.getElementById('cust-addr').value, sDate: document.getElementById('cust-survey-date').value, wDate: document.getElementById('cust-work-date').value, details: document.getElementById('report-detail-list').innerHTML, date: new Date().toLocaleDateString(), paidAmount: 0, isPaid: false }; let rs = JSON.parse(localStorage.getItem('cm_records')||'[]'); rs.unshift(data); localStorage.setItem('cm_records', JSON.stringify(rs)); showToast("저장 완료"); }
         function updateBrandSelect() { const sel = document.getElementById('brand-select'); sel.innerHTML = '<option value="">브랜드 선택</option>'; masterData.forEach(m => sel.add(new Option(m.brand, m.brand))); sel.add(new Option("직접 입력", "direct")); }
         function updateProducts() { const bName = document.getElementById('brand-select').value, pSel = document.getElementById('product-select'); pSel.innerHTML = '<option value="">제품 선택</option>'; const bObj = masterData.find(x => x.brand === bName); if(bObj) bObj.products.forEach((p,i) => pSel.add(new Option(p.name, i))); calc(); }
         function handleProductSelect() { const bName = document.getElementById('brand-select').value, pIdx = document.getElementById('product-select').value; if(pIdx!=="") { const p = masterData.find(x=>x.brand===bName).products[pIdx]; document.getElementById('prod-spec').value = p.spec; document.getElementById('input-box-area').value = p.boxArea; document.getElementById('box-price').value = (userType==='firm'?p.firmPrice:p.price).toLocaleString(); } calc(); }
-        function checkAppLogin() { if(document.getElementById('app-password').value === '1306') document.getElementById('login-gate').style.display='none'; }
-        function addZone() { const w = parseFloat(document.getElementById('zone-w').value)||0, h = parseFloat(document.getElementById('zone-h').value)||0; if(!w||!h) return; const area = (w*h)/1000000 - ((parseFloat(document.getElementById('deduct-w').value)||0)*(parseFloat(document.getElementById('deduct-h').value)||0))/1000000; zoneList.push({name:document.getElementById('zone-name').value||'구역', w, h, area}); renderZones(); document.getElementById('zone-w').value=''; if(mode!=='wall') document.getElementById('zone-h').value=''; autoSave(); }
-        function renderZones() { document.getElementById('zone-list').innerHTML = zoneList.map((z,i) => `<div class="bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm"><div class="text-xs font-bold">${z.name} (${z.w}×${z.h})</div><div class="flex items-center gap-2"><span class="text-blue-600 font-bold">${z.area.toFixed(2)}㎡</span><button onclick="zoneList.splice(${i},1); renderZones();" class="text-gray-300">×</button></div></div>`).join(''); calc(); }
         function formatNum(el) { el.value = el.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
         function formatPhone(el) { el.value = el.value.replace(/[^0-9]/g, "").replace(/(^02|^0505|^1[0-9]{3}|^0[0-9]{2})([0-9]+)?([0-9]{4})$/,"$1-$2-$3"); updateInfo(); }
         function showToast(m) { TOAST.innerText=m; TOAST.style.display='block'; setTimeout(()=>TOAST.style.display='none', 2000); }
-        function openManager() { document.getElementById('manage-modal').style.display='flex'; setManageTab('all'); }
+        function openManager() { document.getElementById('manage-modal').style.display='flex'; renderManager(); }
         function closeModal(e) { if(e.target.id === 'manage-modal') document.getElementById('manage-modal').style.display='none'; }
+        function setManageTab(v) { manageTab = v; ['all', 'consumer', 'firm', 'unpaid'].forEach(id => { const el = document.getElementById('m-nav-' + id); if (el) el.className = (id === v) ? 'tab-btn active' : 'tab-btn inactive'; }); renderManager(); }
+        function saveRecord() { const data = { id: Date.now(), userType: userType, name: document.getElementById('cust-name').value||'미지정', firm: userType==='firm'?document.getElementById('firm-name').value:'일반', total: document.getElementById('val-total').innerText, product: document.getElementById('rep-prod').innerText, m2: document.getElementById('total-m2').value, boxes: document.getElementById('total-box').value, addr: document.getElementById('cust-addr').value, sDate: document.getElementById('cust-survey-date').value, wDate: document.getElementById('cust-work-date').value, details: document.getElementById('report-detail-list').innerHTML, date: new Date().toLocaleDateString(), paidAmount: 0, isPaid: false }; let rs = JSON.parse(localStorage.getItem('cm_records')||'[]'); rs.unshift(data); localStorage.setItem('cm_records', JSON.stringify(rs)); showToast("저장 완료"); }
+        function updateInfo() { document.getElementById('rep-name').innerText = document.getElementById('cust-name').value||'고객님'; document.getElementById('rep-firm').innerText = userType==='firm'?('Partner: '+document.getElementById('firm-name').value):''; document.getElementById('rep-addr').innerText = document.getElementById('cust-addr').value||'-'; const sD = document.getElementById('cust-survey-date').value, wD = document.getElementById('cust-work-date').value; document.getElementById('rep-dates').innerText = (sD?`실측:${sD} `:'')+(wD?`시공:${wD}`:''); }
+        function addZone() { const w = parseFloat(document.getElementById('zone-w').value)||0, h = parseFloat(document.getElementById('zone-h').value)||0; if(!w||!h) return; const area = (w*h)/1000000 - ((parseFloat(document.getElementById('deduct-w').value)||0)*(parseFloat(document.getElementById('deduct-h').value)||0))/1000000; zoneList.push({name:document.getElementById('zone-name').value||'구역', w, h, area}); renderZones(); document.getElementById('zone-w').value=''; if(mode!=='wall') document.getElementById('zone-h').value=''; autoSave(); }
+        function renderZones() { document.getElementById('zone-list').innerHTML = zoneList.map((z,i) => `<div class="bg-white p-3 rounded-xl border flex justify-between items-center"><div class="text-xs font-bold">${z.name} (${z.w}×${z.h})</div><div class="flex items-center gap-2"><span class="text-blue-600 font-bold">${z.area.toFixed(2)}㎡</span><button onclick="zoneList.splice(${i},1); renderZones();" class="text-gray-300">×</button></div></div>`).join(''); calc(); }
+        function checkAppLogin() { if(document.getElementById('app-password').value === '1306') { localStorage.setItem('cm_auth', 'ok'); document.getElementById('login-gate').style.display='none'; } }
+        function handleImage(f) { if(!f) return; document.getElementById('ocr-loading').style.display='flex'; Tesseract.recognize(f, 'kor+eng').then(({data:{text}})=>{document.getElementById('raw-text').value=text; document.getElementById('ocr-loading').style.display='none'; runSuperParse();}); }
+        function saveImg() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(c => { let a = document.createElement('a'); a.href = c.toDataURL(); a.download = "청인마루_견적.png"; a.click(); }); }
+        function shareKakao() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(c => { c.toBlob(b => navigator.share({files:[new File([b], "견적서.png", {type:"image/png"})]})); }); }
         function deleteSelected() { const checks = document.querySelectorAll('.manage-check:checked'); if(checks.length === 0) return; if(!confirm("삭제?")) return; let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); const ids = Array.from(checks).map(c => parseInt(c.dataset.id)); rs = rs.filter(r => !ids.includes(r.id)); localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager(); }
-        function exportToExcel() { const rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); let csv = "\uFEFF이름,업체,총액,날짜\n"; rs.forEach(r => { csv += `"${r.name}","${r.firm}","${r.total}","${r.date}"\n`; }); const b = new Blob([csv], {type:'text/csv;charset=utf-8;'}); const l = document.createElement("a"); l.href = URL.createObjectURL(b); l.download="청인마루_통합데이터.csv"; l.click(); }
+        function exportToExcel() { const rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); let csv = "\uFEFF이름,업체,총액,날짜\n"; rs.forEach(r => { csv += `"${r.name}","${r.firm}","${r.total}","${r.date}"\n`; }); const b = new Blob([csv], {type:'text/csv;charset=utf-8;'}); const l = document.createElement("a"); l.href = URL.createObjectURL(b); l.download="청인마루_상세데이터.csv"; l.click(); }
+        function togglePay(id) { let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); let r = rs.find(x => x.id === id); if(r) r.isPaid = !r.isPaid; localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager(); }
+        function updatePaidAmount(id, v) { let rs = JSON.parse(localStorage.getItem('cm_records')||'[]'); let r = rs.find(x=>x.id===id); if(r) { r.paidAmount = parseInt(v)||0; localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager(); } }
         function syncPy() { const py = parseFloat(document.getElementById('input-supply-py').value)||0; document.getElementById('input-supply-m2').value = (py*3.3058).toFixed(1); document.getElementById('input-real-py').value = Math.ceil(py*(isExp?0.8:0.75)); calc(); }
         function syncM2() { const m2 = parseFloat(document.getElementById('input-supply-m2').value)||0; document.getElementById('input-supply-py').value = (m2/3.3058).toFixed(1); syncPy(); }
         function setExp(v) { isExp = v; document.getElementById('exp-on').className = v?"px-3 py-1 bg-white rounded-md text-[11px] font-bold text-blue-600 shadow-sm":"px-3 py-1 text-[11px] font-bold text-gray-400"; document.getElementById('exp-off').className = !v?"px-3 py-1 bg-white rounded-md text-[11px] font-bold text-blue-600 shadow-sm":"px-3 py-1 text-[11px] font-bold text-gray-400"; syncPy(); }
-        function updateInfo() { document.getElementById('rep-name').innerText = document.getElementById('cust-name').value||'고객님'; document.getElementById('rep-firm').innerText = userType==='firm'?('Partner: '+document.getElementById('firm-name').value):''; document.getElementById('rep-addr').innerText = document.getElementById('cust-addr').value||'-'; const sD = document.getElementById('cust-survey-date').value, wD = document.getElementById('cust-work-date').value; document.getElementById('rep-dates').innerText = (sD?`실측:${sD} `:'')+(wD?`시공:${wD}`:''); }
-        function togglePay(id) { let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); let r = rs.find(x => x.id === id); if(r) r.isPaid = !r.isPaid; localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager(); }
         function autoSave() { const d = { timestamp: new Date().getTime(), cN: document.getElementById('cust-name').value, cP: document.getElementById('cust-phone').value, zones: zoneList }; localStorage.setItem('cm_autosave', JSON.stringify(d)); }
         function loadAutoSave() { const s = JSON.parse(localStorage.getItem('cm_autosave')); if (s && new Date().getTime() - s.timestamp < 300000) { if(s.zones) { zoneList = s.zones; renderZones(); } } }
-        function saveImg() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(c => { let a = document.createElement('a'); a.href = c.toDataURL(); a.download = "청인마루_견적.png"; a.click(); }); }
-        function shareKakao() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(c => { c.toBlob(b => navigator.share({files:[new File([b], "견적서.png", {type:"image/png"})]})); }); }
-        function setManageTab(v) { manageTab = v; ['all', 'consumer', 'firm', 'unpaid'].forEach(id => { const el = document.getElementById('m-nav-' + id); if (el) el.className = (id === v) ? 'tab-btn active' : 'tab-btn inactive'; }); renderManager(); }
-        function setupDropZone() { const dz = document.getElementById('drop-zone'); dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); }); dz.addEventListener('dragleave', e => { e.preventDefault(); dz.classList.remove('dragover'); }); dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleImage(e.dataTransfer.files[0]); }); }
         async function connectBosch() { try { const d = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Bosch' }], optionalServices: ['0000170d-0000-1000-8000-00805f9b34fb', '232e51d8-9020-4b3f-95fa-4460f9919f1b'] }); const s = await d.gatt.connect(); document.getElementById('bt-btn').innerText = "ON"; const svs = await s.getPrimaryServices(); for(const sv of svs) { const chs = await sv.getCharacteristics(); for(const ch of chs) { if(ch.properties.notify) { await ch.startNotifications(); ch.addEventListener('characteristicvaluechanged', e => { const v = e.target.value.getFloat32(1, true); if(v>0) { document.getElementById('zone-w').value = Math.round(v*1000); autoSave(); } }); } } } } catch(e) {} }
     </script>
 </body>
