@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>청인마루 Master v36.0</title>
+    <title>청인마루 Master v37.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -15,7 +15,6 @@
     <style>
         body { font-family: 'Pretendard', sans-serif; background-color: #F4F6F8; color: #333; -webkit-tap-highlight-color: transparent; }
         
-        /* v35.0 오리지널 디자인 유지 */
         .card-clean { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #EEF2F6; margin-bottom: 20px; }
         .input-field { width: 100%; padding: 14px; background: #F8F9FA; border-radius: 12px; border: 1px solid #E9ECEF; font-weight: 700; font-size: 15px; color: #212529; outline: none; transition: 0.2s; }
         .input-field:focus { border-color: #4C6EF5; background: #FFF; box-shadow: 0 0 0 3px rgba(76, 110, 245, 0.1); }
@@ -53,7 +52,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-3xl font-black text-white mb-2 tracking-tighter">CHUNG-IN</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v36.0</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold tracking-[0.3em]">MASTER v37.0</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4 border border-gray-700 focus:border-blue-500" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-colors">Access System</button>
         </div>
@@ -75,7 +74,6 @@
                 <input type="text" id="manage-search" class="input-field text-sm" placeholder="이름, 업체명 검색..." oninput="renderManager()">
             </div>
             <div id="manage-list" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"></div>
-            
             <div id="sample-form" class="p-4 bg-white border-t hidden">
                 <div class="flex gap-2">
                     <input type="text" id="new-sample-firm" class="input-field text-xs h-10" placeholder="업체명">
@@ -128,7 +126,6 @@
                 <label class="input-label text-blue-500">인테리어 업체명</label><input type="text" id="firm-name" class="input-field border-blue-200 bg-blue-50/30" placeholder="거래처 이름" oninput="updateInfo(); autoSave()">
             </div>
             <div class="mb-3"><label class="input-label">현장 주소</label><input type="text" id="cust-addr" class="input-field" placeholder="시공지 주소" oninput="updateInfo(); autoSave()"></div>
-            
             <div class="grid grid-cols-2 gap-3">
                 <div><label class="input-label text-blue-600">실측 날짜</label><input type="date" id="cust-survey-date" class="input-field text-center text-sm" oninput="updateInfo(); autoSave()"></div>
                 <div><label class="input-label text-green-600">시공 날짜</label><input type="date" id="cust-work-date" class="input-field text-center text-sm" oninput="updateInfo(); autoSave()"></div>
@@ -183,13 +180,13 @@
             </div>
         </div>
 
-        <div class="card-clean cursor-pointer" onclick="toggleOption()">
-            <div class="flex justify-between items-center">
+        <div class="card-clean">
+            <div class="flex justify-between items-center cursor-pointer mb-2" onclick="toggleOption()">
                 <span class="text-sm font-black text-gray-700">부자재 및 시공 옵션</span>
-                <i id="opt-arrow" class="fas fa-chevron-down text-gray-300"></i>
+                <i id="opt-arrow" class="fas fa-chevron-down text-gray-300 transition-transform"></i>
             </div>
             <div id="opt-content" class="accordion-content">
-                <div class="grid grid-cols-2 gap-3 pt-4">
+                <div class="grid grid-cols-2 gap-3 pt-2 pb-2">
                     <div><label class="input-label">철거비 (원)</label><input type="text" id="opt-removal" class="input-field text-right" placeholder="0" oninput="formatNum(this); calc(); autoSave()"></div>
                     <div><label class="input-label">걸레받이 (원)</label><input type="text" id="opt-molding" class="input-field text-right" placeholder="0" oninput="formatNum(this); calc(); autoSave()"></div>
                     <div><label class="input-label">운반비 (원)</label><input type="text" id="opt-lifting" class="input-field text-right" placeholder="0" oninput="formatNum(this); calc(); autoSave()"></div>
@@ -255,7 +252,7 @@
             if(localStorage.getItem('cm_auth') === 'ok') document.getElementById('login-gate').remove();
             document.getElementById('rep-no').innerText = 'NO. ' + new Date().getTime().toString().slice(-6);
             setupDropZone();
-            loadAutoSave(); // 자동 저장 데이터 불러오기
+            loadAutoSave();
         };
 
         function checkAppLogin() {
@@ -265,7 +262,6 @@
             } else { alert('비밀번호 오류'); }
         }
 
-        // [신규] 5분 자동 저장 및 복구 로직
         function autoSave() {
             const data = {
                 timestamp: new Date().getTime(),
@@ -276,7 +272,7 @@
                 sDate: document.getElementById('cust-survey-date').value,
                 wDate: document.getElementById('cust-work-date').value,
                 supplyPy: document.getElementById('input-supply-py').value,
-                realPy: document.getElementById('input-real-py').value, // 수정 가능
+                realPy: document.getElementById('input-real-py').value,
                 brand: document.getElementById('brand-name').value,
                 prod: document.getElementById('prod-name').value,
                 boxPrice: document.getElementById('box-price').value,
@@ -292,15 +288,7 @@
         function loadAutoSave() {
             const saved = JSON.parse(localStorage.getItem('cm_autosave'));
             if (saved) {
-                const now = new Date().getTime();
-                // 5분(300,000ms) 경과 체크
-                if (now - saved.timestamp > 300000) {
-                    localStorage.removeItem('cm_autosave');
-                    console.log('5분 경과: 데이터 초기화');
-                    return;
-                }
-                
-                // 데이터 복구
+                if (new Date().getTime() - saved.timestamp > 300000) { localStorage.removeItem('cm_autosave'); return; }
                 document.getElementById('cust-name').value = saved.custName || '';
                 document.getElementById('cust-phone').value = saved.custPhone || '';
                 document.getElementById('cust-addr').value = saved.custAddr || '';
@@ -316,18 +304,11 @@
                 document.getElementById('opt-molding').value = saved.optMolding || '';
                 document.getElementById('opt-lifting').value = saved.optLifting || '';
                 document.getElementById('opt-etc').value = saved.optEtc || '';
-                if(saved.zones && saved.zones.length > 0) {
-                    zoneList = saved.zones;
-                    renderZones();
-                }
-                
-                calc(); // 계산 로직 재실행
-                updateInfo();
-                showToast("작업 내용을 복구했습니다.");
+                if(saved.zones) { zoneList = saved.zones; renderZones(); }
+                calc(); updateInfo(); showToast("작업 복구됨");
             }
         }
 
-        // 명함 OCR 및 텍스트 파싱
         function setupDropZone() {
             const dz = document.getElementById('drop-zone');
             dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
@@ -337,35 +318,31 @@
 
         function handleImage(file) {
             if(!file) return;
-            showToast("명함을 분석 중입니다... (최대 10초)");
-            document.getElementById('ocr-status').innerText = "분석중...";
-            Tesseract.recognize(file, 'kor', { logger: m => console.log(m) })
-            .then(({ data: { text } }) => {
+            showToast("분석중..."); document.getElementById('ocr-status').innerText = "분석중...";
+            Tesseract.recognize(file, 'kor').then(({ data: { text } }) => {
                 document.getElementById('raw-text').value = text;
                 document.getElementById('ocr-status').innerText = "완료!";
                 runSuperParse();
-            })
-            .catch(err => { alert("이미지 인식 실패. 다시 시도해주세요."); document.getElementById('ocr-status').innerText = "실패"; });
+            }).catch(err => { document.getElementById('ocr-status').innerText = "실패"; });
         }
 
         function runSuperParse() {
             const txt = document.getElementById('raw-text').value;
             if(!txt) return alert("내용을 입력해주세요.");
-            const nameMatch = txt.match(/(?:성함|이름|성명)[:\s]*([가-힣\w\s]+)/) || txt.match(/([가-힣]{3})(?=\s*님)/);
-            const phoneMatch = txt.match(/010[\s-]?\d{3,4}[\s-]?\d{4}/);
-            const addrMatch = txt.match(/(([가-힣]+(시|도|구|군|동|로|길))\s[\w가-힣\d\s\-\(\),]+)/);
-            const firmMatch = txt.match(/(?:업체|회사)[:\s]*([가-힣\w\s]+)/);
+            const nMatch = txt.match(/(?:성함|이름|성명)[:\s]*([가-힣\w\s]+)/) || txt.match(/([가-힣]{3})(?=\s*님)/);
+            const pMatch = txt.match(/010[\s-]?\d{3,4}[\s-]?\d{4}/);
+            const aMatch = txt.match(/(([가-힣]+(시|도|구|군|동|로|길))\s[\w가-힣\d\s\-\(\),]+)/);
+            const fMatch = txt.match(/(?:업체|회사)[:\s]*([가-힣\w\s]+)/);
 
-            if(nameMatch) document.getElementById('cust-name').value = nameMatch[1] || nameMatch[0];
-            if(phoneMatch) document.getElementById('cust-phone').value = phoneMatch[0].replace(/[^0-9]/g, '').replace(/^(\d{3})(\d{4})(\d{4})$/, `$1-$2-$3`);
-            if(addrMatch) document.getElementById('cust-addr').value = addrMatch[0].trim();
-            if(firmMatch && userType === 'firm') document.getElementById('firm-name').value = firmMatch[1].trim();
+            if(nMatch) document.getElementById('cust-name').value = nMatch[1] || nMatch[0];
+            if(pMatch) document.getElementById('cust-phone').value = pMatch[0].replace(/[^0-9]/g, '').replace(/^(\d{3})(\d{4})(\d{4})$/, `$1-$2-$3`);
+            if(aMatch) document.getElementById('cust-addr').value = aMatch[0].trim();
+            if(fMatch && userType === 'firm') document.getElementById('firm-name').value = fMatch[1].trim();
 
             document.getElementById('raw-text').value = '';
-            updateInfo(); autoSave(); showToast("정보가 입력되었습니다!");
+            updateInfo(); autoSave(); showToast("입력 완료!");
         }
 
-        // 관리 기능
         function openManager() { document.getElementById('manage-modal').style.display='flex'; toggleManageView('all'); }
         function closeModal(e) { if(e.target.id === 'manage-modal') document.getElementById('manage-modal').style.display='none'; }
         
@@ -381,9 +358,7 @@
                 isPaid: false
             };
             let rs = JSON.parse(localStorage.getItem('cm_records') || '[]');
-            rs.unshift(data);
-            localStorage.setItem('cm_records', JSON.stringify(rs));
-            showToast("저장되었습니다.");
+            rs.unshift(data); localStorage.setItem('cm_records', JSON.stringify(rs)); showToast("저장됨");
         }
 
         function toggleManageView(v) {
@@ -403,48 +378,18 @@
             if (manageView === 'all' || manageView === 'unpaid') {
                 let filtered = rs.filter(r => r.name.includes(search) || r.firm.includes(search));
                 if (manageView === 'unpaid') filtered = filtered.filter(r => !r.isPaid);
-                html = filtered.map(r => `
-                    <div class="bg-gray-50 p-3 rounded-xl flex justify-between items-center border ${r.isPaid ? 'border-gray-200' : 'border-red-200 bg-red-50'}">
-                        <div><div class="text-[10px] text-gray-500">${r.firm}</div><div class="font-bold">${r.name}</div><div class="text-[10px] text-gray-400">${r.sDate||'-'} / ${r.wDate||'-'}</div></div>
-                        <div class="text-right"><div class="font-bold text-blue-600">${r.total}</div><button onclick="togglePay(${r.id})" class="text-[10px] px-2 py-1 rounded ${r.isPaid ? 'bg-gray-200' : 'bg-red-500 text-white'}">${r.isPaid?'완료':'미수금'}</button></div>
-                    </div>`).join('');
+                html = filtered.map(r => `<div class="bg-gray-50 p-3 rounded-xl flex justify-between items-center border ${r.isPaid ? 'border-gray-200' : 'border-red-200 bg-red-50'}"><div><div class="text-[10px] text-gray-500">${r.firm}</div><div class="font-bold">${r.name}</div><div class="text-[10px] text-gray-400">${r.sDate||'-'} / ${r.wDate||'-'}</div></div><div class="text-right"><div class="font-bold text-blue-600">${r.total}</div><button onclick="togglePay(${r.id})" class="text-[10px] px-2 py-1 rounded ${r.isPaid ? 'bg-gray-200' : 'bg-red-500 text-white'}">${r.isPaid?'완료':'미수금'}</button></div></div>`).join('');
             } else if (manageView === 'firm') {
-                const firms = {};
-                rs.forEach(r => {
-                    if (!firms[r.firm]) firms[r.firm] = { count:0, list:[] };
-                    firms[r.firm].count++;
-                    firms[r.firm].list.push(r);
-                });
-                Object.keys(firms).forEach(f => {
-                    if(f.toLowerCase().includes(search)) {
-                        html += `<div class="bg-blue-50 p-3 rounded-xl mb-2"><div class="font-black text-blue-700 mb-2">${f} (${firms[f].count}건)</div>`;
-                        firms[f].list.forEach(item => { html += `<div class="flex justify-between text-xs border-b border-blue-100 py-1"><span>${item.name}</span><span>${item.total}</span></div>`; });
-                        html += `</div>`;
-                    }
-                });
+                const firms = {}; rs.forEach(r => { if (!firms[r.firm]) firms[r.firm] = { count:0, list:[] }; firms[r.firm].count++; firms[r.firm].list.push(r); });
+                Object.keys(firms).forEach(f => { if(f.toLowerCase().includes(search)) { html += `<div class="bg-blue-50 p-3 rounded-xl mb-2"><div class="font-black text-blue-700 mb-2">${f} (${firms[f].count}건)</div>`; firms[f].list.forEach(item => { html += `<div class="flex justify-between text-xs border-b border-blue-100 py-1"><span>${item.name}</span><span>${item.total}</span></div>`; }); html += `</div>`; } });
             } else if (manageView === 'samples') {
-                html = ss.filter(s => s.firm.includes(search) || s.name.includes(search)).map(s => `
-                    <div class="bg-green-50 p-3 rounded-xl border border-green-100 flex justify-between">
-                        <div><div class="font-bold text-gray-700">${s.firm}</div><div class="text-xs text-green-600">📘 ${s.name}</div></div>
-                        <div class="text-[10px] text-gray-400">${s.date}</div>
-                    </div>`).join('');
+                html = ss.filter(s => s.firm.includes(search) || s.name.includes(search)).map(s => `<div class="bg-green-50 p-3 rounded-xl border border-green-100 flex justify-between"><div><div class="font-bold text-gray-700">${s.firm}</div><div class="text-xs text-green-600">📘 ${s.name}</div></div><div class="text-[10px] text-gray-400">${s.date}</div></div>`).join('');
             }
             list.innerHTML = html || '<div class="text-center text-gray-400 py-4">데이터가 없습니다.</div>';
         }
 
-        function togglePay(id) {
-            let rs = JSON.parse(localStorage.getItem('cm_records') || '[]');
-            let r = rs.find(x => x.id === id); if(r) r.isPaid = !r.isPaid;
-            localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager();
-        }
-
-        function addSample() {
-            const firm = document.getElementById('new-sample-firm').value; const name = document.getElementById('new-sample-name').value;
-            if(!firm || !name) return;
-            let ss = JSON.parse(localStorage.getItem('cm_samples') || '[]');
-            ss.unshift({ id: Date.now(), firm, name, date: new Date().toLocaleDateString() });
-            localStorage.setItem('cm_samples', JSON.stringify(ss)); renderManager();
-        }
+        function togglePay(id) { let rs = JSON.parse(localStorage.getItem('cm_records') || '[]'); let r = rs.find(x => x.id === id); if(r) r.isPaid = !r.isPaid; localStorage.setItem('cm_records', JSON.stringify(rs)); renderManager(); }
+        function addSample() { const firm = document.getElementById('new-sample-firm').value; const name = document.getElementById('new-sample-name').value; if(!firm || !name) return; let ss = JSON.parse(localStorage.getItem('cm_samples') || '[]'); ss.unshift({ id: Date.now(), firm, name, date: new Date().toLocaleDateString() }); localStorage.setItem('cm_samples', JSON.stringify(ss)); renderManager(); }
 
         function setModeType(type) {
             userType = type;
@@ -473,7 +418,7 @@
         function syncPy() {
             const py = parseFloat(document.getElementById('input-supply-py').value) || 0;
             document.getElementById('input-supply-m2').value = (py * 3.3058).toFixed(1);
-            document.getElementById('input-real-py').value = Math.ceil(py * (isExp ? 0.8 : 0.75));
+            document.getElementById('disp-real-py').innerText = Math.ceil(py * (isExp ? 0.8 : 0.75));
             calc(); autoSave();
         }
         function syncM2() {
@@ -485,8 +430,7 @@
         async function connectBosch() {
             try {
                 const device = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Bosch' }], optionalServices: ['0000170d-0000-1000-8000-00805f9b34fb', '232e51d8-9020-4b3f-95fa-4460f9919f1b'] });
-                const server = await device.gatt.connect();
-                document.getElementById('bt-btn').innerText = "연결됨"; document.getElementById('bt-btn').className = "bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-bold";
+                const server = await device.gatt.connect(); document.getElementById('bt-btn').innerText = "연결됨";
                 const services = await server.getPrimaryServices();
                 for(const s of services) { const chars = await s.getCharacteristics(); for(const c of chars) { if(c.properties.notify) { await c.startNotifications(); c.addEventListener('characteristicvaluechanged', e => { const v = e.target.value.getFloat32(1, true); if(v>0) { const val = Math.round(v*1000); const w = document.getElementById('zone-w'); const h = document.getElementById('zone-h'); if(!w.value) w.value = val; else h.value = val; autoSave(); } }); } } }
             } catch(e) {}
@@ -510,36 +454,20 @@
         function calc() {
             let m2 = zoneList.reduce((a,b)=>a+b.area, 0);
             if(m2 === 0 && mode === 'floor') {
-                // 수정 가능한 실시공 면적 값 우선 사용, 없으면 자동 계산
                 const inputReal = parseFloat(document.getElementById('input-real-py').value);
-                if (inputReal > 0) {
-                    m2 = inputReal * 3.3058;
-                } else {
-                    const py = parseFloat(document.getElementById('input-supply-py').value) || 0;
-                    m2 = (py * 3.3058) * (isExp ? 0.8 : 0.75);
-                }
+                if (inputReal > 0) m2 = inputReal * 3.3058;
+                else { const py = parseFloat(document.getElementById('input-supply-py').value) || 0; m2 = (py * 3.3058) * (isExp ? 0.8 : 0.75); }
             }
-            document.getElementById('total-m2').innerText = m2.toFixed(2);
-            document.getElementById('rep-m2').innerText = m2.toFixed(2);
-
-            const boxArea = 3.2; 
-            const loss = 1.1; 
-            const boxes = Math.ceil(m2 / boxArea * loss);
+            document.getElementById('total-m2').innerText = m2.toFixed(2); document.getElementById('rep-m2').innerText = m2.toFixed(2);
+            const boxArea = 3.2; const loss = 1.1; const boxes = Math.ceil(m2 / boxArea * loss);
             document.getElementById('total-box').innerText = boxes;
-
             const price = parseInt(document.getElementById('box-price').value.replace(/,/g,'')) || 0;
             const baseCost = boxes * price;
             const opts = ['opt-removal', 'opt-molding', 'opt-lifting', 'opt-etc'];
             const optCost = opts.reduce((a,id) => a + (parseInt(document.getElementById(id).value.replace(/,/g,'')) || 0), 0);
             const total = baseCost + optCost;
-            
-            document.getElementById('val-base').innerText = baseCost.toLocaleString() + " 원";
-            document.getElementById('val-opt').innerText = optCost.toLocaleString() + " 원";
-            document.getElementById('val-supply').innerText = total.toLocaleString() + " 원";
-            document.getElementById('val-total').innerText = Math.round(total * 1.1).toLocaleString();
-            
-            const brand = document.getElementById('brand-name').value;
-            const prod = document.getElementById('prod-name').value;
+            document.getElementById('val-base').innerText = baseCost.toLocaleString() + " 원"; document.getElementById('val-opt').innerText = optCost.toLocaleString() + " 원"; document.getElementById('val-supply').innerText = total.toLocaleString() + " 원"; document.getElementById('val-total').innerText = Math.round(total * 1.1).toLocaleString();
+            const brand = document.getElementById('brand-name').value; const prod = document.getElementById('prod-name').value;
             document.getElementById('rep-prod').innerText = (brand ? brand + ' ' : '') + (prod || '제품 미선택');
         }
 
@@ -549,11 +477,13 @@
             document.getElementById('rep-name').innerText = document.getElementById('cust-name').value || '고객님';
             document.getElementById('rep-firm').innerText = userType==='firm' ? ('Partner: ' + document.getElementById('firm-name').value) : '';
             document.getElementById('rep-addr').innerText = document.getElementById('cust-addr').value || '';
-            const sDate = document.getElementById('cust-survey-date').value;
-            const wDate = document.getElementById('cust-work-date').value;
+            const sDate = document.getElementById('cust-survey-date').value; const wDate = document.getElementById('cust-work-date').value;
             document.getElementById('rep-dates').innerText = (sDate ? `실측:${sDate} ` : '') + (wDate ? `시공:${wDate}` : '');
         }
-        function toggleOption() { document.getElementById('opt-content').classList.toggle('open'); document.getElementById('opt-arrow').classList.toggle('fa-chevron-up'); }
+        function toggleOption() { 
+            document.getElementById('opt-content').classList.toggle('open'); 
+            document.getElementById('opt-arrow').classList.toggle('fa-chevron-up'); 
+        }
         function showToast(msg) { const t = document.getElementById('toast'); t.innerText=msg; t.style.display='block'; setTimeout(()=>t.style.display='none', 2000); }
         function shareKakao() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => { canvas.toBlob(blob => navigator.share({files:[new File([blob], "견적서.png", {type:"image/png"})]})); }); }
         function saveImg() { html2canvas(document.getElementById('capture-area'), {scale:2}).then(canvas => { let a = document.createElement('a'); a.href = canvas.toDataURL(); a.download = "청인마루_견적.png"; a.click(); }); }
