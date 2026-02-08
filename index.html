@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>청인마루 통합 시스템 v72.5</title>
+    <title>청인마루 통합 시스템 v72.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -42,7 +42,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-2xl font-black text-white mb-2">청인마루 통합 시스템</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold text-blue-500">v72.5 Final Stable</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold text-blue-500">v72.6 Factor Linked</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold">Access System</button>
         </div>
@@ -67,7 +67,7 @@
 
     <div class="p-4">
         <header class="max-w-6xl mx-auto mb-6">
-            <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v72.5</span></h1>
+            <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v72.6</span></h1>
             <p class="text-[13px] text-blue-500 font-black uppercase">공간의 위로가 되다</p>
         </header>
 
@@ -124,8 +124,8 @@
                             <div><label class="input-label">규격</label><input type="text" id="floor-spec" class="input-field"></div>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-4">
-                            <div class="bg-white border rounded-xl p-3 text-center"><label class="block text-[10px] text-gray-400 mb-1">공급평형</label><input id="f-supply-py" type="number" step="0.1" class="w-full text-center font-black text-lg outline-none" oninput="syncFPy()"></div>
-                            <div class="bg-white border rounded-xl p-3 text-center"><label class="block text-[10px] text-gray-400 mb-1">공급면적(㎡)</label><input id="f-supply-m2" type="number" step="0.1" class="w-full text-center font-black text-lg outline-none" oninput="syncFM2()"></div>
+                            <div class="bg-white border rounded-xl p-3 text-center"><label class="block text-[10px] text-gray-400 mb-1">공급평형</label><input id="f-supply-py" type="number" step="0.1" class="w-full text-center font-black text-lg outline-none" placeholder="0" oninput="syncFPy()"></div>
+                            <div class="bg-white border rounded-xl p-3 text-center"><label class="block text-[10px] text-gray-400 mb-1">공급면적(㎡)</label><input id="f-supply-m2" type="number" step="0.1" class="w-full text-center font-black text-lg outline-none" placeholder="0" oninput="syncFM2()"></div>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-4">
                             <div class="bg-white border rounded-xl p-3 text-center relative"><label class="block text-[10px] text-gray-400 mb-1">로스율(%)</label><select id="f-loss" class="w-full text-center font-black text-lg outline-none bg-transparent" onchange="calcFloor()"><option value="1.05">5%</option><option value="1.08">8%</option><option value="1.10" selected>10%</option><option value="1.12">12%</option><option value="1.15">15%</option><option value="1.18">18%</option></select></div>
@@ -170,7 +170,7 @@
 
         window.onload = () => { if(localStorage.getItem('cm_auth') === 'ok') document.getElementById('login-gate').style.display='none'; setMode('floor'); };
 
-        // [중요] 시트 데이터 로드 및 면적 키 강제 매핑
+        // [핵심] 시트 데이터 로드 및 factor 키 우선 매핑
         async function loadData() {
             const url = FLOOR_URL + "?t=" + new Date().getTime();
             try {
@@ -180,25 +180,27 @@
                     if(item.brand) { 
                         if(!temp[item.brand]) temp[item.brand]={brand:item.brand, products:[]}; 
                         
-                        // [면적 값 강제 탐색] 모든 키를 뒤져서 '면적'이나 'area' 관련 숫자 찾기
+                        // [Factor 연동 엔진] 'factor' 값을 최우선 면적으로 채택
                         let foundArea = 3.2;
-                        for(let k in item) {
-                            let val = parseFloat(item[k]);
-                            if(!isNaN(val) && val > 0.5 && val < 6.0) { // 일반적인 박스 면적 범위
-                                let keyName = k.toLowerCase().replace(/[^a-z0-9가-힣]/g,'');
-                                if(keyName.includes('area') || keyName.includes('box') || keyName.includes('면적') || keyName.includes('헤베') || keyName.includes('m2')) {
-                                    foundArea = val; break;
+                        if(item.factor && !isNaN(parseFloat(item.factor))) {
+                            foundArea = parseFloat(item.factor);
+                        } else {
+                            // factor가 없으면 다른 면적 키워드 탐색
+                            for(let k in item) {
+                                let v = parseFloat(item[k]);
+                                if(!isNaN(v) && v > 0.5 && v < 6.0) {
+                                    let kn = k.toLowerCase().replace(/[^a-z]/g,'');
+                                    if(kn.includes('area') || kn.includes('box') || kn.includes('m')) { foundArea = v; break; }
                                 }
                             }
                         }
-                        temp[item.brand].products.push({...item, forceArea: foundArea}); 
+                        temp[item.brand].products.push({...item, finalArea: foundArea}); 
                     } 
                 });
                 masterData = Object.values(temp); updateBrandSelects();
-            } catch(e) { console.error("Data Load Error"); }
+            } catch(e) { console.error("Load Fail"); }
         }
 
-        // 업체 탭 활성화 로직 복원
         function setModeType(t) { 
             userType = t; 
             document.getElementById('mode-consumer').className = (t === 'consumer' ? 'mode-btn active-consumer' : 'mode-btn');
@@ -214,7 +216,6 @@
             loadData(); if(m==='floor') calcFloor();
         }
 
-        // 비확장/확장 탭 활성화 복원
         function setExp(v) { 
             floorExp = v; 
             document.getElementById('btn-exp').className = (v ? 'flex-1 p-4 rounded-xl cursor-pointer exp-card-active' : 'flex-1 p-4 rounded-xl cursor-pointer exp-card-inactive');
@@ -222,7 +223,7 @@
             calcFloor(); 
         }
 
-        // [핵심] 제품 선택 시 면적 강제 주입
+        // [중요: factor 값 강제 주입]
         function handleFloorProduct() {
             const bName = document.getElementById('floor-brand').value, pIdx = document.getElementById('floor-product').value;
             if (pIdx !== "") {
@@ -233,9 +234,9 @@
                     document.getElementById('rep-prod').innerText = p.name;
                     document.getElementById('floor-spec').value = p.spec || '';
                     
-                    // 입력 필드에 강제 주입 및 시각적 효과
+                    // 입력 필드에 finalArea( factor 기반) 강제 주입
                     const areaField = document.getElementById('f-box-area');
-                    areaField.value = p.forceArea;
+                    areaField.value = p.finalArea;
                     areaField.classList.add('flash-update');
                     setTimeout(() => areaField.classList.remove('flash-update'), 800);
                 }
@@ -252,8 +253,7 @@
             const realPy = Math.ceil(py * factor);
             const boxArea = parseFloat(document.getElementById('f-box-area').value) || 3.2;
             const loss = parseFloat(document.getElementById('f-loss').value) || 1.1;
-            const totalM2 = realPy * PY_FACTOR;
-            const boxes = Math.ceil((totalM2 / boxArea) * loss);
+            const boxes = Math.ceil(((realPy * PY_FACTOR) / boxArea) * loss);
             document.getElementById('f-final-box').innerText = boxes;
             document.getElementById('rep-boxes').innerText = boxes;
             document.getElementById('rep-m2-text').innerText = (py * PY_FACTOR).toFixed(2);
