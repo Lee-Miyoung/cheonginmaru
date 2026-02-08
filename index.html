@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>청인마루 통합 시스템 v73.1</title>
+    <title>청인마루 통합 시스템 v73.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@100;400;600;700;900&display=swap" rel="stylesheet">
     <style>
@@ -30,25 +31,20 @@
         .manage-card { width: 95%; max-width: 600px; height: 90vh; background: #F8F9FA; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; }
         .exp-card-active { border: 2px solid #fdba74; background: #fff7ed; opacity: 1 !important; }
         .exp-card-inactive { border: 1px solid #e5e7eb; background: white; opacity: 0.6; }
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; text-align: center; background: #fff; cursor: pointer; position: relative; }
         @keyframes flash { 0% { background-color: #fef08a; } 100% { background-color: transparent; } }
         .flash-update { animation: flash 0.8s ease-out; }
-        .timer-badge { background: rgba(255,0,0,0.1); color: #ff4d4f; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; }
-        
-        /* 상세 내역 아코디언 스타일 */
         .detail-view { display: none; background: #F1F3F5; border-radius: 12px; padding: 15px; margin-top: 10px; border-left: 4px solid #4C6EF5; }
-        .detail-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
-        .detail-label { color: #868E96; font-weight: 700; }
-        .detail-value { color: #212529; font-weight: 800; text-align: right; }
     </style>
 </head>
 <body>
 
-    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full text-sm font-bold z-[10000] hidden shadow-lg">알림</div>
+    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full text-sm font-bold z-[20000] hidden shadow-lg">알림</div>
 
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-2xl font-black text-white mb-2">청인마루 통합 시스템</h2>
-            <p class="text-xs text-blue-500 font-bold mb-8">v73.1 PRO+</p>
+            <p class="text-xs text-blue-500 font-bold mb-8">v73.2 ULTIMATE</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold">Access System</button>
         </div>
@@ -62,11 +58,11 @@
             </div>
             <div class="p-4 bg-white border-b flex gap-1 overflow-x-auto">
                 <button id="m-tab-all" onclick="renderManager('all')" class="tab-btn active text-[10px] whitespace-nowrap">전체</button>
-                <button id="m-tab-firm" onclick="renderManager('firm')" class="tab-btn inactive text-[10px] whitespace-nowrap text-blue-600">인테리어 업체</button>
-                <button id="m-tab-consumer" onclick="renderManager('consumer')" class="tab-btn inactive text-[10px] whitespace-nowrap">일반 소비자</button>
+                <button id="m-tab-firm" onclick="renderManager('firm')" class="tab-btn inactive text-[10px] text-blue-600">업체</button>
+                <button id="m-tab-consumer" onclick="renderManager('consumer')" class="tab-btn inactive text-[10px]">소비자</button>
             </div>
             <div class="p-2 px-4 bg-gray-50 border-b">
-                <input type="text" id="manage-search" class="input-field text-xs p-2" placeholder="이름, 업체명, 주소 검색..." oninput="renderManager()">
+                <input type="text" id="manage-search" class="input-field text-xs p-2" placeholder="검색..." oninput="renderManager()">
             </div>
             <div id="manage-list" class="flex-1 overflow-y-auto p-4 bg-gray-50"></div>
         </div>
@@ -75,14 +71,27 @@
     <div class="p-4">
         <header class="max-w-6xl mx-auto mb-6 flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v73.1</span></h1>
+                <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v73.2</span></h1>
                 <p class="text-[13px] text-blue-500 font-black uppercase">공간의 위로가 되다</p>
             </div>
-            <div class="timer-badge">초기화: <span id="reset-timer">05:00</span></div>
+            <div class="timer-badge bg-red-50 text-red-500 px-3 py-1 rounded-lg text-[10px] font-black">RESET: <span id="reset-timer">05:00</span></div>
         </header>
 
         <div class="master-layout">
             <div class="input-forms">
+                <div class="card-clean border-blue-100 bg-blue-50/50">
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <textarea id="raw-text" class="w-full h-24 p-3 rounded-xl border border-blue-100 text-xs resize-none" placeholder="내용 붙여넣기 (추출용)"></textarea>
+                        <div id="drop-zone" class="drop-zone flex flex-col justify-center items-center h-24" onclick="document.getElementById('file-input').click()">
+                            <div id="ocr-loading" style="display:none;" class="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl"><i class="fas fa-spinner fa-spin text-blue-600"></i></div>
+                            <i class="fas fa-camera text-slate-300 text-2xl"></i>
+                            <p class="text-[8px] font-black text-slate-400 mt-1 uppercase">Card OCR</p>
+                            <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleImage(this.files[0])">
+                        </div>
+                    </div>
+                    <div class="flex justify-end"><button onclick="runSuperParse()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-black text-[10px] shadow-lg">정보 자동 추출</button></div>
+                </div>
+
                 <div class="mode-switch">
                     <div id="mode-consumer" onclick="setModeType('consumer')" class="mode-btn active-consumer">소비자용</div>
                     <div id="mode-firm" onclick="setModeType('firm')" class="mode-btn">인테리어 업체용</div>
@@ -99,25 +108,22 @@
                         <div><label class="input-label">고객명</label><input type="text" id="cust-name" class="input-field" placeholder="성함" oninput="resetTimer()"></div>
                         <div><label class="input-label">연락처</label><input type="tel" id="cust-phone" class="input-field" placeholder="연락처"></div>
                     </div>
-                    
                     <div id="firm-row" class="hidden space-y-3 mb-3">
                         <div><label class="input-label text-blue-500">인테리어 업체명</label><input type="text" id="firm-name" class="input-field border-blue-100 bg-blue-50/30"></div>
                         <div class="grid grid-cols-2 gap-3">
-                            <div><label class="input-label text-red-500">미수 금액</label><input type="text" id="firm-unpaid" class="input-field border-red-100" placeholder="0" oninput="formatNum(this)"></div>
+                            <div><label class="input-label text-red-500">미수 금액</label><input type="text" id="firm-unpaid" class="input-field border-red-100 text-red-600" placeholder="0" oninput="formatNum(this)"></div>
                             <div class="flex items-center justify-center bg-gray-50 rounded-xl border border-gray-100">
                                 <input type="checkbox" id="firm-sample" class="w-5 h-5 mr-2 accent-blue-600"><label for="firm-sample" class="text-xs font-bold text-gray-500">샘플북전달</label>
                             </div>
                         </div>
-                        <div class="p-4 bg-gray-100/50 rounded-2xl space-y-3">
-                            <p class="text-[10px] font-black text-gray-400 uppercase">입금 및 샘플 관리 (관리센터 저장용)</p>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div><label class="input-label">계약금 입금일</label><input type="date" id="pay-deposit-date" class="input-field text-xs"></div>
-                                <div><label class="input-label">잔금 입금일</label><input type="date" id="pay-balance-date" class="input-field text-xs"></div>
+                        <div class="p-3 bg-gray-100/50 rounded-xl">
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <input type="date" id="pay-dep-date" class="input-field text-[10px] p-2" title="계약금 입금일">
+                                <input type="date" id="pay-bal-date" class="input-field text-[10px] p-2" title="잔금 입금일">
                             </div>
-                            <div><label class="input-label">샘플북 전달 내역 메모</label><input type="text" id="sample-note" class="input-field text-xs" placeholder="예: 1/15 나투스진 샘플북 전달"></div>
+                            <input type="text" id="sample-note" class="input-field text-xs" placeholder="샘플북 내역 메모">
                         </div>
                     </div>
-
                     <div class="mb-3"><label class="input-label">현장 시공 주소</label><input type="text" id="cust-addr" class="input-field"></div>
                     <div class="grid grid-cols-2 gap-3">
                         <div><label class="input-label">실측일</label><input type="date" id="cust-survey-date" class="input-field text-sm"></div>
@@ -136,18 +142,23 @@
                             <div><label class="input-label">제품</label><select id="floor-product" class="input-field" onchange="handleFloorProduct()"></select></div>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-4">
-                            <div class="bg-white border rounded-xl p-3 text-center"><label class="block text-[10px] text-gray-400 mb-1">공급평형</label><input id="f-supply-py" type="number" step="0.1" class="w-full text-center font-black text-lg outline-none" placeholder="0" oninput="syncFPy()"></div>
-                            <div class="bg-white border rounded-xl p-3 text-center"><label class="block text-[10px] text-gray-400 mb-1">공급면적(㎡)</label><input id="f-supply-m2" type="number" step="0.1" class="w-full text-center font-black text-lg outline-none" placeholder="0" oninput="syncFM2()"></div>
+                            <div><label class="input-label">모델명</label><input type="text" id="floor-model" class="input-field"></div>
+                            <div><label class="input-label">규격</label><input type="text" id="floor-spec" class="input-field"></div>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-4">
-                            <div class="bg-white border rounded-xl p-3 text-center relative"><label class="block text-[10px] text-gray-400 mb-1">로스율(%)</label><select id="f-loss" class="w-full text-center font-black text-lg outline-none bg-transparent" onchange="calcFloor()"><option value="1.05">5%</option><option value="1.08">8%</option><option value="1.10" selected>10%</option><option value="1.12">12%</option><option value="1.15">15%</option><option value="1.18">18%</option></select></div>
-                            <div class="bg-gray-900 rounded-xl p-3 text-center text-white"><label class="block text-[10px] text-gray-500 mb-1">최종발주</label><div class="font-black text-lg" id="f-final-box">0</div></div>
+                            <div class="bg-white border rounded-xl p-3 text-center"><label class="block text-[10px] text-gray-400 mb-1">공급평형</label><input id="f-supply-py" type="number" step="0.1" class="w-full text-center font-black text-lg outline-none" oninput="syncFPy()"></div>
+                            <div class="bg-white border rounded-xl p-3 text-center"><label class="block text-[10px] text-gray-400 mb-1">공급면적(㎡)</label><input id="f-supply-m2" type="number" step="0.1" class="w-full text-center font-black text-lg outline-none" oninput="syncFM2()"></div>
                         </div>
-                        <div class="bg-yellow-50 border border-yellow-100 rounded-xl p-4 flex justify-between items-center">
-                            <div class="flex flex-col"><span class="text-[10px] font-bold text-yellow-600 mb-1">박스당 면적(㎡)</span><input id="f-box-area" type="number" step="0.01" value="3.2" class="bg-transparent font-black text-lg text-yellow-700 outline-none w-24" oninput="calcFloor()"></div>
+                        <div id="floor-price-box" class="bg-yellow-50 border border-yellow-100 rounded-xl p-4 flex justify-between items-center">
+                            <div class="flex flex-col"><span class="text-[10px] font-bold text-yellow-600 mb-1">박스당 면적(㎡)</span><input id="f-box-area" type="number" step="0.001" value="3.2" class="bg-transparent font-black text-lg text-yellow-700 outline-none w-24" oninput="calcFloor()"></div>
                             <div class="text-right"><span class="text-[10px] font-bold text-yellow-600 mb-1">BOX 당 단가</span><input id="floor-price" class="bg-transparent text-right font-black text-xl text-yellow-600 outline-none w-32" value="0" oninput="formatNum(this); calcFloor()"></div>
                         </div>
                     </div>
+                </div>
+
+                <div id="wall-measure-wrapper" class="card-clean hidden">
+                    <div class="flex justify-between items-center mb-4"><span class="text-sm font-black" id="wm-title">실측 센서</span><button onclick="connectBosch()" id="bosch-btn" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-xs font-black shadow-sm"><i class="fab fa-bluetooth-b mr-1"></i> BOSCH 연결</button></div>
+                    <div id="zone-list" class="space-y-2"></div>
                 </div>
 
                 <div id="floor-options" class="card-clean"><div class="grid grid-cols-2 gap-3"><input type="text" id="opt-removal" class="input-field text-right" placeholder="철거비(평)" oninput="formatNum(this); calcFloor()"><input type="text" id="opt-molding" class="input-field text-right" placeholder="걸레받이(평)" oninput="formatNum(this); calcFloor()"><input type="text" id="opt-lifting" class="input-field text-right" placeholder="운반비" oninput="formatNum(this); calcFloor()"><input type="text" id="opt-etc" class="input-field text-right" placeholder="기타/보양" oninput="formatNum(this); calcFloor()"></div></div>
@@ -160,12 +171,16 @@
                             <div><h2 id="rep-name" class="text-2xl font-black">고객님</h2><p id="rep-firm" class="text-sm text-blue-300 font-bold mt-1"></p></div>
                             <div class="text-right text-xl font-black">청인마루</div>
                         </div>
-                        <div class="mb-8"><p class="report-label text-blue-400">PRODUCT</p><h2 id="rep-prod" class="text-2xl font-black mb-1">제품 미선택</h2><p class="text-right text-4xl font-black text-blue-400 mt-2"><span id="rep-boxes">0</span> BOX</p></div>
+                        <div class="mb-8">
+                            <p class="report-label text-blue-400">PRODUCT</p>
+                            <h2 id="rep-prod" class="text-2xl font-black mb-1">제품 미선택</h2>
+                            <p class="text-right text-4xl font-black text-blue-400 mt-2"><span id="rep-boxes">0</span> BOX</p>
+                        </div>
                         <div id="report-detail-list" class="space-y-2 mb-4"></div>
                         <div class="flex justify-between items-center mt-4 text-blue-400 font-black border-t border-gray-700 pt-4"><span class="text-sm font-bold">SUPPLY TOTAL</span><span id="val-supply" class="text-xl">0 원</span></div>
                         <div class="bg-blue-600 rounded-3xl p-6 text-center shadow-lg my-6"><h2 class="text-4xl font-black text-white"><span id="val-total">0</span> 원</h2><p class="text-[10px] opacity-70 mt-1">VAT Included</p></div>
                         <div class="grid grid-cols-2 gap-3" data-html2canvas-ignore="true">
-                            <button onclick="saveRecord()" class="btn-main bg-slate-700 text-white font-black">견적 저장</button>
+                            <button onclick="saveRecord()" class="btn-main bg-slate-700 text-white font-black">기록 저장</button>
                             <button onclick="openManager()" class="btn-main bg-blue-800 text-white font-black">관리 센터</button>
                             <button onclick="saveImg()" class="btn-main bg-white text-gray-800 font-black col-span-2">이미지 저장</button>
                         </div>
@@ -177,24 +192,52 @@
 
     <script>
         const FLOOR_URL = "https://script.google.com/macros/s/AKfycbzp2kx3wOkbCEh1eTj9m5zKaCpXjMatk1KAjSVhh2OmBJhxjX-YedcI8CNVo0pj7zPs/exec";
-        let masterData=[], userType='consumer', mode='floor', floorExp=true, resetSecs = 300, currentFilter = 'all';
+        let masterData=[], userType='consumer', mode='floor', floorExp=true, resetSecs = 300;
         const PY_FACTOR = 3.3058;
 
         window.onload = () => { if(localStorage.getItem('cm_auth') === 'ok') document.getElementById('login-gate').style.display='none'; setMode('floor'); startTimer(); };
 
+        // [복구] 타이머 엔진
         function startTimer() { setInterval(() => { if(resetSecs <= 0) { resetAllFields(); resetSecs = 300; } const m = Math.floor(resetSecs/60); const s = resetSecs%60; document.getElementById('reset-timer').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; resetSecs--; }, 1000); }
         function resetTimer() { resetSecs = 300; }
-        function resetAllFields() { document.querySelectorAll('input').forEach(i => i.type==='checkbox'?i.checked=false:i.value=''); calcFloor(); }
+        function resetAllFields() { document.querySelectorAll('input:not([type=password])').forEach(i => i.type==='checkbox'?i.checked=false:i.value=''); calcFloor(); }
 
+        // [데이터 로딩] factor 연동 고정
         async function loadData() {
+            const url = FLOOR_URL + "?t=" + new Date().getTime();
             try {
-                const res = await fetch(FLOOR_URL + "?t=" + new Date().getTime());
-                const data = await res.json();
+                const res = await fetch(url); const data = await res.json();
                 const temp = {};
                 data.forEach(item => { if(item.brand) { if(!temp[item.brand]) temp[item.brand]={brand:item.brand, products:[]}; 
-                const fVal = parseFloat(item.factor) || 3.2; temp[item.brand].products.push({...item, factorValue: fVal}); } });
+                const fVal = parseFloat(item.factor) || 3.2; temp[item.brand].products.push({...item, finalArea: fVal}); } });
                 masterData = Object.values(temp); updateBrandSelects();
-            } catch(e) { console.error("Load Fail"); }
+            } catch(e) { showToast("데이터 로드 실패"); }
+        }
+
+        // [추출 기능 복구] 명함 OCR 및 텍스트 파싱
+        async function handleImage(file) {
+            const loading = document.getElementById('ocr-loading'); loading.style.display='flex';
+            try {
+                const { data: { text } } = await Tesseract.recognize(file, 'kor+eng');
+                document.getElementById('raw-text').value = text; runSuperParse();
+                showToast("명함 분석 완료");
+            } catch(e) { showToast("OCR 실패"); } finally { loading.style.display='none'; }
+        }
+
+        function runSuperParse() {
+            const t = document.getElementById('raw-text').value;
+            const nameMatch = t.match(/([가-힣]{2,4})(\s|님|대리|과장|실장|사장)/); if(nameMatch) document.getElementById('cust-name').value = nameMatch[1];
+            const phoneMatch = t.match(/010[-.\s]?\d{3,4}[-.\s]?\d{4}/); if(phoneMatch) document.getElementById('cust-phone').value = phoneMatch[0];
+            const addrMatch = t.match(/([가-힣]+(시|도)\s[가-힣]+(구|군|시)\s.+)/); if(addrMatch) document.getElementById('cust-addr').value = addrMatch[1];
+            updateInfo(); resetTimer();
+        }
+
+        // [보쉬 연동 복구] 블루투스
+        async function connectBosch() {
+            try {
+                const device = await navigator.bluetooth.requestDevice({ filters: [{ services: ['00001810-0000-1000-8000-00805f9b34fb'] }] });
+                showToast("BOSCH 장치 연결 성공");
+            } catch(e) { showToast("블루투스 지원 안됨"); }
         }
 
         function setModeType(t) { 
@@ -210,9 +253,10 @@
             if (pIdx !== "") {
                 const p = masterData.find(x => x.brand === bName).products[pIdx];
                 document.getElementById('floor-price').value = (userType==='firm'?(p.firm_price||p.price):p.price).toLocaleString();
-                document.getElementById('f-box-area').value = p.factorValue; // factor 연동
+                document.getElementById('f-box-area').value = p.finalArea; 
                 document.getElementById('rep-prod').innerText = p.name;
-                const fArea = document.getElementById('f-box-area'); fArea.classList.add('flash-update'); setTimeout(()=>fArea.classList.remove('flash-update'), 800);
+                document.getElementById('floor-spec').value = p.spec || '';
+                const aField = document.getElementById('f-box-area'); aField.classList.add('flash-update'); setTimeout(()=>aField.classList.remove('flash-update'),800);
             }
             calcFloor(); resetTimer();
         }
@@ -221,107 +265,50 @@
         function syncFM2() { const m2 = parseFloat(document.getElementById('f-supply-m2').value)||0; document.getElementById('f-supply-py').value=(m2/PY_FACTOR).toFixed(2); calcFloor(); resetTimer(); }
 
         function calcFloor() {
-            const py = parseFloat(document.getElementById('f-supply-py').value)||0; const factor = floorExp ? 0.8 : 0.75;
-            const realM2 = Math.ceil(py*factor)*PY_FACTOR;
-            const bArea = parseFloat(document.getElementById('f-box-area').value)||3.2;
-            const boxes = Math.ceil((realM2/bArea)*(parseFloat(document.getElementById('f-loss').value)||1.1));
-            document.getElementById('f-final-box').innerText = boxes;
-            document.getElementById('rep-boxes').innerText = boxes;
+            const py = parseFloat(document.getElementById('f-supply-py').value)||0; const f = floorExp ? 0.8 : 0.75;
+            const boxes = Math.ceil(((Math.ceil(py*f)*PY_FACTOR)/parseFloat(document.getElementById('f-box-area').value||3.2))*1.1);
+            document.getElementById('f-final-box').innerText = boxes; document.getElementById('rep-boxes').innerText = boxes;
             updateReport(boxes*(parseInt(document.getElementById('floor-price').value.replace(/,/g,''))||0));
         }
 
-        function updateReport(mat) { const total = mat; document.getElementById('val-supply').innerText = total.toLocaleString()+" 원"; document.getElementById('val-total').innerText = Math.round(total*1.1).toLocaleString(); }
-        
+        function updateReport(mat) { document.getElementById('val-supply').innerText = mat.toLocaleString()+" 원"; document.getElementById('val-total').innerText = Math.round(mat*1.1).toLocaleString(); }
+
         function saveRecord() {
             const r = JSON.parse(localStorage.getItem('cm_records')||'[]');
-            const newEntry = {
-                id: Date.now(),
-                date: new Date().toLocaleString(),
-                type: userType,
-                name: document.getElementById('cust-name').value || '고객님',
-                firm: document.getElementById('firm-name').value || '-',
-                unpaid: document.getElementById('firm-unpaid').value || '0',
-                sample: document.getElementById('firm-sample').checked,
-                sampleNote: document.getElementById('sample-note').value || '-',
-                depositDate: document.getElementById('pay-deposit-date').value || '-',
-                balanceDate: document.getElementById('pay-balance-date').value || '-',
-                product: document.getElementById('rep-prod').innerText,
-                total: document.getElementById('val-total').innerText,
-                addr: document.getElementById('cust-addr').value || '-',
-                survey: document.getElementById('cust-survey-date').value || '-',
-                work: document.getElementById('cust-work-date').value || '-'
-            };
-            r.unshift(newEntry);
-            localStorage.setItem('cm_records', JSON.stringify(r));
-            showToast("관리 센터에 저장되었습니다.");
+            r.unshift({ id: Date.now(), date: new Date().toLocaleString(), type: userType, name: document.getElementById('cust-name').value, firm: document.getElementById('firm-name').value||'-', unpaid: document.getElementById('firm-unpaid').value||'0', sample: document.getElementById('firm-sample').checked, sampleNote: document.getElementById('sample-note').value||'-', depDate: document.getElementById('pay-dep-date').value||'-', balDate: document.getElementById('pay-bal-date').value||'-', product: document.getElementById('rep-prod').innerText, total: document.getElementById('val-total').innerText, addr: document.getElementById('cust-addr').value||'-' });
+            localStorage.setItem('cm_records', JSON.stringify(r)); showToast("기록 저장됨");
         }
 
         function openManager() { document.getElementById('manage-modal').style.display='flex'; renderManager('all'); }
         
-        function renderManager(filter = currentFilter) {
-            currentFilter = filter;
+        function renderManager(filter = 'all') {
             const r = JSON.parse(localStorage.getItem('cm_records')||'[]');
             const search = document.getElementById('manage-search').value.toLowerCase();
+            ['all','firm','consumer'].forEach(t => document.getElementById('m-tab-'+t).className = (t===filter?'tab-btn active text-[10px]':'tab-btn inactive text-[10px]'));
             
-            // 탭 스타일 변경
-            ['all', 'firm', 'consumer'].forEach(t => {
-                document.getElementById('m-tab-'+t).className = (t === filter ? 'tab-btn active text-[10px]' : 'tab-btn inactive text-[10px]');
-            });
-
             const filtered = r.filter(x => {
-                const matchSearch = x.name.toLowerCase().includes(search) || x.firm.toLowerCase().includes(search) || x.addr.toLowerCase().includes(search);
-                if (filter === 'firm') return matchSearch && x.type === 'firm';
-                if (filter === 'consumer') return matchSearch && x.type === 'consumer';
-                return matchSearch;
+                const match = x.name.toLowerCase().includes(search) || x.firm.toLowerCase().includes(search) || x.addr.toLowerCase().includes(search);
+                if(filter==='firm') return match && x.type==='firm';
+                if(filter==='consumer') return match && x.type==='consumer';
+                return match;
             });
 
             document.getElementById('manage-list').innerHTML = filtered.map(x => `
-                <div class="bg-white p-4 rounded-xl border mb-3 shadow-sm active:scale-[0.98] transition-all" onclick="toggleDetail('${x.id}')">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs font-black ${x.type==='firm'?'text-blue-600':'text-gray-700'}">${x.firm !== '-' ? '['+x.firm+'] ' : ''}${x.name}</span>
-                        <span class="text-[9px] text-gray-400">${x.date.split(' ')[0]}</span>
-                    </div>
-                    <div class="text-[10px] text-gray-500 mb-2 truncate">${x.addr}</div>
-                    <div class="flex justify-between items-center pt-2 border-t border-gray-50">
-                        <span class="text-[11px] font-bold text-gray-600">${x.product}</span>
-                        <span class="text-sm font-black text-red-500">${x.total}원</span>
-                    </div>
-                    
-                    <div id="detail-${x.id}" class="detail-view">
-                        <div class="detail-row"><span class="detail-label">현장주소</span><span class="detail-value">${x.addr}</span></div>
-                        <div class="detail-row"><span class="detail-label">실측일 / 시공일</span><span class="detail-value">${x.survey} / ${x.work}</span></div>
-                        <div style="border-top:1px dashed #ddd; margin:8px 0;"></div>
-                        ${x.type === 'firm' ? `
-                            <div class="detail-row"><span class="detail-label text-red-500">미수 금액</span><span class="detail-value text-red-600">${x.unpaid}원</span></div>
-                            <div class="detail-row"><span class="detail-label">샘플북 전달</span><span class="detail-value">${x.sample?'전달완료':'미전달'}</span></div>
-                            <div class="detail-row"><span class="detail-label">샘플북 비고</span><span class="detail-value">${x.sampleNote}</span></div>
-                            <div class="detail-row"><span class="detail-label">계약금 입금일</span><span class="detail-value">${x.depositDate}</span></div>
-                            <div class="detail-row"><span class="detail-label">잔금 입금일</span><span class="detail-value">${x.balanceDate}</span></div>
-                        ` : '<div class="text-center text-[10px] text-gray-400">일반 소비자 견적입니다.</div>'}
-                        <button onclick="deleteItem(event, '${x.id}')" class="w-full mt-3 py-2 bg-red-50 text-red-500 rounded-lg text-[10px] font-black">삭제하기</button>
+                <div class="bg-white p-4 rounded-xl border mb-3 shadow-sm" onclick="const d=this.querySelector('.detail-view'); d.style.display=d.style.display==='block'?'none':'block'">
+                    <div class="flex justify-between font-black text-blue-600"><span>${x.firm !== '-' ? '['+x.firm+'] ' : ''}${x.name}</span><span class="text-[9px] text-gray-400">${x.date.split(' ')[0]}</span></div>
+                    <div class="text-[10px] text-gray-500 my-1 truncate">${x.addr}</div>
+                    <div class="flex justify-between mt-2 pt-2 border-t text-xs font-bold"><span>${x.product}</span><span class="text-red-500">${x.total}원</span></div>
+                    <div class="detail-view">
+                        <div class="space-y-1 mt-2 text-[10px]">
+                            <div class="flex justify-between"><span>계약/잔금일</span><b>${x.depDate} / ${x.balDate}</b></div>
+                            ${x.type==='firm'?`<div class="flex justify-between"><span>미수금</span><b class="text-red-600">${x.unpaid}원</b></div><div class="flex justify-between"><span>샘플북</span><b>${x.sample?'전달':'미전달'}</b></div><div>비고: ${x.sampleNote}</div>`:''}
+                        </div>
                     </div>
                 </div>
             `).join('') || '<div class="text-center py-10 text-gray-400 text-xs">기록이 없습니다.</div>';
         }
 
-        function toggleDetail(id) {
-            const el = document.getElementById('detail-'+id);
-            const isVisible = el.style.display === 'block';
-            document.querySelectorAll('.detail-view').forEach(d => d.style.display = 'none');
-            el.style.display = isVisible ? 'none' : 'block';
-        }
-
-        function deleteItem(e, id) {
-            e.stopPropagation();
-            if(confirm("이 견적 기록을 삭제하시겠습니까?")) {
-                let r = JSON.parse(localStorage.getItem('cm_records')||'[]');
-                r = r.filter(x => x.id != id);
-                localStorage.setItem('cm_records', JSON.stringify(r));
-                renderManager();
-            }
-        }
-
-        function setMode(m) { ['floor','wall','measure'].forEach(id => document.getElementById('tab-'+id).className = 'tab-btn '+(id===m?'active':'inactive')); loadData(); }
+        function setMode(m) { mode = m; ['floor','wall','measure'].forEach(id => document.getElementById('tab-'+id).className = 'tab-btn '+(id===m?'active':'inactive')); document.getElementById('floor-wrapper').style.display=(m==='floor'?'block':'none'); document.getElementById('wall-measure-wrapper').style.display=(m!=='floor'?'block':'none'); loadData(); }
         function setExp(v) { floorExp=v; document.getElementById('btn-exp').className=(v?'flex-1 p-4 rounded-xl cursor-pointer exp-card-active':'flex-1 p-4 rounded-xl cursor-pointer exp-card-inactive'); document.getElementById('btn-nexp').className=(!v?'flex-1 p-4 rounded-xl cursor-pointer exp-card-active':'flex-1 p-4 rounded-xl cursor-pointer exp-card-inactive'); calcFloor(); }
         function checkAppLogin() { if(document.getElementById('app-password').value === '1306') { document.getElementById('login-gate').style.display='none'; localStorage.setItem('cm_auth','ok'); } }
         function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 2000); }
@@ -329,8 +316,7 @@
         function updateBrandSelects() { const fBrand = document.getElementById('floor-brand'); fBrand.innerHTML='<option value="">브랜드 선택</option>'; masterData.forEach(m=>fBrand.add(new Option(m.brand, m.brand))); }
         function updateFloorProducts() { const bName = document.getElementById('floor-brand').value, pSel = document.getElementById('floor-product'); pSel.innerHTML = '<option value="">제품 선택</option>'; const bObj = masterData.find(x => x.brand === bName); if(bObj) bObj.products.forEach((p, i) => pSel.add(new Option(p.name, i))); }
         function updateInfo() { document.getElementById('rep-name').innerText = document.getElementById('cust-name').value || '고객님'; document.getElementById('rep-firm').innerText = userType==='firm'?'Partner: '+document.getElementById('firm-name').value:''; }
-        function saveImg() { html2canvas(document.querySelector("#capture-area")).then(canvas => { const link = document.createElement('a'); link.download = '청인마루_견적서.png'; link.href = canvas.toDataURL(); link.click(); }); }
-        function setFloorType(t) { floorType=t; document.getElementById('type-res').className=(t==='res'?'flex-1 py-3 rounded-lg text-sm font-bold type-btn-active':'flex-1 py-3 rounded-lg text-sm font-bold type-btn-inactive'); document.getElementById('type-com').className=(t==='com'?'flex-1 py-3 rounded-lg text-sm font-bold type-btn-active':'flex-1 py-3 rounded-lg text-sm font-bold type-btn-inactive'); document.getElementById('res-options').style.display=(t==='res'?'flex':'none'); calcFloor(); }
+        function saveImg() { html2canvas(document.querySelector("#capture-area")).then(canvas => { const link = document.createElement('a'); link.download = '견적서.png'; link.href = canvas.toDataURL(); link.click(); }); }
     </script>
 </body>
 </html>
