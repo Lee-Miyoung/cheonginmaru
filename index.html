@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>청인마루 통합 시스템 v73.3</title>
+    <title>청인마루 통합 시스템 v73.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@100;400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        /* [중요] 스크롤 당겨서 새로고침 방지 (데이터 날림 방지) */
-        body { font-family: 'Pretendard', sans-serif; background-color: #F4F6F8; color: #333; overscroll-behavior: none; touch-action: pan-y; }
-        
+        body { font-family: 'Pretendard', sans-serif; background-color: #F4F6F8; color: #333; overscroll-behavior: none; }
         .card-clean { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #EEF2F6; margin-bottom: 20px; }
         .input-field { width: 100%; padding: 14px; background: #F8F9FA; border-radius: 12px; border: 1px solid #E9ECEF; font-weight: 700; font-size: 15px; color: #212529; outline: none; transition: 0.2s; }
         .input-field:focus { border-color: #4C6EF5; background: #FFF; box-shadow: 0 0 0 3px rgba(76, 110, 245, 0.1); }
@@ -37,10 +35,13 @@
         .flash-update { animation: flash 0.8s ease-out; }
         .timer-badge { background: rgba(255,0,0,0.1); color: #ff4d4f; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; }
         .detail-view { display: none; background: #F1F3F5; border-radius: 12px; padding: 15px; margin-top: 10px; border-left: 4px solid #4C6EF5; }
-        .detail-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
-        .detail-label { color: #868E96; font-weight: 700; }
-        .detail-value { color: #212529; font-weight: 800; text-align: right; }
         .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; text-align: center; background: #fff; cursor: pointer; position: relative; }
+        
+        /* [v73.4] 다크모드 리포트 내역 스타일 개선 */
+        .report-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); font-size: 12px; }
+        .report-item:last-child { border-bottom: none; }
+        .report-calc { font-size: 10px; color: #9CA3AF; margin-right: 4px; }
+        .report-val { color: #60A5FA; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -50,7 +51,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-2xl font-black text-white mb-2">청인마루 통합 시스템</h2>
-            <p class="text-xs text-blue-500 font-bold mb-8">v73.3 FIXED</p>
+            <p class="text-xs text-blue-500 font-bold mb-8">v73.4 PRO MAX</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold">Access System</button>
         </div>
@@ -77,7 +78,7 @@
     <div class="p-4">
         <header class="max-w-6xl mx-auto mb-6 flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v73.3</span></h1>
+                <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v73.4</span></h1>
                 <p class="text-[13px] text-blue-500 font-black uppercase">공간의 위로가 되다</p>
             </div>
             <div class="timer-badge bg-red-50 text-red-500 px-3 py-1 rounded-lg text-[10px] font-black">RESET: <span id="reset-timer">05:00</span></div>
@@ -178,7 +179,8 @@
                             <div class="text-right text-xl font-black">청인마루</div>
                         </div>
                         <div class="mb-8"><p class="report-label text-blue-400">PRODUCT</p><h2 id="rep-prod" class="text-2xl font-black mb-1">제품 미선택</h2><p class="text-right text-4xl font-black text-blue-400 mt-2"><span id="rep-boxes">0</span> BOX</p><p class="text-right text-xs text-gray-500 mt-1">Total Area: <span id="rep-m2-text">0.00</span> ㎡</p></div>
-                        <div id="report-detail-list" class="space-y-2 mb-4 bg-gray-800/50 p-4 rounded-xl border border-gray-700/50 text-xs"></div>
+                        
+                        <div id="report-detail-list" class="space-y-2 mb-4 bg-gray-800/50 p-4 rounded-xl border border-gray-700/50"></div>
                         
                         <div class="flex justify-between items-center mt-4 text-blue-400 font-black border-t border-gray-700 pt-4"><span class="text-sm font-bold">SUPPLY TOTAL</span><span id="val-supply" class="text-xl">0 원</span></div>
                         <div class="bg-blue-600 rounded-3xl p-6 text-center shadow-lg my-6"><h2 class="text-4xl font-black text-white"><span id="val-total">0</span> 원</h2><p class="text-[10px] opacity-70 mt-1">VAT Included</p></div>
@@ -198,11 +200,11 @@
         let masterData=[], userType='consumer', mode='floor', floorExp=true, resetSecs = 300;
         const PY_FACTOR = 3.3058;
 
-        // [복구] 데이터 증발 방지 및 복원 로직
+        // [중요] localStorage에 임시 저장하여 앱 재실행 시 복구
         window.onload = () => { 
             if(localStorage.getItem('cm_auth') === 'ok') document.getElementById('login-gate').style.display='none'; 
             setMode('floor'); 
-            restoreTemp(); // 임시 저장된 데이터 복원
+            restoreTemp(); 
             startTimer(); 
         };
 
@@ -211,13 +213,16 @@
             document.querySelectorAll('input').forEach(el => {
                 if(el.id) data[el.id] = el.type==='checkbox' ? el.checked : el.value;
             });
-            sessionStorage.setItem('cm_temp', JSON.stringify(data));
+            localStorage.setItem('cm_temp_data', JSON.stringify(data)); // Session 대신 Local 사용
+            localStorage.setItem('cm_temp_time', Date.now());
             resetTimer();
         }
 
         function restoreTemp() {
-            const data = JSON.parse(sessionStorage.getItem('cm_temp'));
-            if(data) {
+            const data = JSON.parse(localStorage.getItem('cm_temp_data'));
+            const time = localStorage.getItem('cm_temp_time');
+            // 5분(300초) 지났으면 폐기
+            if(data && time && (Date.now() - time < 300000)) {
                 for(const key in data) {
                     const el = document.getElementById(key);
                     if(el) {
@@ -225,15 +230,23 @@
                         else el.value = data[key];
                     }
                 }
-                calcFloor(); // 계산 다시 실행해서 리포트 갱신
+                setTimeout(calcFloor, 500); // 데이터 로드 후 계산
+            } else {
+                localStorage.removeItem('cm_temp_data');
             }
         }
 
-        function startTimer() { setInterval(() => { if(resetSecs <= 0) { resetAllFields(); resetSecs = 300; sessionStorage.removeItem('cm_temp'); } const m = Math.floor(resetSecs/60); const s = resetSecs%60; document.getElementById('reset-timer').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; resetSecs--; }, 1000); }
-        function resetTimer() { resetSecs = 300; }
+        function startTimer() { 
+            setInterval(() => { 
+                if(resetSecs <= 0) { resetAllFields(); resetSecs = 300; localStorage.removeItem('cm_temp_data'); } 
+                const m = Math.floor(resetSecs/60); const s = resetSecs%60; 
+                document.getElementById('reset-timer').innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; 
+                resetSecs--; 
+            }, 1000); 
+        }
+        function resetTimer() { resetSecs = 300; localStorage.setItem('cm_temp_time', Date.now()); }
         function resetAllFields() { document.querySelectorAll('input:not([type=password])').forEach(i => i.type==='checkbox'?i.checked=false:i.value=''); calcFloor(); }
 
-        // [데이터 로드] factor 연동
         async function loadData() {
             try {
                 const res = await fetch(FLOOR_URL + "?t=" + new Date().getTime());
@@ -290,7 +303,7 @@
         function syncFPy() { const py = parseFloat(document.getElementById('f-supply-py').value)||0; document.getElementById('f-supply-m2').value=(py*PY_FACTOR).toFixed(2); calcFloor(); saveTemp(); }
         function syncFM2() { const m2 = parseFloat(document.getElementById('f-supply-m2').value)||0; document.getElementById('f-supply-py').value=(m2/PY_FACTOR).toFixed(2); calcFloor(); saveTemp(); }
 
-        // [견적 반영 해결] 옵션 계산 로직 통합
+        // [견적 반영 & 수식 시각화]
         function calcFloor() {
             const py = parseFloat(document.getElementById('f-supply-py').value)||0; const f = floorExp ? 0.8 : 0.75;
             const realPy = Math.ceil(py*f); // 실평수
@@ -309,14 +322,15 @@
             const matTotal = boxes * matPrice;
             const optTotal = (remPrice*realPy) + (molPrice*py) + liftPrice + etcPrice;
 
-            // [상세 내역 생성]
-            let detHtml = '';
-            if(remPrice > 0) detHtml += `<div class="flex justify-between"><span>철거(${realPy}평)</span><span>${(remPrice*realPy).toLocaleString()}원</span></div>`;
-            if(molPrice > 0) detHtml += `<div class="flex justify-between"><span>걸레받이(${py}평)</span><span>${(molPrice*py).toLocaleString()}원</span></div>`;
-            if(liftPrice > 0) detHtml += `<div class="flex justify-between"><span>운반비</span><span>${liftPrice.toLocaleString()}원</span></div>`;
-            if(etcPrice > 0) detHtml += `<div class="flex justify-between"><span>기타/보양</span><span>${etcPrice.toLocaleString()}원</span></div>`;
+            // [다크모드 리포트 상세 내역]
+            let html = '';
+            if(matPrice > 0) html += `<div class="report-item"><span class="report-calc">자재 (${boxes}box × ${matPrice.toLocaleString()})</span><span class="report-val">${matTotal.toLocaleString()}</span></div>`;
+            if(remPrice > 0) html += `<div class="report-item"><span class="report-calc">철거 (${realPy}평 × ${remPrice.toLocaleString()})</span><span class="report-val">${(remPrice*realPy).toLocaleString()}</span></div>`;
+            if(molPrice > 0) html += `<div class="report-item"><span class="report-calc">걸레받이 (${py}평 × ${molPrice.toLocaleString()})</span><span class="report-val">${(molPrice*py).toLocaleString()}</span></div>`;
+            if(liftPrice > 0) html += `<div class="report-item"><span class="report-calc">운반비</span><span class="report-val">${liftPrice.toLocaleString()}</span></div>`;
+            if(etcPrice > 0) html += `<div class="report-item"><span class="report-calc">기타/보양</span><span class="report-val">${etcPrice.toLocaleString()}</span></div>`;
             
-            document.getElementById('report-detail-list').innerHTML = detHtml || '<span class="text-gray-500 opacity-50">- 추가 옵션 없음 -</span>';
+            document.getElementById('report-detail-list').innerHTML = html || '<span class="text-gray-500 opacity-50">- 상세 내역 없음 -</span>';
             
             const total = matTotal + optTotal;
             document.getElementById('val-supply').innerText = total.toLocaleString()+" 원"; 
@@ -361,7 +375,7 @@
         }
 
         function setMode(m) { ['floor','wall','measure'].forEach(id => document.getElementById('tab-'+id).className = 'tab-btn '+(id===m?'active':'inactive')); document.getElementById('floor-wrapper').style.display=(m==='floor'?'block':'none'); document.getElementById('wall-measure-wrapper').style.display=(m!=='floor'?'block':'none'); loadData(); resetTimer(); }
-        function setExp(v) { floorExp=v; document.getElementById('btn-exp').className=(v?'flex-1 p-4 rounded-xl cursor-pointer exp-card-active':'flex-1 p-4 rounded-xl cursor-pointer exp-card-inactive'); document.getElementById('btn-nexp').className=(!v?'flex-1 p-4 rounded-xl cursor-pointer exp-card-active':'flex-1 p-4 rounded-xl cursor-pointer exp-card-inactive'); calcFloor(); }
+        function setExp(v) { floorExp=v; document.getElementById('btn-exp').className=(v?'flex-1 p-4 rounded-xl cursor-pointer exp-card-active':'flex-1 p-4 rounded-xl cursor-pointer exp-card-inactive'); document.getElementById('btn-nexp').className=(!v?'flex-1 p-4 rounded-xl cursor-pointer exp-card-active':'flex-1 p-4 rounded-xl cursor-pointer exp-card-inactive'); calcFloor(); saveTemp(); }
         function checkAppLogin() { if(document.getElementById('app-password').value === '1306') { document.getElementById('login-gate').style.display='none'; localStorage.setItem('cm_auth','ok'); } }
         function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 2000); }
         function formatNum(el) { el.value = el.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
