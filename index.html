@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>청인마루 통합 시스템 v72.0 (Force Fix)</title>
+    <title>청인마루 통합 시스템 v72.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -29,15 +29,10 @@
         #login-gate { display: flex; position: fixed; inset: 0; background: #1B202D; z-index: 99999; align-items: center; justify-content: center; }
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .manage-card { width: 95%; max-width: 600px; height: 90vh; background: #F8F9FA; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; }
-        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; text-align: center; background: #fff; cursor: pointer; position: relative; }
         .exp-card-active { border: 2px solid #fdba74; background: #fff7ed; }
         .exp-card-inactive { border: 1px solid #e5e7eb; background: white; opacity: 0.7; }
-        .type-btn-active { background: #2563eb; color: white; border: none; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3); }
-        .type-btn-inactive { background: #f3f4f6; color: #9ca3af; }
-        
-        /* 업데이트 시 깜빡임 효과 */
-        @keyframes highlight { 0% { background-color: #fff; } 50% { background-color: #fef08a; } 100% { background-color: transparent; } }
-        .flash-update { animation: highlight 1s ease; }
+        @keyframes flash { 0% { background-color: #fef08a; } 100% { background-color: transparent; } }
+        .flash-update { animation: flash 0.8s ease-out; }
     </style>
 </head>
 <body>
@@ -47,7 +42,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-2xl font-black text-white mb-2">청인마루 통합 시스템</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold text-blue-500">v72.0 Force Fix</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold text-blue-500">v72.1 Stable</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold">Access System</button>
         </div>
@@ -72,7 +67,7 @@
 
     <div class="p-4">
         <header class="max-w-6xl mx-auto mb-6">
-            <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v72.0</span></h1>
+            <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v72.1</span></h1>
             <p class="text-[13px] text-blue-500 font-black tracking-tight uppercase">공간의 위로가 되다</p>
         </header>
 
@@ -87,17 +82,6 @@
                     <div id="tab-floor" onclick="setMode('floor')" class="tab-btn active">마루/바닥</div>
                     <div id="tab-wall" onclick="setMode('wall')" class="tab-btn inactive">벽장재</div>
                     <div id="tab-measure" onclick="setMode('measure')" class="tab-btn inactive">실측전용</div>
-                </div>
-
-                <div class="card-clean border-blue-100 bg-blue-50/50">
-                    <div class="grid grid-cols-2 gap-3">
-                        <textarea id="raw-text" class="w-full h-24 p-3 rounded-xl border border-blue-100 text-xs resize-none" placeholder="내용 붙여넣기"></textarea>
-                        <div id="drop-zone" class="drop-zone flex flex-col justify-center items-center h-24" onclick="document.getElementById('file-input').click()">
-                            <i class="fas fa-camera text-slate-300 text-2xl"></i>
-                            <p class="text-[8px] font-black text-slate-400 mt-1 uppercase">OCR 스캔</p>
-                            <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleImage(this.files[0])">
-                        </div>
-                    </div>
                 </div>
 
                 <div class="card-clean">
@@ -124,7 +108,7 @@
                             <div class="relative">
                                 <label class="input-label">제품</label>
                                 <select id="floor-product" class="input-field" onchange="handleFloorProduct()"></select>
-                                <button onclick="debugProduct()" class="absolute top-0 right-0 bg-red-500 text-white text-[9px] px-2 py-1 rounded-md z-10 opacity-70">데이터 진단</button>
+                                <button onclick="debugProduct()" class="absolute top-0 right-0 bg-red-500 text-white text-[9px] px-2 py-1 rounded-md z-10 opacity-60">진단</button>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-4">
@@ -139,7 +123,6 @@
                             <div class="bg-white border rounded-xl p-3 text-center relative"><label class="block text-[10px] text-gray-400 mb-1">로스율(%)</label><select id="f-loss" class="w-full text-center font-black text-lg outline-none bg-transparent" onchange="calcFloor()"><option value="1.05">5%</option><option value="1.08">8%</option><option value="1.10" selected>10%</option><option value="1.12">12%</option><option value="1.15">15%</option><option value="1.18">18%</option></select></div>
                             <div class="bg-gray-900 rounded-xl p-3 text-center text-white"><label class="block text-[10px] text-gray-500 mb-1">최종발주</label><div class="font-black text-lg" id="f-final-box">0</div></div>
                         </div>
-                        
                         <div id="floor-price-box" class="bg-yellow-50 border border-yellow-100 rounded-xl p-4 flex justify-between items-center">
                             <div class="flex flex-col">
                                 <span class="text-[10px] font-bold text-yellow-600 mb-1">박스당 면적(㎡)</span>
@@ -155,13 +138,6 @@
 
                 <div id="wall-measure-wrapper" class="card-clean hidden">
                     <div class="flex justify-between items-center mb-4"><span class="text-sm font-black" id="wm-title">실측 및 계산</span><button onclick="connectBosch()" id="bosch-btn" class="bg-gray-100 text-gray-500 px-3 py-1.5 rounded-lg text-[10px] font-bold"><i class="fab fa-bluetooth-b mr-1"></i> BOSCH 연결</button></div>
-                    <div id="wm-product-box" class="mb-4 hidden">
-                        <div class="grid grid-cols-2 gap-3 mb-3"><select id="wm-brand" class="input-field" onchange="updateWMProducts()"></select><select id="wm-product" class="input-field" onchange="handleWMProduct()"></select></div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-gray-50 p-3 rounded-xl"><label class="input-label">Box면적(㎡)</label><input type="number" id="wm-box-area" class="w-full bg-transparent font-black text-center" value="3.2" oninput="calcWall()"></div>
-                            <div class="bg-yellow-50 p-3 rounded-xl"><label class="input-label text-yellow-600">Box단가(원)</label><input type="text" id="wm-box-price" class="w-full bg-transparent font-black text-center text-yellow-600" oninput="formatNum(this); calcWall()"></div>
-                        </div>
-                    </div>
                     <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 mb-4">
                         <div class="grid grid-cols-3 gap-2 mb-2"><input type="text" id="zone-name" class="input-field text-xs text-center" placeholder="구역명"><input type="number" id="deduct-w" class="input-field text-xs text-center" placeholder="공제W"><input type="number" id="deduct-h" class="input-field text-xs text-center" placeholder="공제H"></div>
                         <div class="flex items-center gap-2"><input type="number" id="zone-w" class="input-field text-center text-xl h-14" placeholder="가로"><span class="font-bold">×</span><input type="number" id="zone-h" class="input-field text-center text-xl h-14" placeholder="세로"><button onclick="addZone()" class="w-14 h-14 bg-blue-600 text-white rounded-xl shadow"><i class="fas fa-plus"></i></button></div>
@@ -201,38 +177,85 @@
         window.onload = () => { if(localStorage.getItem('cm_auth') === 'ok') document.getElementById('login-gate').style.display='none'; setMode('floor'); };
 
         async function loadData() {
-            // [캐시 무시]
             const url = (mode==='wall'||mode==='measure' ? WALL_URL : FLOOR_URL) + "?t=" + new Date().getTime();
             try {
                 const res = await fetch(url); const data = await res.json();
                 const temp = {};
-                
                 data.forEach(item => { 
                     if(item.brand) { 
                         if(!temp[item.brand]) temp[item.brand]={brand:item.brand, products:[]}; 
-                        
-                        // [강제 탐색] 모든 값을 시트에 있는 그대로 가져오기
-                        // rawObject에 원본 데이터를 다 담아서 나중에 handleProduct에서 뒤짐
-                        temp[item.brand].products.push({
-                            ...item, // 모든 시트 데이터 포함
-                            name: item.name, 
-                            spec: item.spec || '',
-                            price: parseInt(item.price)||0, 
-                            firmPrice: parseInt(item.firm_price)||parseInt(item.price)||0
-                        }); 
+                        temp[item.brand].products.push({...item}); 
                     } 
                 });
                 masterData = Object.values(temp); updateBrandSelects();
-                showToast("최신 데이터 로드 완료");
-            } catch(e) { console.error("Error"); showToast("데이터 로딩 실패"); }
+            } catch(e) { showToast("데이터 로드 실패"); }
+        }
+
+        // [복구] 업체탭 클릭 시 UI 활성화 로직
+        function setModeType(t) { 
+            userType = t; 
+            const cBtn = document.getElementById('mode-consumer');
+            const fBtn = document.getElementById('mode-firm');
+            if(t === 'consumer') {
+                cBtn.className = 'mode-btn active-consumer';
+                fBtn.className = 'mode-btn';
+                document.getElementById('firm-row').style.display = 'none';
+            } else {
+                cBtn.className = 'mode-btn';
+                fBtn.className = 'mode-btn active-firm';
+                document.getElementById('firm-row').style.display = 'block';
+            }
+            loadData(); 
         }
 
         function setMode(m) {
             mode = m;
             ['floor', 'wall', 'measure'].forEach(id => { const el = document.getElementById('tab-'+id); if(el) el.className = 'tab-btn ' + (id===m ? 'active' : 'inactive'); });
-            document.getElementById('floor-wrapper').style.display = (m==='floor'?'block':'none'); document.getElementById('floor-options').style.display = (m==='floor'?'block':'none');
-            document.getElementById('wall-measure-wrapper').style.display = (m!=='floor'?'block':'none'); document.getElementById('wm-product-box').style.display = (m==='wall'?'block':'none');
+            document.getElementById('floor-wrapper').style.display = (m==='floor'?'block':'none');
+            document.getElementById('wall-measure-wrapper').style.display = (m!=='floor'?'block':'none');
             loadData(); if(m==='floor') calcFloor(); else calcWall();
+        }
+
+        // [강력 동기화] 제품 선택 시 면적 데이터 강제 추출
+        function handleFloorProduct() {
+            const bName = document.getElementById('floor-brand').value, pIdx = document.getElementById('floor-product').value;
+            if (pIdx !== "") {
+                const bObj = masterData.find(x => x.brand === bName);
+                if(bObj) {
+                    const p = bObj.products[pIdx];
+                    document.getElementById('floor-price').value = (userType === 'firm' ? (p.firm_price || p.price) : p.price).toLocaleString();
+                    document.getElementById('rep-prod').innerText = p.name;
+                    document.getElementById('floor-spec').value = p.spec || '';
+
+                    // 면적 찾기 키워드 확장 (박스면적, 면적, 헤베 등 모든 한글 가능성)
+                    let foundArea = 3.2;
+                    const areaKeys = ['box_area', 'boxarea', 'area', '면적', '박스면적', '헤베', 'm2', '평'];
+                    
+                    for (const key in p) {
+                        const val = parseFloat(p[key]);
+                        if (!isNaN(val) && val > 0) {
+                            const k = key.toLowerCase().replace(/ /g, '');
+                            if (areaKeys.some(ak => k.includes(ak)) || (val > 0.5 && val < 6.0)) {
+                                foundArea = val;
+                                break;
+                            }
+                        }
+                    }
+
+                    const areaField = document.getElementById('f-box-area');
+                    areaField.value = foundArea;
+                    areaField.classList.add('flash-update');
+                    setTimeout(() => areaField.classList.remove('flash-update'), 800);
+                }
+            }
+            calcFloor();
+        }
+
+        function debugProduct() {
+            const bName = document.getElementById('floor-brand').value, pIdx = document.getElementById('floor-product').value;
+            if (!pIdx) return alert("제품 선택 필요");
+            const p = masterData.find(x => x.brand === bName).products[pIdx];
+            alert("원본 데이터:\n" + JSON.stringify(p, null, 2));
         }
 
         function syncFPy() { const py = parseFloat(document.getElementById('f-supply-py').value) || 0; document.getElementById('f-supply-m2').value = (py * PY_FACTOR).toFixed(2); calcFloor(); }
@@ -246,85 +269,13 @@
             const loss = parseFloat(document.getElementById('f-loss').value) || 1.1;
             const totalM2 = realPy * PY_FACTOR;
             const boxes = Math.ceil((totalM2 / boxArea) * loss);
-            
             document.getElementById('f-final-box').innerText = boxes;
             document.getElementById('rep-boxes').innerText = boxes;
             document.getElementById('rep-m2-text').innerText = (py * PY_FACTOR).toFixed(2);
-            
             const bP = parseInt(document.getElementById('floor-price').value.replace(/,/g,''))||0;
             const rU = parseInt(document.getElementById('opt-removal').value.replace(/,/g,''))||0, mU = parseInt(document.getElementById('opt-molding').value.replace(/,/g,''))||0;
             const matTotal = boxes * bP, optTotal = (rU * realPy) + (mU * py);
-            let det = (rU>0?`<div class="flex justify-between text-xs text-gray-400"><span>철거(${realPy}평)</span><b>${(rU*realPy).toLocaleString()}원</b></div>`:'') + (mU>0?`<div class="flex justify-between text-xs text-gray-400"><span>걸레받이(${py}평)</span><b>${(mU*py).toLocaleString()}원</b></div>`:'');
-            updateReport(matTotal, optTotal, det);
-        }
-
-        // [핵심] 제품 선택 시 동기화 (강력 모드)
-        function handleFloorProduct() {
-            const bName = document.getElementById('floor-brand').value, pIdx = document.getElementById('floor-product').value;
-            if (pIdx !== "") {
-                const bObj = masterData.find(x => x.brand === bName);
-                if(bObj) {
-                    const p = bObj.products[pIdx];
-                    document.getElementById('floor-price').value = (userType === 'firm' ? p.firmPrice : p.price).toLocaleString();
-                    document.getElementById('rep-prod').innerText = p.name;
-                    document.getElementById('floor-spec').value = p.spec || '';
-
-                    // [면적 찾기 로직]
-                    // p 객체의 모든 키를 뒤져서 'box'나 'area'나 'm2'가 포함된 값을 찾는다.
-                    // 값이 1.0 ~ 6.0 사이의 숫자라면 그것을 면적으로 간주한다.
-                    let detectedArea = 3.2;
-                    let logMsg = "";
-                    
-                    // 1순위: 명시적 키 확인
-                    if(p.box_area) detectedArea = parseFloat(p.box_area);
-                    else if(p.boxArea) detectedArea = parseFloat(p.boxArea);
-                    else if(p.area) detectedArea = parseFloat(p.area);
-                    else {
-                        // 2순위: 키 검색 (가장 강력함)
-                        for (const key in p) {
-                            const val = parseFloat(p[key]);
-                            if (!isNaN(val) && val > 0.5 && val < 6.0) {
-                                const k = key.toLowerCase();
-                                // box, area, m2, hebe, vol 등의 단어가 들어가면 채택
-                                if (k.includes('box') || k.includes('area') || k.includes('m2') || k.includes('hebe') || k.includes('vol')) {
-                                    detectedArea = val;
-                                    logMsg = `Found in ${key}`;
-                                    break; 
-                                }
-                            }
-                        }
-                    }
-
-                    // 입력창에 강제 주입
-                    const areaInput = document.getElementById('f-box-area');
-                    areaInput.value = detectedArea;
-                    
-                    // 시각적 피드백 (깜빡임)
-                    areaInput.classList.remove('flash-update');
-                    void areaInput.offsetWidth; // 리플로우 강제
-                    areaInput.classList.add('flash-update');
-                }
-            }
-            calcFloor();
-        }
-
-        function debugProduct() {
-            const bName = document.getElementById('floor-brand').value, pIdx = document.getElementById('floor-product').value;
-            if (!pIdx) return alert("제품 선택 필요");
-            const p = masterData.find(x => x.brand === bName).products[pIdx];
-            alert("Raw Data:\n" + JSON.stringify(p, null, 2));
-        }
-
-        function handleWMProduct() {
-            const bName = document.getElementById('wm-brand').value, pIdx = document.getElementById('wm-product').value;
-            if (pIdx !== "") {
-                const p = masterData.find(x => x.brand === bName).products[pIdx];
-                document.getElementById('wm-box-price').value = (userType === 'firm' ? p.firmPrice : p.price).toLocaleString();
-                // 벽장재도 동일 로직 적용 가능하나 일단 기본 box_area 키 우선
-                document.getElementById('wm-box-area').value = p.box_area || p.boxArea || 3.2;
-                document.getElementById('rep-prod').innerText = p.name;
-            }
-            calcWall();
+            updateReport(matTotal, optTotal, "");
         }
 
         function addZone() {
@@ -335,24 +286,21 @@
         }
         function renderZones() { document.getElementById('zone-list').innerHTML = zoneList.map((z, i) => `<div class="bg-white p-2 border rounded-lg flex justify-between text-xs mb-1"><span>${z.name}</span><span>${z.area.toFixed(2)}㎡ <button onclick="removeZone(${i})" class="text-red-500">×</button></span></div>`).join(''); }
         function removeZone(i) { zoneList.splice(i,1); renderZones(); calcWall(); }
-        function calcWall() { let m2 = zoneList.reduce((a,b)=>a+b.area, 0); const boxArea = parseFloat(document.getElementById('wm-box-area').value)||3.2; const boxes = Math.ceil((m2 / boxArea) * 1.1); document.getElementById('rep-boxes').innerText = boxes; document.getElementById('rep-m2-text').innerText = m2.toFixed(2); updateReport(boxes*(parseInt(document.getElementById('wm-box-price').value.replace(/,/g,''))||0), 0, ""); }
+        function calcWall() { let m2 = zoneList.reduce((a,b)=>a+b.area, 0); const boxes = Math.ceil((m2 / 3.2) * 1.1); document.getElementById('rep-boxes').innerText = boxes; document.getElementById('rep-m2-text').innerText = m2.toFixed(2); updateReport(0, 0, ""); }
         function updateReport(mat, opt, det) { document.getElementById('report-detail-list').innerHTML = det; const total = mat + opt; document.getElementById('val-supply').innerText = total.toLocaleString() + " 원"; document.getElementById('val-total').innerText = Math.round(total*1.1).toLocaleString(); }
         function openManager() { document.getElementById('manage-modal').style.display='flex'; renderManager(); }
         function saveRecord() { const r = JSON.parse(localStorage.getItem('cm_records') || '[]'); r.unshift({ id: Date.now(), name: document.getElementById('cust-name').value || '미정', addr: document.getElementById('cust-addr').value || '-', product: document.getElementById('rep-prod').innerText, total: document.getElementById('val-total').innerText }); localStorage.setItem('cm_records', JSON.stringify(r)); showToast("기록 저장 완료"); }
         function renderManager() { const r = JSON.parse(localStorage.getItem('cm_records') || '[]'); document.getElementById('manage-list').innerHTML = r.map(x => `<div class="bg-white p-4 border rounded-xl mb-2"><div class="font-black">${x.name}</div><div class="text-xs text-gray-400">${x.addr}</div><div class="flex justify-between mt-2 font-bold"><span>${x.product}</span><span class="text-red-600">${x.total}원</span></div></div>`).join(''); }
         function checkAppLogin() { if(document.getElementById('app-password').value === '1306') { document.getElementById('login-gate').style.display='none'; localStorage.setItem('cm_auth','ok'); } }
         function showToast(m) { const t = document.getElementById('toast'); t.innerText=m; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 2000); }
-        function updateInfo() { document.getElementById('rep-name').innerText = document.getElementById('cust-name').value || '고객님'; }
-        function updateBrandSelects() { const fBrand = document.getElementById('floor-brand'), wmBrand = document.getElementById('wm-brand'); [fBrand, wmBrand].forEach(sel => { if(sel){ sel.innerHTML='<option value="">브랜드 선택</option>'; masterData.forEach(m=>sel.add(new Option(m.brand, m.brand))); }}); }
+        function updateInfo() { document.getElementById('rep-name').innerText = document.getElementById('cust-name').value || '고객님'; document.getElementById('rep-firm').innerText = userType==='firm'?'Partner: '+document.getElementById('firm-name').value:''; }
+        function updateBrandSelects() { const fBrand = document.getElementById('floor-brand'); fBrand.innerHTML='<option value="">브랜드 선택</option>'; masterData.forEach(m=>fBrand.add(new Option(m.brand, m.brand))); }
         function updateFloorProducts() { const bName = document.getElementById('floor-brand').value, pSel = document.getElementById('floor-product'); pSel.innerHTML = '<option value="">제품 선택</option>'; const bObj = masterData.find(x => x.brand === bName); if(bObj) bObj.products.forEach((p, i) => pSel.add(new Option(p.name, i))); }
-        function updateWMProducts() { const bName = document.getElementById('wm-brand').value, pSel = document.getElementById('wm-product'); pSel.innerHTML = '<option value="">제품 선택</option>'; const bObj = masterData.find(x => x.brand === bName); if(bObj) bObj.products.forEach((p, i) => pSel.add(new Option(p.name, i))); }
         function saveImg() { html2canvas(document.querySelector("#capture-area")).then(canvas => { const link = document.createElement('a'); link.download = '견적.png'; link.href = canvas.toDataURL(); link.click(); }); }
-        function setModeType(t) { userType=t; loadData(); }
         function setFloorType(t) { floorType=t; calcFloor(); }
         function setExp(v) { floorExp=v; calcFloor(); }
         function formatNum(el) { el.value = el.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
         async function connectBosch() { showToast("보쉬 거리측정기 탐색 중..."); }
-        function handleImage(f) { showToast("문자 판독 중..."); }
     </script>
 </body>
 </html>
