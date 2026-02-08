@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>청인마루 통합 시스템 v71.8 (Final Fix)</title>
+    <title>청인마루 통합 시스템 v71.9 (Diagnostic)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -43,7 +43,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-2xl font-black text-white mb-2">청인마루 통합 시스템</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold text-blue-500">v71.8 Final Fix</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold text-blue-500">v71.9 Diagnostic</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold">Access System</button>
         </div>
@@ -68,7 +68,7 @@
 
     <div class="p-4">
         <header class="max-w-6xl mx-auto mb-6">
-            <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v71.8</span></h1>
+            <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v71.9</span></h1>
             <p class="text-[13px] text-blue-500 font-black tracking-tight uppercase">공간의 위로가 되다</p>
         </header>
 
@@ -117,7 +117,11 @@
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-4">
                             <div><label class="input-label">브랜드</label><select id="floor-brand" class="input-field" onchange="updateFloorProducts()"></select></div>
-                            <div><label class="input-label">제품</label><select id="floor-product" class="input-field" onchange="handleFloorProduct()"></select></div>
+                            <div class="relative">
+                                <label class="input-label">제품</label>
+                                <select id="floor-product" class="input-field" onchange="handleFloorProduct()"></select>
+                                <button onclick="debugProduct()" class="absolute top-0 right-0 bg-red-500 text-white text-[9px] px-2 py-1 rounded-md z-10">데이터 진단</button>
+                            </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-4">
                             <div><label class="input-label">모델명</label><input type="text" id="floor-model" class="input-field" placeholder="컬러 등"></div>
@@ -192,7 +196,7 @@
         window.onload = () => { if(localStorage.getItem('cm_auth') === 'ok') document.getElementById('login-gate').style.display='none'; setMode('floor'); };
 
         async function loadData() {
-            // [캐시 무시] URL 뒤에 타임스탬프 추가
+            // [캐시 무시]
             const url = (mode==='wall'||mode==='measure' ? WALL_URL : FLOOR_URL) + "?t=" + new Date().getTime();
             try {
                 const res = await fetch(url); const data = await res.json();
@@ -201,36 +205,38 @@
                     if(item.brand) { 
                         if(!temp[item.brand]) temp[item.brand]={brand:item.brand, products:[]}; 
                         
-                        // [스마트 탐색] 모든 키를 뒤져서 숫자 데이터 찾기
+                        // [독한 데이터 탐색 로직]
                         let foundArea = 3.2;
-                        for (const key in item) {
-                            const lowerKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
-                            // 키 이름에 'box'와 'area', 또는 'm2'가 포함되어 있고 값이 존재하면 채택
-                            if ((lowerKey.includes('box') && lowerKey.includes('area')) || lowerKey.includes('m2') || lowerKey.includes('hebe')) {
-                                const val = parseFloat(item[key]);
-                                if (!isNaN(val) && val > 0) {
-                                    foundArea = val;
-                                    break; 
+                        // 1. 키 이름으로 찾기
+                        const keys = Object.keys(item);
+                        for(let k of keys) {
+                            let val = item[k];
+                            // 숫자로 변환 가능한지 확인
+                            if(!isNaN(parseFloat(val))) {
+                                let v = parseFloat(val);
+                                let lk = k.toLowerCase().replace(/[^a-z0-9]/g,'');
+                                // 키 이름에 힌트가 있고, 값이 0.5 ~ 5.0 사이 (박스 면적 범위)
+                                if((lk.includes('box') || lk.includes('area') || lk.includes('m2') || lk.includes('hebe')) && v > 0.5 && v < 6.0) {
+                                    foundArea = v;
+                                    break; // 찾았으면 탈출
                                 }
                             }
                         }
-                        // 그래도 못 찾았으면 기본 키 확인
-                        if(foundArea === 3.2) {
-                            foundArea = parseFloat(item.box_area) || parseFloat(item.area) || parseFloat(item.spec_area) || 3.2;
-                        }
-
+                        
+                        // 원본 데이터 전체를 보존 (디버깅용)
                         temp[item.brand].products.push({
+                            ...item, // 원본 데이터 다 넣기
                             name:item.name, 
                             spec:item.spec||'', 
-                            boxArea: foundArea, // 최종적으로 찾아낸 면적 값
+                            boxArea: foundArea,
                             price:parseInt(item.price)||0, 
                             firmPrice:parseInt(item.firm_price)||parseInt(item.price)||0
                         }); 
                     } 
                 });
                 masterData = Object.values(temp); updateBrandSelects();
-                showToast("최신 데이터를 불러왔습니다.");
-            } catch(e) { console.error("Data Load Error"); showToast("데이터 로딩 실패 (인터넷 확인)"); }
+                showToast("최신 데이터 로드 완료");
+            } catch(e) { console.error("Data Load Error"); showToast("데이터 로딩 실패"); }
         }
 
         function setMode(m) {
@@ -272,12 +278,20 @@
                 if(bObj) {
                     const p = bObj.products[pIdx];
                     document.getElementById('floor-price').value = (userType === 'firm' ? p.firmPrice : p.price).toLocaleString();
-                    document.getElementById('f-box-area').value = p.boxArea; // 찾아낸 면적 값 적용
+                    document.getElementById('f-box-area').value = p.boxArea; 
                     document.getElementById('rep-prod').innerText = p.name;
                     document.getElementById('floor-spec').value = p.spec || '';
                 }
             }
             calcFloor();
+        }
+
+        // [진단 함수] 제품 옆 빨간 버튼 누르면 실행
+        function debugProduct() {
+            const bName = document.getElementById('floor-brand').value, pIdx = document.getElementById('floor-product').value;
+            if (pIdx === "") { alert("제품을 먼저 선택해주세요."); return; }
+            const p = masterData.find(x => x.brand === bName).products[pIdx];
+            alert("제품 원본 데이터:\n" + JSON.stringify(p, null, 2));
         }
 
         function handleWMProduct() {
