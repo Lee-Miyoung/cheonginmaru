@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>청인마루 통합 시스템 v71.6</title>
+    <title>청인마루 통합 시스템 v71.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -29,9 +29,11 @@
         #login-gate { display: flex; position: fixed; inset: 0; background: #1B202D; z-index: 99999; align-items: center; justify-content: center; }
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .manage-card { width: 95%; max-width: 600px; height: 90vh; background: #F8F9FA; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; }
-        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; text-align: center; background: #fff; cursor: pointer; }
+        .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; text-align: center; background: #fff; cursor: pointer; position: relative; }
         .exp-card-active { border: 2px solid #fdba74; background: #fff7ed; }
         .exp-card-inactive { border: 1px solid #e5e7eb; background: white; opacity: 0.7; }
+        .type-btn-active { background: #2563eb; color: white; border: none; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3); }
+        .type-btn-inactive { background: #f3f4f6; color: #9ca3af; }
     </style>
 </head>
 <body>
@@ -41,7 +43,7 @@
     <div id="login-gate">
         <div class="text-center w-full max-w-xs px-4">
             <h2 class="text-2xl font-black text-white mb-2">청인마루 통합 시스템</h2>
-            <p class="text-xs text-gray-500 mb-8 font-bold text-blue-500">v71.6 Stable</p>
+            <p class="text-xs text-gray-500 mb-8 font-bold text-blue-500">v71.7 Stable</p>
             <input type="password" id="app-password" class="w-full p-4 bg-gray-800 rounded-xl text-center text-xl text-white font-bold outline-none mb-4" placeholder="Password" onkeyup="if(event.keyCode==13) checkAppLogin()">
             <button onclick="checkAppLogin()" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold">Access System</button>
         </div>
@@ -66,7 +68,7 @@
 
     <div class="p-4">
         <header class="max-w-6xl mx-auto mb-6">
-            <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v71.6</span></h1>
+            <h1 class="text-2xl font-black text-gray-800">청인마루 통합 시스템 <span class="text-xs text-gray-400 font-normal ml-1">v71.7</span></h1>
             <p class="text-[13px] text-blue-500 font-black tracking-tight uppercase">공간의 위로가 되다</p>
         </header>
 
@@ -99,7 +101,7 @@
                         <div><label class="input-label">고객명</label><input type="text" id="cust-name" class="input-field" placeholder="성함" oninput="updateInfo()"></div>
                         <div><label class="input-label">연락처</label><input type="tel" id="cust-phone" class="input-field" placeholder="연락처"></div>
                     </div>
-                    <div id="firm-row" class="mb-3 hidden"><label class="input-label text-blue-500">인테리어 업체명</label><input type="text" id="firm-name" class="input-field border-blue-200" oninput="updateInfo()"></div>
+                    <div id="firm-row" class="mb-3 hidden"><label class="input-label text-blue-500">인테리어 업체명</label><input type="text" id="firm-name" class="input-field border-blue-200 bg-blue-50/30" oninput="updateInfo()"></div>
                     <div class="mb-3"><label class="input-label">현장 시공 주소</label><input type="text" id="cust-addr" class="input-field"></div>
                 </div>
 
@@ -194,13 +196,25 @@
             try {
                 const res = await fetch(url); const data = await res.json();
                 const temp = {};
-                data.forEach(item => { if(item.brand) { if(!temp[item.brand]) temp[item.brand]={brand:item.brand, products:[]}; 
-                // [수정] 필드명 매핑 확실히 (box_area)
-                temp[item.brand].products.push({
-                    name:item.name, spec:item.spec||'', 
-                    boxArea: parseFloat(item.box_area) || parseFloat(item.area) || 3.2, 
-                    price:parseInt(item.price)||0, firmPrice:parseInt(item.firm_price)||parseInt(item.price)||0
-                }); } });
+                data.forEach(item => { 
+                    if(item.brand) { 
+                        if(!temp[item.brand]) temp[item.brand]={brand:item.brand, products:[]}; 
+                        
+                        // [강제 동기화 Fix] 시트의 헤더가 무엇이든 찾아냅니다.
+                        // box_area, boxArea, area, 박스면적, 면적, 1box면적 등등...
+                        const rawArea = item.box_area || item.boxArea || item.area || item['1box_area'] || item['면적'] || item['박스면적'] || 3.2;
+                        const cleanArea = parseFloat(String(rawArea).replace(/[^0-9.]/g, ""));
+                        const finalArea = cleanArea > 0 ? cleanArea : 3.2;
+
+                        temp[item.brand].products.push({
+                            name:item.name, 
+                            spec:item.spec||'', 
+                            boxArea: finalArea, 
+                            price:parseInt(item.price)||0, 
+                            firmPrice:parseInt(item.firm_price)||parseInt(item.price)||0
+                        }); 
+                    } 
+                });
                 masterData = Object.values(temp); updateBrandSelects();
             } catch(e) { console.error("Data Load Error"); }
         }
@@ -213,18 +227,19 @@
             loadData(); if(m==='floor') calcFloor(); else calcWall();
         }
 
-        // [복구] 쌍방향 실시간 동기화
         function syncFPy() { const py = parseFloat(document.getElementById('f-supply-py').value) || 0; document.getElementById('f-supply-m2').value = (py * PY_FACTOR).toFixed(2); calcFloor(); }
         function syncFM2() { const m2 = parseFloat(document.getElementById('f-supply-m2').value) || 0; document.getElementById('f-supply-py').value = (m2 / PY_FACTOR).toFixed(2); calcFloor(); }
 
-        // [복구] 마루 계산 & 박스당 면적 반영
         function calcFloor() {
             const py = parseFloat(document.getElementById('f-supply-py').value) || 0;
             const factor = floorType === 'res' ? (floorExp ? 0.8 : 0.75) : 1.0;
             const realPy = Math.ceil(py * factor);
             const boxArea = parseFloat(document.getElementById('f-box-area').value) || 3.2;
             const loss = parseFloat(document.getElementById('f-loss').value) || 1.1;
-            const boxes = Math.ceil(((realPy * PY_FACTOR) / boxArea) * loss);
+            
+            // [계산식] (실평수 * 3.3058) / 박스당면적 * 로스율
+            const totalM2 = realPy * PY_FACTOR;
+            const boxes = Math.ceil((totalM2 / boxArea) * loss);
             
             document.getElementById('f-final-box').innerText = boxes;
             document.getElementById('rep-boxes').innerText = boxes;
@@ -237,7 +252,7 @@
             updateReport(matTotal, optTotal, det);
         }
 
-        // [중요] 제품 선택 시 시트 데이터(박스당 면적 포함) 동기화
+        // [핵심] 제품 선택 시 박스당 면적 강제 주입
         function handleFloorProduct() {
             const bName = document.getElementById('floor-brand').value, pIdx = document.getElementById('floor-product').value;
             if (pIdx !== "") {
@@ -245,7 +260,10 @@
                 if(bObj) {
                     const p = bObj.products[pIdx];
                     document.getElementById('floor-price').value = (userType === 'firm' ? p.firmPrice : p.price).toLocaleString();
-                    document.getElementById('f-box-area').value = p.boxArea; // 시트 값 반영
+                    
+                    // [여기서 값 강제 주입]
+                    document.getElementById('f-box-area').value = p.boxArea; 
+                    
                     document.getElementById('rep-prod').innerText = p.name;
                     document.getElementById('floor-spec').value = p.spec || '';
                 }
